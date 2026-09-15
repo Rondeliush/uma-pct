@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 ## App version
 
-Which version of Umamusume PCT app are you using?
+Which version of app are you using?
 
 ## Additional context
 Add any other context about the problem here.
