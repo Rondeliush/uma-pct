@@ -1,2 +1,2 @@
-# umamusume-PCT
-Public releases, updates and issue tracking for Umamusume Personal Competitive Tracker app
+# Umamusume-PCT
+Public releases, updates, and issue tracking for the Umamusume Personal Competitive Tracker fan app
