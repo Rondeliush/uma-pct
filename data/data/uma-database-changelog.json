@@ -1,0 +1,20 @@
+[
+  {
+    "version": 2,
+    "date": "2026-09-22",
+    "added": [],
+    "updated": [
+      "Database update system test."
+    ],
+    "removed": []
+  },
+  {
+    "version": 1,
+    "date": "2026-09-22",
+    "added": [
+      "Initial Uma database included with UmaPCT 0.1.0."
+    ],
+    "updated": [],
+    "removed": []
+  }
+]
