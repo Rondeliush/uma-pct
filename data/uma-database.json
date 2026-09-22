@@ -1,0 +1,1099 @@
+{
+  "version": 1,
+  "characters": [
+    {
+      "id": "special-week",
+      "name": "Special Week"
+    },
+    {
+      "id": "silence-suzuka",
+      "name": "Silence Suzuka"
+    },
+    {
+      "id": "tokai-teio",
+      "name": "Tokai Teio"
+    },
+    {
+      "id": "maruzensky",
+      "name": "Maruzensky"
+    },
+    {
+      "id": "fuji-kiseki",
+      "name": "Fuji Kiseki"
+    },
+    {
+      "id": "oguri-cap",
+      "name": "Oguri Cap"
+    },
+    {
+      "id": "gold-ship",
+      "name": "Gold Ship"
+    },
+    {
+      "id": "vodka",
+      "name": "Vodka"
+    },
+    {
+      "id": "daiwa-scarlet",
+      "name": "Daiwa Scarlet"
+    },
+    {
+      "id": "taiki-shuttle",
+      "name": "Taiki Shuttle"
+    },
+    {
+      "id": "grass-wonder",
+      "name": "Grass Wonder"
+    },
+    {
+      "id": "hishi-amazon",
+      "name": "Hishi Amazon"
+    },
+    {
+      "id": "mejiro-mcqueen",
+      "name": "Mejiro McQueen"
+    },
+    {
+      "id": "el-condor-pasa",
+      "name": "El Condor Pasa"
+    },
+    {
+      "id": "tm-opera-o",
+      "name": "T.M. Opera O"
+    },
+    {
+      "id": "narita-brian",
+      "name": "Narita Brian"
+    },
+    {
+      "id": "symboli-rudolf",
+      "name": "Symboli Rudolf"
+    },
+    {
+      "id": "air-groove",
+      "name": "Air Groove"
+    },
+    {
+      "id": "agnes-digital",
+      "name": "Agnes Digital"
+    },
+    {
+      "id": "seiun-sky",
+      "name": "Seiun Sky"
+    },
+    {
+      "id": "tamamo-cross",
+      "name": "Tamamo Cross"
+    },
+    {
+      "id": "fine-motion",
+      "name": "Fine Motion"
+    },
+    {
+      "id": "biwa-hayahide",
+      "name": "Biwa Hayahide"
+    },
+    {
+      "id": "mayano-top-gun",
+      "name": "Mayano Top Gun"
+    },
+    {
+      "id": "manhattan-cafe",
+      "name": "Manhattan Cafe"
+    },
+    {
+      "id": "mihono-bourbon",
+      "name": "Mihono Bourbon"
+    },
+    {
+      "id": "mejiro-ryan",
+      "name": "Mejiro Ryan"
+    },
+    {
+      "id": "hishi-akebono",
+      "name": "Hishi Akebono"
+    },
+    {
+      "id": "yukino-bijin",
+      "name": "Yukino Bijin"
+    },
+    {
+      "id": "rice-shower",
+      "name": "Rice Shower"
+    },
+    {
+      "id": "ines-fujin",
+      "name": "Ines Fujin"
+    },
+    {
+      "id": "agnes-tachyon",
+      "name": "Agnes Tachyon"
+    },
+    {
+      "id": "admire-vega",
+      "name": "Admire Vega"
+    },
+    {
+      "id": "inari-one",
+      "name": "Inari One"
+    },
+    {
+      "id": "winning-ticket",
+      "name": "Winning Ticket"
+    },
+    {
+      "id": "air-shakur",
+      "name": "Air Shakur"
+    },
+    {
+      "id": "eishin-flash",
+      "name": "Eishin Flash"
+    },
+    {
+      "id": "curren-chan",
+      "name": "Curren Chan"
+    },
+    {
+      "id": "kawakami-princess",
+      "name": "Kawakami Princess"
+    },
+    {
+      "id": "gold-city",
+      "name": "Gold City"
+    },
+    {
+      "id": "sakura-bakushin-o",
+      "name": "Sakura Bakushin O"
+    },
+    {
+      "id": "seeking-the-pearl",
+      "name": "Seeking the Pearl"
+    },
+    {
+      "id": "sweep-tosho",
+      "name": "Sweep Tosho"
+    },
+    {
+      "id": "super-creek",
+      "name": "Super Creek"
+    },
+    {
+      "id": "smart-falcon",
+      "name": "Smart Falcon"
+    },
+    {
+      "id": "tosen-jordan",
+      "name": "Tosen Jordan"
+    },
+    {
+      "id": "narita-taishin",
+      "name": "Narita Taishin"
+    },
+    {
+      "id": "nishino-flower",
+      "name": "Nishino Flower"
+    },
+    {
+      "id": "haru-urara",
+      "name": "Haru Urara"
+    },
+    {
+      "id": "bamboo-memory",
+      "name": "Bamboo Memory"
+    },
+    {
+      "id": "matikanefukukitaru",
+      "name": "Matikanefukukitaru"
+    },
+    {
+      "id": "meisho-doto",
+      "name": "Meisho Doto"
+    },
+    {
+      "id": "mejiro-dober",
+      "name": "Mejiro Dober"
+    },
+    {
+      "id": "nice-nature",
+      "name": "Nice Nature"
+    },
+    {
+      "id": "king-halo",
+      "name": "King Halo"
+    },
+    {
+      "id": "matikanetannhauser",
+      "name": "Matikanetannhauser"
+    },
+    {
+      "id": "mejiro-palmer",
+      "name": "Mejiro Palmer"
+    },
+    {
+      "id": "satono-diamond",
+      "name": "Satono Diamond"
+    },
+    {
+      "id": "kitasan-black",
+      "name": "Kitasan Black"
+    },
+    {
+      "id": "sakura-chiyono-o",
+      "name": "Sakura Chiyono O"
+    },
+    {
+      "id": "mejiro-ardan",
+      "name": "Mejiro Ardan"
+    },
+    {
+      "id": "yaeno-muteki",
+      "name": "Yaeno Muteki"
+    },
+    {
+      "id": "mejiro-bright",
+      "name": "Mejiro Bright"
+    },
+    {
+      "id": "copano-rickey",
+      "name": "Copano Rickey"
+    },
+    {
+      "id": "aston-machan",
+      "name": "Aston Machan"
+    },
+    {
+      "id": "yamanin-zephyr",
+      "name": "Yamanin Zephyr"
+    },
+    {
+      "id": "nakayama-festa",
+      "name": "Nakayama Festa"
+    }
+  ],
+  "versions": [
+    {
+      "id": "special-week-original",
+      "characterId": "special-week",
+      "displayName": "Special Week",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1001_100101.png"
+    },
+    {
+      "id": "special-week-summer",
+      "characterId": "special-week",
+      "displayName": "Special Week (Summer)",
+      "versionName": "Summer",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1001_100102.png"
+    },
+    {
+      "id": "silence-suzuka-original",
+      "characterId": "silence-suzuka",
+      "displayName": "Silence Suzuka",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1002_100201.png"
+    },
+    {
+      "id": "tokai-teio-original",
+      "characterId": "tokai-teio",
+      "displayName": "Tokai Teio",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1003_100301.png"
+    },
+    {
+      "id": "tokai-teio-anime",
+      "characterId": "tokai-teio",
+      "displayName": "Tokai Teio (Anime)",
+      "versionName": "Anime",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1003_100302.png"
+    },
+    {
+      "id": "maruzensky-original",
+      "characterId": "maruzensky",
+      "displayName": "Maruzensky",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1004_100401.png"
+    },
+    {
+      "id": "maruzensky-summer",
+      "characterId": "maruzensky",
+      "displayName": "Maruzensky (Summer)",
+      "versionName": "Summer",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1004_100402.png"
+    },
+    {
+      "id": "fuji-kiseki-original",
+      "characterId": "fuji-kiseki",
+      "displayName": "Fuji Kiseki",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1005_100501.png"
+    },
+    {
+      "id": "fuji-kiseki-ballroom",
+      "characterId": "fuji-kiseki",
+      "displayName": "Fuji Kiseki (Ballroom)",
+      "versionName": "Ballroom",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1005_100502.png"
+    },
+    {
+      "id": "oguri-cap-original",
+      "characterId": "oguri-cap",
+      "displayName": "Oguri Cap",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1006_100601.png"
+    },
+    {
+      "id": "oguri-cap-christmas",
+      "characterId": "oguri-cap",
+      "displayName": "Oguri Cap (Christmas)",
+      "versionName": "Christmas",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1006_100602.png"
+    },
+    {
+      "id": "gold-ship-original",
+      "characterId": "gold-ship",
+      "displayName": "Gold Ship",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1007_100701.png"
+    },
+    {
+      "id": "gold-ship-summer",
+      "characterId": "gold-ship",
+      "displayName": "Gold Ship (Summer)",
+      "versionName": "Summer",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1007_100702.png"
+    },
+    {
+      "id": "vodka-original",
+      "characterId": "vodka",
+      "displayName": "Vodka",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1008_100801.png"
+    },
+    {
+      "id": "daiwa-scarlet-original",
+      "characterId": "daiwa-scarlet",
+      "displayName": "Daiwa Scarlet",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1009_100901.png"
+    },
+    {
+      "id": "taiki-shuttle-original",
+      "characterId": "taiki-shuttle",
+      "displayName": "Taiki Shuttle",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1010_101001.png"
+    },
+    {
+      "id": "taiki-shuttle-summer",
+      "characterId": "taiki-shuttle",
+      "displayName": "Taiki Shuttle (Summer)",
+      "versionName": "Summer",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1010_101002.png"
+    },
+    {
+      "id": "grass-wonder-original",
+      "characterId": "grass-wonder",
+      "displayName": "Grass Wonder",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1011_101101.png"
+    },
+    {
+      "id": "grass-wonder-fantasy",
+      "characterId": "grass-wonder",
+      "displayName": "Grass Wonder (Fantasy)",
+      "versionName": "Fantasy",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1011_101102.png"
+    },
+    {
+      "id": "hishi-amazon-original",
+      "characterId": "hishi-amazon",
+      "displayName": "Hishi Amazon",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1012_101201.png"
+    },
+    {
+      "id": "mejiro-mcqueen-original",
+      "characterId": "mejiro-mcqueen",
+      "displayName": "Mejiro McQueen",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1013_101301.png"
+    },
+    {
+      "id": "mejiro-mcqueen-anime",
+      "characterId": "mejiro-mcqueen",
+      "displayName": "Mejiro McQueen (Anime)",
+      "versionName": "Anime",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1013_101302.png"
+    },
+    {
+      "id": "mejiro-mcqueen-summer",
+      "characterId": "mejiro-mcqueen",
+      "displayName": "Mejiro McQueen (Summer)",
+      "versionName": "Summer",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1013_101303.png"
+    },
+    {
+      "id": "el-condor-pasa-original",
+      "characterId": "el-condor-pasa",
+      "displayName": "El Condor Pasa",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1014_101401.png"
+    },
+    {
+      "id": "el-condor-pasa-fantasy",
+      "characterId": "el-condor-pasa",
+      "displayName": "El Condor Pasa (Fantasy)",
+      "versionName": "Fantasy",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1014_101402.png"
+    },
+    {
+      "id": "tm-opera-o-original",
+      "characterId": "tm-opera-o",
+      "displayName": "T.M. Opera O",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1015_101501.png"
+    },
+    {
+      "id": "tm-opera-o-new-year",
+      "characterId": "tm-opera-o",
+      "displayName": "T.M. Opera O (New Year)",
+      "versionName": "New Year",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1015_101502.png"
+    },
+    {
+      "id": "narita-brian-original",
+      "characterId": "narita-brian",
+      "displayName": "Narita Brian",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1016_101601.png"
+    },
+    {
+      "id": "symboli-rudolf-original",
+      "characterId": "symboli-rudolf",
+      "displayName": "Symboli Rudolf",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1017_101701.png"
+    },
+    {
+      "id": "symboli-rudolf-festival",
+      "characterId": "symboli-rudolf",
+      "displayName": "Symboli Rudolf (Festival)",
+      "versionName": "Festival",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1017_101702.png"
+    },
+    {
+      "id": "air-groove-original",
+      "characterId": "air-groove",
+      "displayName": "Air Groove",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1018_101801.png"
+    },
+    {
+      "id": "air-groove-wedding",
+      "characterId": "air-groove",
+      "displayName": "Air Groove (Wedding)",
+      "versionName": "Wedding",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1018_101802.png"
+    },
+    {
+      "id": "agnes-digital-original",
+      "characterId": "agnes-digital",
+      "displayName": "Agnes Digital",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1019_101901.png"
+    },
+    {
+      "id": "seiun-sky-original",
+      "characterId": "seiun-sky",
+      "displayName": "Seiun Sky",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1020_102001.png"
+    },
+    {
+      "id": "seiun-sky-ballroom",
+      "characterId": "seiun-sky",
+      "displayName": "Seiun Sky (Ballroom)",
+      "versionName": "Ballroom",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1020_102002.png"
+    },
+    {
+      "id": "tamamo-cross-original",
+      "characterId": "tamamo-cross",
+      "displayName": "Tamamo Cross",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1021_102101.png"
+    },
+    {
+      "id": "fine-motion-original",
+      "characterId": "fine-motion",
+      "displayName": "Fine Motion",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1022_102201.png"
+    },
+    {
+      "id": "fine-motion-wedding",
+      "characterId": "fine-motion",
+      "displayName": "Fine Motion (Wedding)",
+      "versionName": "Wedding",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1022_102202.png"
+    },
+    {
+      "id": "biwa-hayahide-original",
+      "characterId": "biwa-hayahide",
+      "displayName": "Biwa Hayahide",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1023_102301.png"
+    },
+    {
+      "id": "biwa-hayahide-christmas",
+      "characterId": "biwa-hayahide",
+      "displayName": "Biwa Hayahide (Christmas)",
+      "versionName": "Christmas",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1023_102302.png"
+    },
+    {
+      "id": "mayano-top-gun-original",
+      "characterId": "mayano-top-gun",
+      "displayName": "Mayano Top Gun",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1024_102401.png"
+    },
+    {
+      "id": "mayano-top-gun-wedding",
+      "characterId": "mayano-top-gun",
+      "displayName": "Mayano Top Gun (Wedding)",
+      "versionName": "Wedding",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1024_102402.png"
+    },
+    {
+      "id": "manhattan-cafe-original",
+      "characterId": "manhattan-cafe",
+      "displayName": "Manhattan Cafe",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1025_102501.png"
+    },
+    {
+      "id": "mihono-bourbon-original",
+      "characterId": "mihono-bourbon",
+      "displayName": "Mihono Bourbon",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1026_102601.png"
+    },
+    {
+      "id": "mihono-bourbon-valentine",
+      "characterId": "mihono-bourbon",
+      "displayName": "Mihono Bourbon (Valentine)",
+      "versionName": "Valentine",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1026_102602.png"
+    },
+    {
+      "id": "mejiro-ryan-original",
+      "characterId": "mejiro-ryan",
+      "displayName": "Mejiro Ryan",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1027_102701.png"
+    },
+    {
+      "id": "hishi-akebono-original",
+      "characterId": "hishi-akebono",
+      "displayName": "Hishi Akebono",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1028_102801.png"
+    },
+    {
+      "id": "yukino-bijin-original",
+      "characterId": "yukino-bijin",
+      "displayName": "Yukino Bijin",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1029_102901.png"
+    },
+    {
+      "id": "rice-shower-original",
+      "characterId": "rice-shower",
+      "displayName": "Rice Shower",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1030_103001.png"
+    },
+    {
+      "id": "rice-shower-halloween",
+      "characterId": "rice-shower",
+      "displayName": "Rice Shower (Halloween)",
+      "versionName": "Halloween",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1030_103002.png"
+    },
+    {
+      "id": "ines-fujin-original",
+      "characterId": "ines-fujin",
+      "displayName": "Ines Fujin",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1031_103101.png"
+    },
+    {
+      "id": "agnes-tachyon-original",
+      "characterId": "agnes-tachyon",
+      "displayName": "Agnes Tachyon",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1032_103201.png"
+    },
+    {
+      "id": "admire-vega-original",
+      "characterId": "admire-vega",
+      "displayName": "Admire Vega",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1033_103301.png"
+    },
+    {
+      "id": "inari-one-original",
+      "characterId": "inari-one",
+      "displayName": "Inari One",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1034_103401.png"
+    },
+    {
+      "id": "winning-ticket-original",
+      "characterId": "winning-ticket",
+      "displayName": "Winning Ticket",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1035_103501.png"
+    },
+    {
+      "id": "winning-ticket-steampunk",
+      "characterId": "winning-ticket",
+      "displayName": "Winning Ticket (Steampunk)",
+      "versionName": "Steampunk",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1035_103502.png"
+    },
+    {
+      "id": "air-shakur-original",
+      "characterId": "air-shakur",
+      "displayName": "Air Shakur",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1036_103601.png"
+    },
+    {
+      "id": "eishin-flash-original",
+      "characterId": "eishin-flash",
+      "displayName": "Eishin Flash",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1037_103701.png"
+    },
+    {
+      "id": "eishin-flash-valentine",
+      "characterId": "eishin-flash",
+      "displayName": "Eishin Flash (Valentine)",
+      "versionName": "Valentine",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1037_103702.png"
+    },
+    {
+      "id": "curren-chan-original",
+      "characterId": "curren-chan",
+      "displayName": "Curren Chan",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1038_103801.png"
+    },
+    {
+      "id": "curren-chan-wedding",
+      "characterId": "curren-chan",
+      "displayName": "Curren Chan (Wedding)",
+      "versionName": "Wedding",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1038_103802.png"
+    },
+    {
+      "id": "kawakami-princess-original",
+      "characterId": "kawakami-princess",
+      "displayName": "Kawakami Princess",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1039_103901.png"
+    },
+    {
+      "id": "gold-city-original",
+      "characterId": "gold-city",
+      "displayName": "Gold City",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1040_104001.png"
+    },
+    {
+      "id": "gold-city-festival",
+      "characterId": "gold-city",
+      "displayName": "Gold City (Festival)",
+      "versionName": "Festival",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1040_104002.png"
+    },
+    {
+      "id": "sakura-bakushin-o-original",
+      "characterId": "sakura-bakushin-o",
+      "displayName": "Sakura Bakushin O",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1041_104101.png"
+    },
+    {
+      "id": "seeking-the-pearl-original",
+      "characterId": "seeking-the-pearl",
+      "displayName": "Seeking the Pearl",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1042_104201.png"
+    },
+    {
+      "id": "sweep-tosho-original",
+      "characterId": "sweep-tosho",
+      "displayName": "Sweep Tosho",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1044_104401.png"
+    },
+    {
+      "id": "super-creek-original",
+      "characterId": "super-creek",
+      "displayName": "Super Creek",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1045_104501.png"
+    },
+    {
+      "id": "super-creek-halloween",
+      "characterId": "super-creek",
+      "displayName": "Super Creek (Halloween)",
+      "versionName": "Halloween",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1045_104502.png"
+    },
+    {
+      "id": "smart-falcon-original",
+      "characterId": "smart-falcon",
+      "displayName": "Smart Falcon",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1046_104601.png"
+    },
+    {
+      "id": "smart-falcon-grand-concert",
+      "characterId": "smart-falcon",
+      "displayName": "Smart Falcon (Grand Concert)",
+      "versionName": "Grand Concert",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1046_104602.png"
+    },
+    {
+      "id": "tosen-jordan-original",
+      "characterId": "tosen-jordan",
+      "displayName": "Tosen Jordan",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1048_104801.png"
+    },
+    {
+      "id": "narita-taishin-original",
+      "characterId": "narita-taishin",
+      "displayName": "Narita Taishin",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1050_105001.png"
+    },
+    {
+      "id": "narita-taishin-steampunk",
+      "characterId": "narita-taishin",
+      "displayName": "Narita Taishin (Steampunk)",
+      "versionName": "Steampunk",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1050_105002.png"
+    },
+    {
+      "id": "nishino-flower-original",
+      "characterId": "nishino-flower",
+      "displayName": "Nishino Flower",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1051_105101.png"
+    },
+    {
+      "id": "haru-urara-original",
+      "characterId": "haru-urara",
+      "displayName": "Haru Urara",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1052_105201.png"
+    },
+    {
+      "id": "haru-urara-new-year",
+      "characterId": "haru-urara",
+      "displayName": "Haru Urara (New Year)",
+      "versionName": "New Year",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1052_105202.png"
+    },
+    {
+      "id": "bamboo-memory-original",
+      "characterId": "bamboo-memory",
+      "displayName": "Bamboo Memory",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1053_105301.png"
+    },
+    {
+      "id": "matikanefukukitaru-original",
+      "characterId": "matikanefukukitaru",
+      "displayName": "Matikanefukukitaru",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1056_105601.png"
+    },
+    {
+      "id": "matikanefukukitaru-full-armor",
+      "characterId": "matikanefukukitaru",
+      "displayName": "Matikanefukukitaru (Full Armor)",
+      "versionName": "Full Armor",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1056_105602.png"
+    },
+    {
+      "id": "meisho-doto-original",
+      "characterId": "meisho-doto",
+      "displayName": "Meisho Doto",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1058_105801.png"
+    },
+    {
+      "id": "mejiro-dober-original",
+      "characterId": "mejiro-dober",
+      "displayName": "Mejiro Dober",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1059_105901.png"
+    },
+    {
+      "id": "mejiro-dober-summer",
+      "characterId": "mejiro-dober",
+      "displayName": "Mejiro Dober (Summer)",
+      "versionName": "Summer",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1059_105902.png"
+    },
+    {
+      "id": "nice-nature-original",
+      "characterId": "nice-nature",
+      "displayName": "Nice Nature",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1060_106001.png"
+    },
+    {
+      "id": "nice-nature-cheerleader",
+      "characterId": "nice-nature",
+      "displayName": "Nice Nature (Cheerleader)",
+      "versionName": "Cheerleader",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1060_106002.png"
+    },
+    {
+      "id": "king-halo-original",
+      "characterId": "king-halo",
+      "displayName": "King Halo",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1061_106101.png"
+    },
+    {
+      "id": "king-halo-cheerleader",
+      "characterId": "king-halo",
+      "displayName": "King Halo (Cheerleader)",
+      "versionName": "Cheerleader",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1061_106102.png"
+    },
+    {
+      "id": "matikanetannhauser-original",
+      "characterId": "matikanetannhauser",
+      "displayName": "Matikanetannhauser",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1062_106201.png"
+    },
+    {
+      "id": "mejiro-palmer-original",
+      "characterId": "mejiro-palmer",
+      "displayName": "Mejiro Palmer",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1064_106401.png"
+    },
+    {
+      "id": "satono-diamond-original",
+      "characterId": "satono-diamond",
+      "displayName": "Satono Diamond",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1067_106701.png"
+    },
+    {
+      "id": "kitasan-black-original",
+      "characterId": "kitasan-black",
+      "displayName": "Kitasan Black",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1068_106801.png"
+    },
+    {
+      "id": "sakura-chiyono-o-original",
+      "characterId": "sakura-chiyono-o",
+      "displayName": "Sakura Chiyono O",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1069_106901.png"
+    },
+    {
+      "id": "mejiro-ardan-original",
+      "characterId": "mejiro-ardan",
+      "displayName": "Mejiro Ardan",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1071_107101.png"
+    },
+    {
+      "id": "yaeno-muteki-original",
+      "characterId": "yaeno-muteki",
+      "displayName": "Yaeno Muteki",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1072_107201.png"
+    },
+    {
+      "id": "mejiro-bright-original",
+      "characterId": "mejiro-bright",
+      "displayName": "Mejiro Bright",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1074_107401.png"
+    },
+    {
+      "id": "copano-rickey-original",
+      "characterId": "copano-rickey",
+      "displayName": "Copano Rickey",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1098_109801.png"
+    },
+    {
+      "id": "agnes-digital-halloween",
+      "characterId": "agnes-digital",
+      "displayName": "Agnes Digital (Halloween)",
+      "versionName": "Halloween",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1019_101902.png"
+    },
+    {
+      "id": "meisho-doto-halloween",
+      "characterId": "meisho-doto",
+      "displayName": "Meisho Doto (Halloween)",
+      "versionName": "Halloween",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1058_105802.png"
+    },
+    {
+      "id": "aston-machan-original",
+      "characterId": "aston-machan",
+      "displayName": "Aston Machan",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1087_108701.png"
+    },
+    {
+      "id": "yamanin-zephyr-original",
+      "characterId": "yamanin-zephyr",
+      "displayName": "Yamanin Zephyr",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1078_107801.png"
+    },
+    {
+      "id": "inari-one-festival",
+      "characterId": "inari-one",
+      "displayName": "Inari One (Festival)",
+      "versionName": "Festival",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1034_103402.png"
+    },
+    {
+      "id": "tamamo-cross-festival",
+      "characterId": "tamamo-cross",
+      "displayName": "Tamamo Cross (Festival)",
+      "versionName": "Festival",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1021_102102.png"
+    },
+    {
+      "id": "nakayama-festa-original",
+      "characterId": "nakayama-festa",
+      "displayName": "Nakayama Festa",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1049_104901.png"
+    }
+  ]
+}
