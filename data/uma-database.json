@@ -1,5 +1,11 @@
 {
-  "version": 2,
+  "version": 3,
+  "assets": [
+    {
+      "path": "/Umas/test-avatar.png",
+      "url": "https://raw.githubusercontent.com/Rondeliush/uma-pct/main/assets/Umas/test-avatar.png"
+    }
+  ],
   "characters": [
     {
       "id": "special-week",
@@ -268,6 +274,10 @@
     {
       "id": "nakayama-festa",
       "name": "Nakayama Festa"
+    },
+    {
+      "id": "remote-test-uma",
+      "name": "Remote Test Uma"
     }
   ],
   "versions": [
@@ -1094,6 +1104,14 @@
       "versionName": "Original",
       "archived": false,
       "avatar": "/Umas/chara_stand_1049_104901.png"
+    },
+    {
+      "id": "remote-test-uma-original",
+      "characterId": "remote-test-uma",
+      "displayName": "Remote Test Uma",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/test-avatar.png"
     }
   ]
 }
