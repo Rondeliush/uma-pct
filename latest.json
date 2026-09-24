@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0",
+  "notes": "Initial release.",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSR292VytFMFZ6aVVWcWxHcS9EN2NIaDdHWHUzOFN4QVpJbkhUMVZjbVVYYTVqRFlncFJ2ZUhzVUtTY3Q0QU9nc0RvazNBdjNoTHY2WnNwb2VzZEFwUmtuclErTFgxS1FnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkwMDEyMjk2CWZpbGU6dW1hLXRyYWNrZXJfMC4xLjBfeDY0LXNldHVwLmV4ZQptN2RzQlRaWWdMS2I4RHgyRVJ2VHRtV3F6WFFQM041ME01cHZMTG03RlJ2bFVvL0V0K0ZJTXVGZTVyb2dQc1JUS3V2eFhYdzFYN3F3Z3UvZDU4QUpBZz09Cg==",
+      "url": "https://github.com/Rondeliush/Rondeliush/uma-pct/releases/download/v0.1.0/uma-tracker_0.1.0_x64-setup.exe"
+    }
+  }
+}
