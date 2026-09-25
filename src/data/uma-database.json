@@ -1,6 +1,6 @@
 {
    "latestAddedVersionIds": [
-    "nakayama-festa-original"
+    "wonder-acute-original"
   ],
   "characters": [
     {
@@ -270,6 +270,10 @@
     {
       "id": "nakayama-festa",
       "name": "Nakayama Festa"
+    },
+    {
+      "id": "wonder-acute",
+      "name": "Wonder Acute"
     }
   ],
   "versions": [
@@ -1096,6 +1100,14 @@
       "versionName": "Original",
       "archived": false,
       "avatar": "/Umas/chara_stand_1049_104901.png"
+    },
+    {
+      "id": "wonder-acute-original",
+      "characterId": "wonder-acute",
+      "displayName": "Wonder Acute",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1100_110001.png"
     }
   ]
 }
