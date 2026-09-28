@@ -30,6 +30,9 @@ const { versions } = useUmaDatabase()
   setSelectedRecentCmNumber,
 ] = useState<number | null>(null)
 
+const [showMobileUmaStats, setShowMobileUmaStats] =
+  useState(false)
+
 const selectedRecentCm =
   selectedRecentCmNumber !== null
     ? cms.find(
@@ -725,15 +728,12 @@ const recentProgress =
   </div>
 
   {/* TABLE HEADER */}
-  <div className="relative grid grid-cols-[52px_minmax(220px,1fr)_90px_90px_100px_100px_110px] items-center border-b border-white/[0.06] px-4 py-2.5 text-[8px] font-black uppercase tracking-[0.16em] text-blue-100/30">
+  {/* TABLE HEADER */}
 
-    <div className="text-center">
-      #
-    </div>
-
-    <div>
-      Uma
-    </div>
+{/* MOBILE */}
+{showMobileUmaStats ? (
+  <div className="relative grid grid-cols-[52px_repeat(5,minmax(0,1fr))] items-center border-b border-white/[0.06] px-3 py-2.5 text-[8px] font-black uppercase tracking-[0.12em] text-blue-100/30 md:hidden">
+    <div />
 
     <div className="text-center">
       Events
@@ -751,11 +751,32 @@ const recentProgress =
       Wins
     </div>
 
-    <div className="text-right">
+    <div className="text-center">
       Win Rate
     </div>
-
   </div>
+) : (
+  <div className="relative grid grid-cols-[44px_minmax(0,1fr)] items-center border-b border-white/[0.06] px-3 py-2.5 text-[8px] font-black uppercase tracking-[0.16em] text-blue-100/30 md:hidden">
+    <div className="text-center">
+      #
+    </div>
+
+    <div>
+      Uma
+    </div>
+  </div>
+)}
+
+{/* DESKTOP */}
+<div className="relative hidden grid-cols-[52px_minmax(220px,1fr)_90px_90px_100px_100px_110px] items-center border-b border-white/[0.06] px-4 py-2.5 text-[8px] font-black uppercase tracking-[0.16em] text-blue-100/30 md:grid">
+  <div className="text-center">#</div>
+  <div>Uma</div>
+  <div className="text-center">Events</div>
+  <div className="text-center">Finals</div>
+  <div className="text-center">Races</div>
+  <div className="text-center">Wins</div>
+  <div className="text-right">Win Rate</div>
+</div>
 
   {/* ROWS */}
     <div className="relative divide-y divide-white/[0.05]">
@@ -767,11 +788,19 @@ const recentProgress =
               uma?.umaId ??
               `empty-${index}`
             }
-            className="grid grid-cols-[52px_minmax(220px,1fr)_90px_90px_100px_100px_110px] items-center px-4 py-2.5 transition hover:bg-white/[0.025]"
+            className={`grid items-center px-3 py-2.5 transition hover:bg-white/[0.025] md:grid-cols-[52px_minmax(220px,1fr)_90px_90px_100px_100px_110px] md:px-4 ${
+              showMobileUmaStats
+                ? "grid-cols-[52px_repeat(5,minmax(0,1fr))]"
+                : "grid-cols-[44px_minmax(0,1fr)]"
+            }`}
           >
 
             {/* RANK */}
-            <div className="flex justify-center">
+            <div
+                className={`justify-center ${
+                  showMobileUmaStats ? "hidden md:flex" : "flex"
+                }`}
+              >
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-md text-xs font-black ${
                   index === 0
@@ -790,7 +819,13 @@ const recentProgress =
             {uma ? (
               <>
                 {/* UMA */}
-                <div className="flex min-w-0 items-center gap-3">
+                <div
+                    className={`flex min-w-0 items-center ${
+                      showMobileUmaStats
+                        ? "justify-center md:justify-start md:gap-3"
+                        : "gap-3"
+                    }`}
+                  >
 
                   {uma.avatar ? (
                   <UmaAvatarImage
@@ -802,29 +837,53 @@ const recentProgress =
                     <div className="h-10 w-10 shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.03]" />
                   )}
 
-                  <div className="truncate text-sm font-black text-white/90">
+                  <div
+                    className={`truncate text-sm font-black text-white/90 ${
+                      showMobileUmaStats ? "hidden md:block" : ""
+                    }`}
+                  >
                     {uma.name}
                   </div>
 
                 </div>
 
-                <div className="text-center text-sm font-bold tabular-nums text-blue-100/65">
+                <div
+                  className={`text-center text-sm font-bold tabular-nums text-blue-100/65 ${
+                    showMobileUmaStats ? "block" : "hidden"
+                  } md:block`}
+                >
                   {uma.events}
                 </div>
 
-                <div className="text-center text-sm font-bold tabular-nums text-violet-200/80">
+                <div
+                  className={`text-center text-sm font-bold tabular-nums text-violet-200/80 ${
+                    showMobileUmaStats ? "block" : "hidden md:block"
+                  }`}
+                >
                   {uma.finals}
                 </div>
 
-                <div className="text-center text-sm font-bold tabular-nums text-white/80">
+                <div
+                  className={`text-center text-sm font-bold tabular-nums text-white/80 ${
+                    showMobileUmaStats ? "block" : "hidden md:block"
+                  }`}
+                >
                   {uma.races}
                 </div>
 
-                <div className="text-center text-sm font-black tabular-nums text-sky-200">
+                <div
+                  className={`text-center text-sm font-black tabular-nums text-sky-200 ${
+                    showMobileUmaStats ? "block" : "hidden md:block"
+                  }`}
+                >
                   {uma.wins}
                 </div>
 
-                <div className="text-right text-sm font-black tabular-nums text-cyan-200">
+                <div
+                  className={`text-right text-sm font-black tabular-nums text-cyan-200 ${
+                    showMobileUmaStats ? "block" : "hidden md:block"
+                  }`}
+                >
                   {uma.winRate.toFixed(2)}%
                 </div>
               </>
@@ -866,7 +925,19 @@ const recentProgress =
       )}
 
     </div>
-
+      <div className="flex justify-end border-t border-white/[0.06] px-4 py-3 md:hidden">
+      <button
+        type="button"
+        onClick={() =>
+          setShowMobileUmaStats((current) => !current)
+        }
+        className="rounded-lg border border-sky-300/20 bg-sky-400/[0.07] px-3 py-2 text-[10px] font-black uppercase tracking-[0.1em] text-sky-200 transition hover:border-sky-300/35 hover:bg-sky-400/[0.12]"
+      >
+        {showMobileUmaStats
+          ? "Show Names"
+          : "Show Stats"}
+      </button>
+    </div>
 </section>
 {/* BEST EVENT */}
 <section
@@ -1071,7 +1142,27 @@ const recentProgress =
   {/* HEADER */}
   <div className="relative flex items-center gap-3 border-b border-sky-300/[0.12] px-5 py-3.5">
 
-   <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center text-[44px] leading-none text-violet-300 drop-shadow-[0_0_5px_rgba(167,139,250,0.4)]">
+   {/* MOBILE ICON */}
+<div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center text-violet-300 drop-shadow-[0_0_6px_rgba(167,139,250,0.45)] md:hidden">
+  <svg
+    viewBox="0 0 24 24"
+    className="h-8 w-8"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M7 4h10a5 5 0 0 1 5 5v6a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V9a5 5 0 0 1 5-5Z" />
+    <path d="M8 7h8a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4a3 3 0 0 1 3-3Z" />
+    <path d="M12 4v3" />
+    <path d="M12 17v3" />
+  </svg>
+</div>
+
+{/* DESKTOP ICON */}
+<div className="mt-0.5 hidden h-9 w-9 shrink-0 items-center justify-center text-[44px] leading-none text-violet-300 drop-shadow-[0_0_5px_rgba(167,139,250,0.4)] md:flex">
   <span className="text-[30px] leading-none">
     👟
   </span>
@@ -1093,24 +1184,24 @@ const recentProgress =
 <div className="relative">
 
   {/* TABLE HEADER */}
-    <div className="grid grid-cols-[90px_80px_minmax(0,1fr)_80px_90px] items-center gap-3 border-b border-white/[0.06] px-5 py-2.5">
+    <div className="grid grid-cols-[52px_56px_minmax(0,1fr)_50px_56px] items-center gap-1.5 border-b border-white/[0.06] px-3 py-2.5 xl:grid-cols-[90px_80px_minmax(0,1fr)_80px_90px] xl:gap-3 xl:px-5">
 
     <div className="text-[8px] font-black uppercase tracking-[0.14em] text-blue-100/25">
       Surface
     </div>
 
-    <div className="pl-2 text-[8px] font-black uppercase tracking-[0.14em] text-blue-100/25">
+    <div className="text-[7px] font-black uppercase tracking-[0.1em] text-blue-100/25 xl:pl-2 xl:text-[8px] xl:tracking-[0.14em]">
       Distance
     </div>
 
     <div className="text-[8px] font-black uppercase tracking-[0.14em] text-blue-100/25">
     </div>
 
-    <div className="text-right text-[8px] font-black uppercase tracking-[0.14em] text-blue-100/30">
+    <div className="text-right text-[7px] font-black uppercase tracking-[0.08em] text-blue-100/30 xl:text-[8px] xl:tracking-[0.14em]">
       Win Rate
     </div>
 
-    <div className="text-right text-[8px] font-black uppercase tracking-[0.14em] text-blue-100/30">
+    <div className="text-right text-[7px] font-black uppercase leading-tight tracking-[0.05em] text-blue-100/30 xl:text-[8px] xl:tracking-[0.14em]">
       Wins / Races
     </div>
 
@@ -1130,7 +1221,7 @@ const recentProgress =
     return (
       <div
         key={surface}
-        className={`grid gap-4 px-5 py-4 xl:grid-cols-[90px_minmax(0,850px)] ${
+        className={`grid grid-cols-[52px_minmax(0,1fr)] gap-2 px-3 py-3 xl:grid-cols-[90px_minmax(0,850px)] xl:gap-4 xl:px-5 xl:py-4 ${
           surfaceIndex === 1
           ? "border-t-2 border-sky-400/20"
           : ""
@@ -1138,7 +1229,7 @@ const recentProgress =
       >
 
         {/* SURFACE */}
-        <div className="flex items-center gap-2 px-5 py-3">
+        <div className="flex flex-col items-center justify-center gap-1 py-2 xl:flex-row xl:justify-start xl:gap-2 xl:px-5 xl:py-3">
           <div
             className={`h-2.5 w-2.5 shrink-0 rounded-full ${
               isTurf
@@ -1148,7 +1239,7 @@ const recentProgress =
           />
 
           <div
-            className={`text-xs font-black uppercase tracking-[0.16em] ${
+            className={`text-[9px] font-black uppercase tracking-[0.1em] xl:text-xs xl:tracking-[0.16em] ${
               isTurf
                 ? "text-emerald-200"
                 : "text-red-300"
@@ -1175,12 +1266,12 @@ const recentProgress =
             return (
               <div
                 key={category}
-                className="grid grid-cols-[80px_minmax(0,1fr)_80px_90px] items-center gap-3 py-2 pr-5"
+                className="grid grid-cols-[56px_minmax(0,1fr)_50px_56px] items-center gap-1.5 py-2 xl:grid-cols-[80px_minmax(0,1fr)_80px_90px] xl:gap-3 xl:pr-5"
               >
 
                 {/* DISTANCE */}
                 <div
-                className={`pl-2 text-[9px] font-black uppercase tracking-[0.13em] ${
+                className={`text-[8px] font-black uppercase tracking-[0.08em] xl:pl-2 xl:text-[9px] xl:tracking-[0.13em] ${
                   distanceColorClasses[category]
                 }`}
               >
@@ -1210,7 +1301,7 @@ const recentProgress =
 
                 {/* EXACT WIN RATE */}
                 <div
-                  className={`text-right text-xs font-black tabular-nums ${
+                  className={`text-right text-[10px] font-black tabular-nums xl:text-xs ${
                     winRate !== null
                       ? "text-white"
                       : "text-blue-100/20"
@@ -1223,7 +1314,7 @@ const recentProgress =
 
                 {/* WINS / RACES */}
                 <div
-                className={`text-right text-[10px] font-bold tabular-nums ${
+                className={`text-right text-[9px] font-bold tabular-nums xl:text-[10px] ${
                   performance.races > 0 ? "text-white" : "text-white/20"
                 }`}
               >
@@ -1272,13 +1363,13 @@ const recentProgress =
   </div>
 
   {/* TIMELINE */}
-  <div className="relative px-6 py-6">
+  <div className="relative px-3 py-5 md:px-6 md:py-6">
 
     {recentProgress.length > 0 ? (
       <div className="relative">
 
 
-        <div className="relative grid grid-cols-3 gap-3 pb-1">
+        <div className="relative grid grid-cols-3 gap-2 pb-1 md:gap-3">
 
           {recentProgress.map((event, index) => {
             const isFirst =
@@ -1321,13 +1412,13 @@ const recentProgress =
                 />
 
                 {/* CARD */}
-                <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#081426]/90 px-4 py-3 shadow-lg transition duration-200 group-hover:-translate-y-1 group-hover:border-violet-300/35 group-hover:bg-[#0a1830] group-hover:shadow-[0_0_18px_rgba(139,92,246,0.12)]">
+                <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#081426]/90 px-2 py-3 shadow-lg transition duration-200 group-hover:-translate-y-1 group-hover:border-violet-300/35 group-hover:bg-[#0a1830] group-hover:shadow-[0_0_18px_rgba(139,92,246,0.12)] md:px-4">
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center text-center md:flex-row md:items-center md:gap-3 md:text-left">
 
                   {/* RESULT ICON */}
                   <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center text-lg font-black ${
+                    className={`mb-1 flex h-8 w-8 shrink-0 items-center justify-center text-lg font-black md:mb-0 ${
                       isFirst
                         ? "text-yellow-300"
                         : isSecond
@@ -1352,7 +1443,7 @@ const recentProgress =
                       CM #{event.cm.number}
                     </div>
 
-                    <div className="mt-0.5 truncate text-xs font-black text-white">
+                    <div className="mt-0.5 line-clamp-2 min-h-[30px] text-[10px] font-black leading-[14px] text-white md:min-h-0 md:truncate md:text-xs md:leading-normal">
                       {event.cm.name || "Unnamed"}
                     </div>
 

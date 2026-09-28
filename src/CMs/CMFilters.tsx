@@ -197,10 +197,10 @@ const selectedUmaName =
       >
         <div className="relative z-40 rounded-xl border border-gray-700 bg-gray-950/70 p-4">
           <div className="space-y-3">
-            <div className="flex flex-wrap items-start gap-3">
+            <div className="grid grid-cols-1 gap-3 md:flex md:flex-wrap md:items-start">
 
               {/* LENGTH */}
-              <div className="relative w-56">
+              <div className="relative w-full md:w-48">
                 <button
                   type="button"
                   onClick={() =>
@@ -291,7 +291,7 @@ const selectedUmaName =
               </div>
 
               {/* SURFACE */}
-              <div className="relative w-48">
+              <div className="relative w-full md:w-60">
                 <button
                   type="button"
                   onClick={() =>
@@ -377,7 +377,7 @@ const selectedUmaName =
 
 
                 {/* RACECOURSE */}
-<div className="relative w-60">
+<div className="relative w-full md:w-40">
   <button
     type="button"
     onClick={() =>
@@ -556,7 +556,7 @@ const selectedUmaName =
               </div>
 
               {/* PLACE */}
-              <div className="relative w-36">
+              <div className="relative w-full md:w-36">
                 <button
                   type="button"
                  onClick={() =>
@@ -648,9 +648,9 @@ const selectedUmaName =
 
             </div>
 
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
                 {/* UMA */}
-<div className="relative w-80">
+<div className="relative w-full md:w-80">
   <button
     type="button"
     onClick={() =>
@@ -697,7 +697,7 @@ const selectedUmaName =
 
 
   {openFilter === "uma" && (
-    <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-lg border border-gray-700 bg-gray-900 p-2 shadow-xl">
+  <div className="relative mt-2 w-full rounded-lg border border-gray-700 bg-gray-900 p-2 shadow-xl md:absolute md:left-0 md:top-full md:z-50">
 
       {/* SEARCH UMA */}
       <input
@@ -769,7 +769,7 @@ const selectedUmaName =
     </div>
   )}
 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex w-full items-center justify-between gap-3 md:w-auto md:justify-start md:gap-4">
               {/* RESULTS COUNT */}
               
               <div className="flex h-9 items-center gap-1 whitespace-nowrap text-sm font-semibold">

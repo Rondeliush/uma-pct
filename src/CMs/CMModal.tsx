@@ -139,11 +139,11 @@ function CMModal({
           {/* TRACK INFORMATION */}
           {/* ======================================= */}
 
-          <div className="relative px-5 py-3">
-          <div className="relative grid grid-cols-4 gap-2">
+          <div className="relative px-3 py-3 md:px-5">
+          <div className="relative grid grid-cols-2 gap-2 md:grid-cols-4">
 
               {/* RACECOURSE */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 64 40"
@@ -198,7 +198,7 @@ function CMModal({
               </div>
 
               {/* SURFACE */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -216,7 +216,7 @@ function CMModal({
                   </svg>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <div className="text-[11px] font-medium text-blue-200/45">
                     Surface
                   </div>
@@ -228,7 +228,7 @@ function CMModal({
               </div>
 
               {/* DISTANCE */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -249,7 +249,7 @@ function CMModal({
                   </svg>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <div className="text-[11px] font-medium text-blue-200/45">
                     Distance
                   </div>
@@ -261,7 +261,7 @@ function CMModal({
               </div>
 
               {/* LENGTH */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -279,7 +279,7 @@ function CMModal({
                   </svg>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <div className="text-[11px] font-medium text-blue-200/45">
                     Length
                   </div>
@@ -291,7 +291,7 @@ function CMModal({
               </div>
 
               {/* DIRECTION */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -320,7 +320,7 @@ function CMModal({
               </div>
 
               {/* WEATHER */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -346,7 +346,7 @@ function CMModal({
                   </svg>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <div className="text-[11px] font-medium text-blue-200/45">
                     Weather
                   </div>
@@ -358,7 +358,7 @@ function CMModal({
               </div>
 
               {/* SEASON */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -416,7 +416,7 @@ function CMModal({
                   </svg>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <div className="text-[11px] font-medium text-blue-200/45">
                     Season
                   </div>
@@ -428,7 +428,7 @@ function CMModal({
               </div>
 
               {/* CONDITION */}
-              <div className="flex min-h-[56px] items-center gap-2.5 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-3 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025]">
+              <div className="flex min-h-[56px] min-w-0 items-center gap-2 rounded-[10px] border border-white/[0.07] bg-white/[0.018] px-2.5 transition hover:border-cyan-300/15 hover:bg-cyan-300/[0.025] md:gap-2.5 md:px-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                   <svg
                     viewBox="0 0 24 24"
@@ -445,7 +445,7 @@ function CMModal({
                   </svg>
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <div className="text-[11px] font-medium text-blue-200/45">
                     Condition
                   </div>

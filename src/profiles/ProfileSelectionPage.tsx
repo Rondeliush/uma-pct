@@ -99,7 +99,7 @@ const [
         {/* HEADER */}
         <div className="relative">
         <div className="text-center">
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-white">
+            <h1 className="mt-3 text-3xl font-black tracking-tight text-white md:text-4xl">
             Select Profile
             </h1>
 
@@ -109,7 +109,7 @@ const [
         </div>
 
         {/* PROFILE TOOLS */}
-        <div className="absolute right-0 top-0 flex items-center gap-2">
+        <div className="mt-5 flex items-center justify-center gap-2 md:absolute md:right-0 md:top-0 md:mt-0 md:justify-start">
             <button
                 type="button"
                 disabled={profiles.length === 0}
@@ -117,7 +117,7 @@ const [
                     setProfileToExport(null)
                     setIsExportOpen(true)
                 }}
-                className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-xs font-bold text-blue-100/50 transition hover:border-violet-300/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-xs font-bold text-blue-100/50 transition hover:border-violet-300/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 md:flex-none md:py-2"
                 >
                 Export Profile
                 </button>
@@ -125,7 +125,7 @@ const [
             <button
               type="button"
               onClick={onImportProfile}
-              className="rounded-lg border border-violet-300/20 bg-violet-400/[0.06] px-3 py-2 text-xs font-black text-violet-200/80 transition hover:border-violet-300/40 hover:bg-violet-400/[0.10] hover:text-violet-100"
+              className="flex-1 rounded-lg border border-violet-300/20 bg-violet-400/[0.06] px-3 py-2.5 text-xs font-black text-violet-200/80 transition hover:border-violet-300/40 hover:bg-violet-400/[0.10] hover:text-violet-100 md:flex-none md:py-2"
             >
               Import Profile
             </button>

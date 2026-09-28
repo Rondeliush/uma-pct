@@ -15,12 +15,13 @@ import {
 import ModalPortal from "../components/ModalPortal"
 import UmaAvatarImage from "../components/UmaAvatarImage"
 import { getTrackImage } from "../data/trackData"
-
+import CMCardMobile from "./CMCardMobile"
 
 
 type CMCardProps = {
   cm: CM
   setCms: React.Dispatch<React.SetStateAction<CM[]>>
+  mobile?: boolean
   compact?: boolean
   compactDimmed?: boolean
   onCompactHoverStart?: () => void
@@ -29,6 +30,7 @@ type CMCardProps = {
 function CMCard({
   cm,
   setCms,
+  mobile = false,
   compact = false,
   compactDimmed = false,
   onCompactHoverStart,
@@ -153,6 +155,109 @@ function CMCard({
           )
       : cm.currentLineup
 
+if (mobile) {
+  return (
+    <>
+      <CMCardMobile
+        cm={cm}
+        compact={compact}
+        onOpen={() =>
+          setIsModalOpen(true)
+        }
+        onEdit={() =>
+          setIsEditModalOpen(true)
+        }
+        onNotes={() =>
+          setIsNotesModalOpen(true)
+        }
+        onDelete={handleDelete}
+        overallWinRate={overallWinRate}
+        displayedFinalQualification={
+          displayedFinalQualification
+        }
+      />
+
+      {isModalOpen && (
+        <CMModal
+          cm={cm}
+          setCms={setCms}
+          onClose={() =>
+            setIsModalOpen(false)
+          }
+        />
+      )}
+
+      {isEditModalOpen && (
+        <EditCMModal
+          cm={cm}
+          setCms={setCms}
+          onClose={() =>
+            setIsEditModalOpen(false)
+          }
+        />
+      )}
+
+      {isNotesModalOpen && (
+        <CMNotesModal
+          cm={cm}
+          onSave={handleSaveNotes}
+          onClose={() =>
+            setIsNotesModalOpen(false)
+          }
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <ModalPortal>
+          <div
+            className="fixed inset-0 z-200 flex items-center justify-center bg-black/70 px-4"
+            onClick={() =>
+              setShowDeleteConfirm(false)
+            }
+          >
+            <div
+              className="w-full max-w-md rounded-xl bg-gray-900 p-6 shadow-2xl"
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <h2 className="mb-3 text-xl font-bold text-white">
+                Delete CM{cm.number}?
+              </h2>
+
+              <p className="mb-6 text-gray-400">
+                Are you sure you want to
+                delete this CM?
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowDeleteConfirm(
+                      false
+                    )
+                  }
+                  className="rounded-lg border-2 border-gray-600 px-5 py-2 text-gray-300"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  className="rounded-lg border-2 border-red-500 px-5 py-2 font-semibold text-red-400"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+    </>
+  )
+}
 
 if (compact) {
   return (

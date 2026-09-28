@@ -616,3 +616,11 @@ body,
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}

@@ -223,7 +223,7 @@ function UmaForm({
 
   return (
     <div
-  className={`relative min-h-[170px] rounded-xl border transition-[border-color,box-shadow,background-color] duration-300 ${
+  className={`relative rounded-xl border transition-[border-color,box-shadow,background-color] duration-300 md:min-h-[170px] ${
     isSearching ? "z-50" : "z-0"
   } ${cardClasses}`}
 >
@@ -231,8 +231,8 @@ function UmaForm({
       {/* CHARACTER ART - CLIPPED TO CARD */}
       {/* ======================================= */}
 
-      <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-xl">
-        <div className="absolute bottom-0 left-0 h-full w-[245px]">
+      <div className="pointer-events-none relative z-10 h-[220px] overflow-hidden rounded-t-xl md:absolute md:inset-0 md:h-auto md:rounded-xl">
+        <div className="relative mx-auto h-full w-full max-w-[260px] md:absolute md:bottom-0 md:left-0 md:w-[245px]">
           {/* SLOT NUMBER */}
           <div className="absolute left-3 top-3 z-30 text-3xl font-black italic text-white/90 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
             {String(number).padStart(
@@ -243,7 +243,7 @@ function UmaForm({
 
           {selectedVersion?.avatar ? (
             <div
-              className="absolute bottom-0 left-[8px] h-[235px] w-[255px]"
+              className="absolute bottom-0 left-1/2 h-[215px] w-[235px] -translate-x-1/2 md:left-[8px] md:h-[235px] md:w-[255px] md:translate-x-0"
               style={{
                 WebkitMaskImage:
                   "linear-gradient(to right, black 0%, black 78%, rgba(0,0,0,0.95) 84%, rgba(0,0,0,0.55) 92%, transparent 100%)",
@@ -286,7 +286,7 @@ function UmaForm({
       {/* CONTENT */}
       {/* ======================================= */}
 
-      <div className="relative min-h-[190px] pl-[255px] pr-4 py-3">
+      <div className="relative px-3 pb-3 pt-2 md:min-h-[190px] md:py-3 md:pl-[255px] md:pr-4">
         <div className="relative z-20 flex min-h-[146px] min-w-0 flex-col">
 
           {/* ======================================= */}
@@ -341,8 +341,10 @@ function UmaForm({
                         w-full
                         border border-transparent
                         bg-transparent
-                        text-[17px] font-extrabold
-                        tracking-[-0.01em]
+                        text-[13px] font-extrabold
+                        tracking-[-0.02em]
+                        md:text-[17px]
+                        md:tracking-[-0.01em]
                         text-white/95
 
                         hover:bg-white/[0.04]
@@ -351,7 +353,7 @@ function UmaForm({
                         focus:bg-black/20
                       `
                       : `
-                        ml-auto w-[300px]
+                        w-full md:ml-auto md:w-[300px]
                         border border-white/10
                         bg-black/10
                         pl-10
@@ -569,8 +571,8 @@ function UmaForm({
           {/* OPTIONS */}
           {/* ======================================= */}
 
-          <div className="mt-3 flex justify-start pl-3">
-            <div className="flex items-center gap-2">
+          <div className="mt-3">
+            <div className="grid grid-cols-3 gap-2 md:flex md:items-center">
 
               {/* ACE */}
               <button
@@ -583,9 +585,10 @@ function UmaForm({
                   })
                 }
                 className={`
-                  group flex h-9 items-center gap-2
-                  rounded-lg border px-3.5
-                  text-xs font-bold
+                  group flex h-9 min-w-0 items-center justify-center gap-1.5
+                  rounded-lg border px-2
+                  text-[11px] font-bold
+                  md:gap-2 md:px-3.5 md:text-xs
                   transition-all duration-200
                   ${
                     value.ace
@@ -604,7 +607,7 @@ function UmaForm({
                   ★
                 </span>
 
-                <span>Ace</span>
+                <span className="whitespace-nowrap">Ace</span>
               </button>
 
               {/* DEBUFFER */}
@@ -618,9 +621,10 @@ function UmaForm({
                   })
                 }
                 className={`
-                  group flex h-9 items-center gap-2
-                  rounded-lg border px-3.5
-                  text-xs font-bold
+                  group flex h-9 min-w-0 items-center justify-center gap-1.5
+                  rounded-lg border px-2
+                  text-[11px] font-bold
+                  md:gap-2 md:px-3.5 md:text-xs
                   transition-all duration-200
                   ${
                     value.debuffer
@@ -647,7 +651,7 @@ function UmaForm({
                   <path d="M8.5 12h7" />
                 </svg>
 
-                <span>Debuffer</span>
+                <span className="whitespace-nowrap">Debuffer</span>
               </button>
 
               {/* AUTO RUN */}
@@ -661,9 +665,10 @@ function UmaForm({
                   })
                 }
                 className={`
-                  group flex h-9 items-center gap-2
-                  rounded-lg border px-3.5
-                  text-xs font-bold
+                  group flex h-9 min-w-0 items-center justify-center gap-1.5
+                  rounded-lg border px-2
+                  text-[11px] font-bold
+                  md:gap-2 md:px-3.5 md:text-xs
                   transition-all duration-200
                   ${
                     value.autoRun
@@ -694,7 +699,9 @@ function UmaForm({
                   <path d="M9 15h6" />
                 </svg>
 
-                <span>Auto Run</span>
+               <span className="whitespace-nowrap">
+                Auto Run
+              </span>
               </button>
 
             </div>

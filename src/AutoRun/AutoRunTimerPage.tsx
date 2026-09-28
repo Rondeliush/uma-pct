@@ -242,18 +242,23 @@ const enoughEnergyText =
                   : "Auto Run training timer"}
             </div>
 
-                  {/* AUTORUN SETTINGS */}
-                <div className="mt-6 text-xs text-blue-100/35">
-                  Alarm volume and notifications can be configured in{" "}
-                  <button
-                    type="button"
-                    onClick={onOpenSettings}
-                    className="font-black text-sky-300/70 transition hover:text-sky-200"
-                  >
-                    Settings
-                  </button>
-                  .
-                </div>
+                  {/* MOBILE INFO */}
+                  <div className="mt-6 rounded-xl border border-sky-300/10 bg-sky-400/[0.04] px-4 py-3 text-xs font-medium text-blue-100/40 md:hidden">
+                    The game will notify you when Auto Run is complete.
+                  </div>
+
+                  {/* DESKTOP SETTINGS */}
+                  <div className="mt-6 hidden text-xs text-blue-100/35 md:block">
+                    Alarm volume and notifications can be configured in{" "}
+                    <button
+                      type="button"
+                      onClick={onOpenSettings}
+                      className="font-black text-sky-300/70 transition hover:text-sky-200"
+                    >
+                      Settings
+                    </button>
+                    .
+                  </div>
 
             {/* BUTTONS */}
             <div className="mt-8 flex justify-center gap-3">

@@ -301,11 +301,11 @@ const avatarSideFadeMask = {
         />
 
         {/* OVERALL WIN RATE - TOP RIGHT */}
-        <div className="absolute right-5 top-4 z-30 text-right">
-          <div className="text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200/55">
+        <div className="absolute right-4 top-4 z-30 text-right md:right-5">
+          <div className="text-[8px] font-black uppercase tracking-[0.12em] text-cyan-200/55 md:text-[10px] md:tracking-[0.16em]">
             Overall Win Rate
           </div>
-          <div className="mt-0.5 text-2xl font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)]">
+          <div className="mt-0.5 text-xl font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] md:text-2xl">
             {formatWinRate(overallWinRate)}
           </div>
         </div>
@@ -316,7 +316,7 @@ const avatarSideFadeMask = {
               {/* RESULT TITLE */}
               <div className="text-center">
                 <div
-                  className={`text-[11px] font-black uppercase tracking-[0.28em] ${
+                  className={`pr-[135px] text-left text-[10px] font-black uppercase tracking-[0.22em] md:pr-0 md:text-center md:text-[11px] md:tracking-[0.28em] ${
                     isChampion
                       ? "text-amber-200/90"
                       : isSecond
@@ -1051,11 +1051,11 @@ const avatarSideFadeMask = {
       {/* ======================================= */}
 
       {cm.phase === "finalResult" && (
-        <section className="mx-5 mt-3 border-l-2 border-violet-400/45 bg-gradient-to-r from-violet-400/[0.045] via-blue-400/[0.018] to-transparent px-4 py-3">
+        <section className="mx-3 mt-3 border-l-2 border-violet-400/45 bg-gradient-to-r from-violet-400/[0.045] via-blue-400/[0.018] to-transparent px-4 py-3 md:mx-5">
           <div className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-violet-200/40">
           Final Result Setup
         </div>
-          <div className="flex items-end gap-3">
+          <div className="grid grid-cols-2 items-end gap-3">
             {/* FINAL PLACE */}
             <div>
               <div className="mb-1.5 text-xs font-bold text-violet-200/45">
@@ -1227,7 +1227,7 @@ const avatarSideFadeMask = {
             )}
           
 
-          <div className="mt-4 flex items-center justify-end gap-4">
+          <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-4">
             {cm.finalPlace === "1st" && selectedWinnerId === "" && (
               <div className="text-xs font-semibold text-amber-300/75">
                 Select the CM Winner before completing the CM.
@@ -1238,7 +1238,7 @@ const avatarSideFadeMask = {
               type="button"
               onClick={handleCompleteCM}
               disabled={!canCompleteCM}
-               className="h-10 min-w-[150px] shrink-0 rounded-lg border border-emerald-400/35 bg-emerald-700/80 px-5 text-sm font-black text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.04] disabled:text-white/25"
+               className="h-10 w-full shrink-0 md:w-auto md:min-w-[150px] rounded-lg border border-emerald-400/35 bg-emerald-700/80 px-5 text-sm font-black text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.04] disabled:text-white/25"
             >
               Complete CM
             </button>

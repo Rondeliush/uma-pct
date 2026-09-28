@@ -511,7 +511,7 @@ const trackImage = getTrackImage(track)
 
         <div className="add-cm-scrollbar relative z-10 flex-1 overflow-y-auto px-7 pb-3 pt-6">
 
-          <div className="grid grid-cols-[0.95fr_1.05fr] items-start gap-5">
+          <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[0.95fr_1.05fr]">
 
             {/* ======================================= */}
             {/* LEFT COLUMN */}
@@ -523,7 +523,7 @@ const trackImage = getTrackImage(track)
               {/* BASIC INFORMATION */}
               {/* ======================================= */}
 
-              <section className="relative overflow-hidden rounded-2xl border border-sky-500/55 bg-[#071426]/85 p-5 shadow-[0_0_18px_rgba(14,165,233,0.20),0_0_38px_rgba(37,99,235,0.10),inset_0_0_18px_rgba(14,165,233,0.035)] backdrop-blur-sm">
+              <section className="relative overflow-hidden rounded-2xl border border-sky-500/55 bg-[#071426]/85 p-4 md:p-5 shadow-[0_0_18px_rgba(14,165,233,0.20),0_0_38px_rgba(37,99,235,0.10),inset_0_0_18px_rgba(14,165,233,0.035)] backdrop-blur-sm">
 
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/70 to-transparent" />
 
@@ -563,7 +563,7 @@ const trackImage = getTrackImage(track)
                 <div className="space-y-4">
 
                   {/* CM NUMBER + LEAGUE */}
-                  <div className="grid grid-cols-[1fr_220px] gap-4">
+                  <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 md:grid-cols-[1fr_220px] md:gap-4">
 
                     {/* CM NUMBER */}
                     <div>
@@ -933,13 +933,13 @@ const trackImage = getTrackImage(track)
 
                 </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-x-8">
+                <div className="mt-5 grid grid-cols-2 gap-3 md:gap-x-8">
 
                   {/* LEFT */}
                   <div className="space-y-1">
 
                     {/* SURFACE */}
-                    <div className="grid min-h-[58px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[58px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -966,7 +966,7 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setSurface(e.target.value as typeof surface)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
                         <option value="Turf">Turf</option>
                         <option value="Dirt">Dirt</option>
@@ -975,7 +975,7 @@ const trackImage = getTrackImage(track)
                     </div>
 
                     {/* DISTANCE */}
-                    <div className="grid min-h-[58px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[58px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -1005,13 +1005,13 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setDistance(e.target.value)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       />
 
                     </div>
 
                     {/* LENGTH */}
-                    <div className="grid min-h-[58px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[58px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -1038,7 +1038,7 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setLength(e.target.value as typeof length)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
                         <option value="Short">Short</option>
                         <option value="Mile">Mile</option>
@@ -1054,7 +1054,7 @@ const trackImage = getTrackImage(track)
                   <div className="space-y-1">
 
                     {/* DIRECTION */}
-                    <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -1080,7 +1080,7 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setDirection(e.target.value as typeof direction)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
                         <option value="Left">Left</option>
                         <option value="Right">Right</option>
@@ -1090,7 +1090,7 @@ const trackImage = getTrackImage(track)
                     </div>
 
                     {/* WEATHER */}
-                    <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -1123,7 +1123,7 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setWeather(e.target.value as typeof weather)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
                         <option value="Sunny">Sunny</option>
                         <option value="Cloudy">Cloudy</option>
@@ -1134,7 +1134,7 @@ const trackImage = getTrackImage(track)
                     </div>
 
                     {/* SEASON */}
-                    <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -1162,7 +1162,7 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setSeason(e.target.value as typeof season)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
                         <option value="Spring">Spring</option>
                         <option value="Summer">Summer</option>
@@ -1173,7 +1173,7 @@ const trackImage = getTrackImage(track)
                     </div>
 
                     {/* CONDITION */}
-                    <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                    <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
 
                       <div className="flex items-center justify-center text-cyan-300">
                         <svg
@@ -1199,7 +1199,7 @@ const trackImage = getTrackImage(track)
                         onChange={(e) =>
                           setCondition(e.target.value as typeof condition)
                         }
-                        className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400"
+                        className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
                         <option value="Firm">Firm</option>
                         <option value="Good">Good</option>
@@ -1291,12 +1291,12 @@ const trackImage = getTrackImage(track)
                 <div className="absolute inset-0 z-40 flex items-center justify-center">
                   <div
                     className="
-                      flex min-w-[460px] max-w-[90%]
+                      flex w-full max-w-[90%] md:min-w-[460px] md:w-auto
                       flex-col items-center justify-center
                       rounded-xl
                       border border-violet-300/15
                       bg-[#07101f]/94
-                      px-7 py-5
+                      px-4 py-5 md:px-7
                       text-center
                       shadow-[0_18px_50px_rgba(0,0,0,0.60),0_0_28px_rgba(139,92,246,0.10)]
                       backdrop-blur-md
@@ -1357,10 +1357,10 @@ const trackImage = getTrackImage(track)
           {/* FOOTER */}
           {/* ======================================= */}
 
-          <div className="-mt-5 flex items-center justify-end gap-2.5">
+          <div className="mt-5 grid grid-cols-2 gap-3 pb-3 md:flex md:items-center md:justify-end md:gap-2.5">
 
             {/* SAVE STATUS */}
-            <div className="mr-2 min-w-[80px] text-right text-xs font-bold text-emerald-300/80">
+            <div className="col-span-2 min-h-8 text-right text-xs font-bold text-emerald-300/80 md:col-auto md:mr-2 md:min-w-[80px]">
               {isSaved && (
               <div className="mr-1 flex h-8 items-center gap-1.5 rounded-lg border border-emerald-400/20 bg-emerald-400/[0.06] px-3 text-xs font-bold text-emerald-300">
                 <svg
@@ -1386,7 +1386,8 @@ const trackImage = getTrackImage(track)
               type="button"
               onClick={onClose}
               className="
-                flex h-10 min-w-[100px]
+                flex h-11 w-full
+                md:h-10 md:w-auto md:min-w-[100px]
                 items-center justify-center
                 rounded-lg
                 border border-white/10
@@ -1408,7 +1409,8 @@ const trackImage = getTrackImage(track)
               type="button"
               onClick={handleSave}
               className="
-                flex h-10 min-w-[140px]
+                flex h-11 w-full
+                md:h-10 md:w-auto md:min-w-[140px]
                 items-center justify-center gap-2
                 rounded-lg
                 border border-cyan-300/45

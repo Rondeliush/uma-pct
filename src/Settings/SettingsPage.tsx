@@ -149,7 +149,19 @@ const {
 
 <div className="mx-6 h-px bg-white/[0.06]" />
 
+      {/* MOBILE AUTORUN INFO */}
+      <div className="px-6 py-5 md:hidden">
+        <div className="text-sm font-black text-white">
+          Mobile notifications
+        </div>
 
+        <p className="mt-1 text-xs leading-relaxed text-blue-100/40">
+          Umamusume will notify you when Auto Run is complete,
+          so UmaPCT alarms and notifications are disabled on mobile.
+        </p>
+      </div>
+
+      <div className="hidden md:block">
       {/* NOTIFICATIONS */}
       <div className="flex items-center justify-between gap-6 px-6 py-5">
         <div>
@@ -234,8 +246,9 @@ const {
       <div className="px-6 py-5">
         <AutoRunTest />
       </div>
+      </div>
     </section>
-
+      
     {/* SUPPORT */}
     <section className="overflow-hidden rounded-3xl border border-sky-300/15 bg-[#07111f]/95 shadow-2xl">
       <div className="border-b border-white/[0.06] px-6 py-4">

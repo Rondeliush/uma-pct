@@ -48,6 +48,8 @@ function CMLineupGuide({
   const isLastStep =
     stepIndex === guideSteps.length - 1
 
+
+
   const openEditForGuide = () => {
   if (cmNumber === undefined) {
     return
@@ -87,6 +89,27 @@ const handleComplete = () => {
   onComplete()
 }
 
+useEffect(() => {
+  const isMobileLayout =
+    window.matchMedia(
+      "(max-width: 767px)"
+    ).matches
+
+  if (!isMobileLayout) {
+    return
+  }
+
+  const previousPaddingBottom =
+    document.body.style.paddingBottom
+
+  document.body.style.paddingBottom =
+    "320px"
+
+  return () => {
+    document.body.style.paddingBottom =
+      previousPaddingBottom
+  }
+}, [])
 
   useEffect(() => {
   let retryTimeoutId: number | null = null
@@ -99,10 +122,21 @@ const handleComplete = () => {
   let attempts = 0
 
   const findTarget = () => {
-    const targetElement =
-      document.querySelector<HTMLElement>(
-        `[data-guide="${step.target}"]`
-      )
+  const isMobileLayout =
+    window.matchMedia(
+      "(max-width: 767px)"
+    ).matches
+
+  const targetName =
+    isMobileLayout &&
+    step.target === "cm-card"
+      ? "cm-card-mobile"
+      : step.target
+
+  const targetElement =
+    document.querySelector<HTMLElement>(
+      `[data-guide="${targetName}"]`
+    )
 
     if (!targetElement) {
       attempts += 1
@@ -124,10 +158,32 @@ const handleComplete = () => {
       )
     }
 
-    targetElement.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    })
+      if (isMobileLayout) {
+        if (step.target === "cm-team-lineup") {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          })
+        } else {
+          const targetTop =
+            targetElement.getBoundingClientRect()
+              .top +
+            window.scrollY
+
+          window.scrollTo({
+            top: Math.max(
+              0,
+              targetTop - 110
+            ),
+            behavior: "smooth",
+          })
+        }
+      } else {
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+    }
 
     updatePosition()
 
@@ -198,8 +254,28 @@ const handleComplete = () => {
         />
       )}
 
-      <div className="pointer-events-auto fixed inset-0 z-[302] flex items-center justify-center px-4">
-        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-violet-400/25 bg-[#050b15] shadow-2xl">
+      <div className="fixed inset-0 z-[302]">
+          <div
+            className="
+              pointer-events-auto
+              fixed bottom-3 left-3 right-3
+              max-h-[42vh]
+              overflow-y-auto
+              rounded-2xl
+              border border-violet-400/25
+              bg-[#050b15]
+              shadow-2xl
+
+              md:bottom-auto
+              md:left-1/2
+              md:right-auto
+              md:top-1/2
+              md:w-full
+              md:max-w-md
+              md:-translate-x-1/2
+              md:-translate-y-1/2
+            "
+          >
 
           <div className="border-b border-white/[0.07] px-6 py-5">
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-violet-300/60">
@@ -286,9 +362,10 @@ const handleComplete = () => {
                   Next
                 </button>
               )}
+              
             </div>
           </div>
-
+              
         </div>
       </div>
     </ModalPortal>

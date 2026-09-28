@@ -245,7 +245,7 @@ function AddCMButton({
               {/* ======================================= */}
 
               <div className="add-cm-scrollbar relative z-10 flex-1 overflow-y-auto px-7 pb-3 pt-6">
-                <div className="grid grid-cols-[0.95fr_1.05fr] items-start gap-5">
+                <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[0.95fr_1.05fr]">
 
                   {/* ======================================= */}
                   {/* LEFT COLUMN */}
@@ -254,7 +254,7 @@ function AddCMButton({
                   <div className="space-y-5">
 
                     {/* BASIC INFORMATION */}
-                    <section className="relative overflow-hidden rounded-2xl border border-sky-500/55 bg-[#071426]/85 p-5 shadow-[0_0_18px_rgba(14,165,233,0.20),0_0_38px_rgba(37,99,235,0.10),inset_0_0_18px_rgba(14,165,233,0.035)] backdrop-blur-sm">
+                    <section className="relative overflow-hidden rounded-2xl border border-sky-500/55 bg-[#071426]/85 p-4 md:p-5 shadow-[0_0_18px_rgba(14,165,233,0.20),0_0_38px_rgba(37,99,235,0.10),inset_0_0_18px_rgba(14,165,233,0.035)] backdrop-blur-sm">
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/70 to-transparent" />
 
                       {/* HEADER */}
@@ -291,7 +291,7 @@ function AddCMButton({
                       <div className="space-y-4">
 
                         {/* CM NUMBER + LEAGUE */}
-                        <div className="grid grid-cols-[1fr_220px] gap-4">
+                        <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 md:grid-cols-[1fr_220px] md:gap-4">
 
                           {/* CM NUMBER */}
                           <div>
@@ -708,7 +708,7 @@ function AddCMButton({
                         {/* SETTINGS */}
                         {/* ======================================= */}
 
-                        <div className="mt-5 grid grid-cols-2 gap-x-8">
+                        <div className="mt-5 grid grid-cols-2 gap-3 md:gap-x-8">
 
                           {/* ======================================= */}
                           {/* LEFT COLUMN */}
@@ -717,7 +717,7 @@ function AddCMButton({
                           <div className="space-y-1">
 
                             {/* SURFACE */}
-                            <div className="grid min-h-[58px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[58px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                   viewBox="0 0 24 24"
@@ -744,7 +744,7 @@ function AddCMButton({
                                 onChange={(e) =>
                                   setSurface(e.target.value)
                                 }
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               >
                                 <option value="Turf">Turf</option>
                                 <option value="Dirt">Dirt</option>
@@ -752,7 +752,7 @@ function AddCMButton({
                             </div>
 
                             {/* DISTANCE */}
-                            <div className="grid min-h-[58px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[58px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                   viewBox="0 0 24 24"
@@ -786,12 +786,12 @@ function AddCMButton({
                                   setDistance(e.target.value)
                                 }
                                 placeholder="1600m"
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition placeholder:text-gray-600 hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition placeholder:text-gray-600 hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               />
                             </div>
 
                             {/* LENGTH */}
-                            <div className="grid min-h-[58px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[58px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                   viewBox="0 0 24 24"
@@ -818,7 +818,7 @@ function AddCMButton({
                                 onChange={(e) =>
                                   setLength(e.target.value)
                                 }
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               >
                                 <option value="Short">Short</option>
                                 <option value="Mile">Mile</option>
@@ -836,7 +836,7 @@ function AddCMButton({
                           <div className="space-y-1">
 
                             {/* DIRECTION */}
-                            <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                 viewBox="0 0 24 24"
@@ -862,7 +862,7 @@ function AddCMButton({
                                 onChange={(e) =>
                                   setDirection(e.target.value)
                                 }
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               >
                                 <option value="Left">Left</option>
                                 <option value="Right">Right</option>
@@ -871,7 +871,7 @@ function AddCMButton({
                             </div>
 
                             {/* WEATHER */}
-                            <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                   viewBox="0 0 24 24"
@@ -906,7 +906,7 @@ function AddCMButton({
                                 onChange={(e) =>
                                   setWeather(e.target.value)
                                 }
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               >
                                 <option value="Sunny">Sunny</option>
                                 <option value="Cloudy">Cloudy</option>
@@ -916,7 +916,7 @@ function AddCMButton({
                             </div>
 
                             {/* SEASON */}
-                            <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                   viewBox="0 0 24 24"
@@ -983,7 +983,7 @@ function AddCMButton({
                                 onChange={(e) =>
                                   setSeason(e.target.value)
                                 }
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               >
                                 <option value="Spring">Spring</option>
                                 <option value="Summer">Summer</option>
@@ -993,7 +993,7 @@ function AddCMButton({
                             </div>
 
                             {/* CONDITION */}
-                            <div className="grid min-h-[42px] grid-cols-[38px_78px_minmax(0,1fr)] items-center gap-2">
+                            <div className="grid min-h-[42px] grid-cols-[28px_minmax(0,1fr)] gap-x-2 gap-y-1.5 md:grid-cols-[38px_78px_minmax(0,1fr)] md:items-center md:gap-2">
                               <div className="flex items-center justify-center text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.4)]">
                                 <svg
                                   viewBox="0 0 24 24"
@@ -1019,7 +1019,7 @@ function AddCMButton({
                                 onChange={(e) =>
                                   setCondition(e.target.value)
                                 }
-                                className="w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400"
+                                className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                               >
                                 <option value="Firm">Firm</option>
                                 <option value="Good">Good</option>
@@ -1095,7 +1095,7 @@ function AddCMButton({
                 {/* FOOTER */}
                 {/* ======================================= */}
 
-                <div className="-mt-5 flex items-center justify-end gap-2.5">
+                <div className="mt-5 grid grid-cols-2 gap-3 pb-3 md:flex md:items-center md:justify-end md:gap-2.5">
 
                   {/* CANCEL */}
                   <button
@@ -1106,7 +1106,8 @@ function AddCMButton({
                       setIsOpen(false)
                     }}
                     className="
-                      flex h-10 min-w-[100px]
+                      flex h-11 w-full
+                      md:h-10 md:w-auto md:min-w-[100px]
                       items-center justify-center
                       rounded-lg
                       border border-white/10
@@ -1137,7 +1138,8 @@ function AddCMButton({
                       !allUmasSelected
                     }
                     className="
-                      flex h-10 min-w-[124px]
+                      flex h-11 w-full
+                      md:h-10 md:w-auto md:min-w-[124px]
                       items-center justify-center gap-2
                       rounded-lg
                       border border-cyan-300/45

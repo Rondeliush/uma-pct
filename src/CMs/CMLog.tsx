@@ -252,12 +252,12 @@ function CMLog({ cm }: CMLogProps) {
                                     return (
                                       <div
                                         key={result.cmUmaId}
-                                        className={`flex min-w-0 items-center gap-2.5 px-3 py-2 ${
+                                        className={`flex min-w-0 flex-col items-center justify-center gap-1 px-2 py-2 md:flex-row md:justify-start md:gap-2.5 md:px-3 ${
                                           index > 0 ? "border-l border-white/[0.06]" : ""
                                         }`}
                                       >
                                         {/* AVATAR */}
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black/20">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black/20 md:h-10 md:w-10">
                                           {version.avatar ? (
                                             <UmaAvatarImage
                                               avatar={version.avatar}
@@ -273,11 +273,11 @@ function CMLog({ cm }: CMLogProps) {
 
                                         {/* UMA INFO */}
                                         <div className="min-w-0">
-                                          <div className="truncate text-sm font-bold text-white/90">
+                                          <div className="hidden truncate text-sm font-bold text-white/90 md:block">
                                             {version.displayName}
                                           </div>
 
-                                          <div className="mt-0.5 text-xs font-medium text-blue-100/40">
+                                          <div className="text-center text-xs font-medium text-blue-100/50 md:mt-0.5 md:text-left md:text-blue-100/40">
                                             {attempt.racesPlayed === 0
                                               ? "—"
                                               : `${result.wins} ${
@@ -411,7 +411,7 @@ function CMLog({ cm }: CMLogProps) {
               {/* UMA INFO */}
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1.5">
-                  <div className="truncate text-sm font-bold text-white/90">
+                  <div className="hidden truncate text-sm font-bold text-white/90 md:block">
                     {version.displayName}
                   </div>
 

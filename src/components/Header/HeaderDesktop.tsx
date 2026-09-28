@@ -3,47 +3,19 @@ import {
   useRef,
   useState,
 } from "react"
-import UpdateNotification from "./UpdateNotification"
+import UpdateNotification from "../UpdateNotification"
 
-type HeaderProps = {
-  activePage:
-    | "home"
-    | "cms"
-    | "loh"
-    | "statistics"
-    | "autoRunTimer"
-    | "umaDatabase"
-    | "settings"
-    | "about"
-    | "changelog"
+import type { HeaderProps } from "./Header"
 
-  onPageChange: (
-    page:
-      | "home"
-      | "cms"
-      | "loh"
-      | "statistics"
-      | "autoRunTimer"
-      | "umaDatabase"
-      | "settings"
-      | "about"
-      | "changelog"
-  ) => void
 
-  newOfficialUmaNames: string[]
-  onViewUpdate: () => void
-
-  activeProfileName: string
-  onProfilesClick: () => void
-}
-
-function Header({
+function HeaderDesktop({
   activePage,
   onPageChange,
   newOfficialUmaNames,
   onViewUpdate,
   activeProfileName,
   onProfilesClick,
+  hasNewChangelog,
 }: HeaderProps) {
   const navButtonClass = (
     page:
@@ -67,6 +39,14 @@ function Header({
 
   const moreMenuRef =
   useRef<HTMLDivElement | null>(null)
+
+  const updateNotificationRef =
+  useRef<HTMLDivElement | null>(null)
+
+const [
+  updateNotificationHeight,
+  setUpdateNotificationHeight,
+] = useState(0)
 
 useEffect(() => {
   if (!isMoreOpen) {
@@ -99,11 +79,38 @@ useEffect(() => {
   }
 }, [isMoreOpen])
 
+useEffect(() => {
+  const element =
+    updateNotificationRef.current
+
+  if (!element) {
+    return
+  }
+
+  const updateHeight = () => {
+    setUpdateNotificationHeight(
+      element.getBoundingClientRect()
+        .height
+    )
+  }
+
+  updateHeight()
+
+  const observer = new ResizeObserver(
+    updateHeight
+  )
+
+  observer.observe(element)
+
+  return () => {
+    observer.disconnect()
+  }
+}, [newOfficialUmaNames.length])
 
   return (
-    <>
-      {/* APP BRAND */}
-      <header className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#040914]">
+  <>
+    {/* APP BRAND */}
+    <header className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#040914]">
 
         {/* SUBTLE BACKGROUND GLOW */}
         <div className="pointer-events-none absolute left-1/2 top-0 h-24 w-[520px] -translate-x-1/2 rounded-full bg-blue-500/[0.07] blur-3xl" />
@@ -127,7 +134,7 @@ useEffect(() => {
       </header>
 
       {/* STICKY NAVIGATION + UPDATE */}
-      <div className="sticky top-0 z-50 w-full">
+        <div className="sticky top-0 z-50 w-full">
 
         {/* NAVIGATION */}
         <nav className="border-b border-sky-400/[0.10] bg-[#081221]/95 shadow-[0_8px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
@@ -244,6 +251,12 @@ useEffect(() => {
     }`}
   >
     More
+    
+    {hasNewChangelog && (
+    <span className="absolute -right-1 -top-1 rounded-md border border-emerald-300/30 bg-emerald-400 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-emerald-950 shadow-[0_0_10px_rgba(52,211,153,0.30)]">
+      New
+    </span>
+  )}
 
     <svg
       viewBox="0 0 24 24"
@@ -264,7 +277,14 @@ useEffect(() => {
   </button>
 
   {isMoreOpen && (
-    <div className="absolute right-0 top-[calc(100%+6px)] z-[100] w-56 overflow-hidden rounded-xl border border-violet-300/15 bg-[#07111f]/98 shadow-2xl backdrop-blur-xl">
+    <div
+        className="absolute right-0 z-[100] w-56 overflow-hidden rounded-xl border border-violet-300/15 bg-[#07111f]/98 shadow-2xl backdrop-blur-xl"
+        style={{
+          top: `calc(100% + ${
+            updateNotificationHeight + 8
+          }px)`,
+        }}
+      >
 
       {/* ACTIVE PROFILE */}
       <div className="border-b border-white/[0.07] px-4 py-3">
@@ -310,9 +330,15 @@ useEffect(() => {
           onPageChange("changelog")
           setIsMoreOpen(false)
         }}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold text-blue-100/60 transition hover:bg-white/[0.04] hover:text-white"
+        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
       >
         <span>Changelog</span>
+
+      {hasNewChangelog && (
+        <span className="rounded-md bg-emerald-400 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-950">
+          New
+        </span>
+      )}
       </button>
             {/* ABOUT */}
       <button
@@ -333,14 +359,17 @@ useEffect(() => {
         </nav>
 
         {/* UPDATE NOTIFICATION */}
+
+        <div ref={updateNotificationRef}>
         <UpdateNotification
           umaNames={newOfficialUmaNames}
           onViewUpdate={onViewUpdate}
         />
-
       </div>
-    </>
+      
+      </div>
+      </>
   )
 }
 
-export default Header
+export default HeaderDesktop

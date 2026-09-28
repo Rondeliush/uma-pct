@@ -12,12 +12,12 @@ import { useUmaDatabase } from "./context/UmaDatabaseContext"
 
 import UmaDatabase from "./Umas/UmaDatabase"
 import HomePage from "./Home/HomePage"
-import ChampionsMeetingPage from "./CMs/ChampionsMeetingPage"
+import ChampionsMeetingPage from "./CMs/ChampionsMeetingPage/ChampionsMeetingPage"
 import LeagueOfHeroesPage from "./LoH/LeagueOfHeroesPage"
 import StatisticsPage from "./Statistics/StatisticsPage"
 import StatisticsShowcase from "./Statistics/StatisticsShowcase"
 
-import Header from "./components/Header"
+import Header from "./components/Header/Header"
 import UpdateReviewModal from "./components/UpdateReviewModal"
 import SplashScreen from "./components/SplashScreen"
 import UmaAvatarImage from "./components/UmaAvatarImage"
@@ -27,6 +27,9 @@ import CreateProfileModal from "./profiles/CreateProfileModal"
 import WelcomePage from "./profiles/WelcomePage"
 import ProfileGuide from "./onboarding/ProfileGuide"
 import CMLineupGuide from "./onboarding/CMLineupGuide"
+
+import CMModal from "./CMs/CMModal"
+import { changelog } from "./data/changelogData"
 
 import type {
   CM,
@@ -216,6 +219,46 @@ const [
     | "changelog"
   >("home")
 
+  const latestChangelogVersion =
+  changelog[0]?.version ?? null
+
+const [hasNewChangelog, setHasNewChangelog] =
+  useState(() => {
+    if (!latestChangelogVersion) {
+      return false
+    }
+
+    return (
+      localStorage.getItem(
+        "uma-pct-last-seen-changelog"
+      ) !== latestChangelogVersion
+    )
+  })
+
+useEffect(() => {
+  if (
+    activePage !== "changelog" ||
+    !latestChangelogVersion
+  ) {
+    return
+  }
+
+  localStorage.setItem(
+    "uma-pct-last-seen-changelog",
+    latestChangelogVersion
+  )
+
+  setHasNewChangelog(false)
+}, [
+  activePage,
+  latestChangelogVersion,
+])
+
+  const [
+    openCmNumber,
+    setOpenCmNumber,
+  ] = useState<number | null>(null)
+
   const [
     isUpdateReviewOpen,
     setIsUpdateReviewOpen,
@@ -371,6 +414,14 @@ const [
             : activePage === "settings"
               ? `${import.meta.env.BASE_URL}settings-background.jpg`
               : `${import.meta.env.BASE_URL}background.jpg`
+  
+  const openedCm =
+    openCmNumber !== null
+      ? cms.find(
+          (cm) =>
+            cm.number === openCmNumber
+        ) ?? null
+      : null           
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -382,12 +433,22 @@ const [
         newOfficialUmaNames={
           newOfficialUmaNames
         }
+        hasNewChangelog={hasNewChangelog}
         onViewUpdate={() => {
           setIsUpdateReviewOpen(true)
         }}
         activeProfileName={profileName}
         onProfilesClick={onProfilesClick}
       />
+      {openedCm && (
+        <CMModal
+          cm={openedCm}
+          setCms={setCms}
+          onClose={() =>
+            setOpenCmNumber(null)
+          }
+        />
+      )}
       
       {showProfileGuide && (
         <ProfileGuide
@@ -415,7 +476,7 @@ const [
 
       {/* FULL WIDTH PAGE BACKGROUND */}
       <div
-        className="relative min-h-screen bg-cover bg-center bg-fixed"
+        className="relative min-h-screen bg-cover bg-center bg-scroll md:bg-fixed"
         style={{
           backgroundImage: `url("${pageBackground}")`,
         }}
@@ -435,7 +496,7 @@ const [
         )}
 
         {/* DARK OVERLAY */}
-        <div className="absolute inset-0 bg-gray-950/50" />
+          <div className="absolute inset-0 bg-gray-950/70" />
 
         {/* STATISTICS SHOWCASE */}
         {activePage ===
@@ -460,20 +521,24 @@ const [
 
         {/* LEAGUE OF HEROES */}
         {activePage === "loh" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
             <LeagueOfHeroesPage />
           </div>
         )}
 
         {/* HOME */}
         {activePage === "home" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
             <HomePage
               cms={cms}
               profileId={profileId}
+              hasNewChangelog={hasNewChangelog}
               onOpenChangelog={() =>
                 setActivePage("changelog")
               }
+              onOpenCm={(cmNumber) => {
+                setOpenCmNumber(cmNumber)
+              }}
             />
           </div>
         )}
@@ -498,7 +563,7 @@ const [
 
             </div>
 
-            <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+            <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
               <ChampionsMeetingPage
                 cms={cms}
                 setCms={setCms}
@@ -511,7 +576,7 @@ const [
 
           {/* AUTORUN TIMER */}
           {activePage === "autoRunTimer" && (
-            <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+            <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
               <AutoRunTimerPage
           onOpenSettings={() =>
             setActivePage("settings")
@@ -536,20 +601,20 @@ const [
 
         {/* SETTINGS */}
         {activePage === "settings" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
             <SettingsPage />
           </div>
         )}
 
         {/* CHANGELOG */}
         {activePage === "changelog" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
             <ChangelogPage />
           </div>
         )}
           {/* ABOUT */}
         {activePage === "about" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 py-6">
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
             <AboutPage />
           </div>
         )}

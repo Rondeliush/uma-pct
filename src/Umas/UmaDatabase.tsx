@@ -169,10 +169,10 @@ function UmaDatabase({
         } z-40 mx-auto mb-6 max-w-4xl overflow-hidden rounded-xl border border-sky-400/15 bg-[#07111f]/90 shadow-[0_12px_32px_rgba(0,0,0,0.28)] backdrop-blur-xl`}
       >
         {/* MAIN ROW */}
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 px-3 py-3 md:flex md:items-center md:gap-3 md:px-4">
 
           {/* STATUS FILTER */}
-          <div className="flex shrink-0 items-center gap-1 border-r border-white/[0.07] pr-3">
+          <div className="col-span-2 flex min-w-0 items-center gap-1 border-b border-white/[0.07] pb-2 md:col-auto md:shrink-0 md:border-b-0 md:border-r md:pb-0 md:pr-3">
             {(
               [
                 ["active", "Active"],
@@ -184,7 +184,7 @@ function UmaDatabase({
                 key={value}
                 type="button"
                 onClick={() => setStatusFilter(value)}
-                className={`relative rounded-md px-3 py-1.5 text-xs font-bold transition ${
+                className={`relative flex-1 rounded-md px-2 py-1.5 text-xs font-bold transition md:flex-none md:px-3 ${
                   statusFilter === value
                     ? "bg-sky-400/[0.09] text-sky-200"
                     : "text-blue-100/40 hover:bg-white/[0.035] hover:text-white"
@@ -232,7 +232,7 @@ function UmaDatabase({
             onClick={() =>
               setIsAddUmaOpen(true)
             }
-            className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-sky-400/35 bg-sky-400/[0.06] px-3.5 text-xs font-bold text-sky-200 transition hover:border-sky-300/60 hover:bg-sky-400/[0.12] hover:text-white"
+            className="flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-sky-400/35 bg-sky-400/[0.06] px-3 text-[10px] font-bold text-sky-200 transition hover:border-sky-300/60 hover:bg-sky-400/[0.12] hover:text-white md:px-3.5 md:text-xs"
           >
             <svg
               viewBox="0 0 24 24"
@@ -246,7 +246,13 @@ function UmaDatabase({
               <path d="M12 5v14M5 12h14" />
             </svg>
 
-            Add Custom Uma
+            <span className="md:hidden">
+              Add Custom
+            </span>
+
+            <span className="hidden md:inline">
+              Add Custom Uma
+            </span>
           </button>
 
         </div>

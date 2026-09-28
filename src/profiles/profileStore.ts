@@ -35,6 +35,19 @@ export async function saveProfiles(
     profiles
   )
 }
+function createProfileId() {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`
+}
+
 
 export async function createProfile(
   name: string,
@@ -42,7 +55,7 @@ export async function createProfile(
 ): Promise<Profile> {
   const profiles = await loadProfiles()
 
-  const id = crypto.randomUUID()
+  const id = createProfileId()
 
   const profile: Profile = {
     id,

@@ -3,6 +3,7 @@ import {
   useState,
 } from "react"
 import ModalPortal from "../components/ModalPortal"
+import { useIsMobile } from "../responsive/useIsMobile"
 
 type GuidePage =
   | "home"
@@ -93,10 +94,12 @@ const guideSteps = [
         section: "AutoRun Timer",
         title: "AutoRun Timer",
         description:
-        "Start the timer when you begin Auto Run training. The app will count down the remaining time and can alert you when training is complete. Optional Training Energy tracking can be enabled in Settings.",
+          "Start the timer when you begin Auto Run training. The app will count down the remaining time and can alert you when training is complete. Optional Training Energy tracking can be enabled in Settings.",
+        mobileDescription:
+          "Start the timer when you begin Auto Run training. The app will count down the remaining time. Umamusume will notify you when Auto Run is complete. Optional Training Energy tracking can be enabled in Settings.",
         page: "autoRunTimer" as const,
         target: "autorun-timer",
-        },
+      },
         {
         section: "Uma Database",
         title: "Uma Database",
@@ -111,6 +114,25 @@ function ProfileGuide({
   onNavigate,
   onComplete,
 }: ProfileGuideProps) {
+
+  const isMobile = useIsMobile()
+  useEffect(() => {
+  if (!isMobile) {
+    return
+  }
+
+  const previousPaddingBottom =
+    document.body.style.paddingBottom
+
+  document.body.style.paddingBottom =
+    "calc(42vh + 48px)"
+
+  return () => {
+    document.body.style.paddingBottom =
+      previousPaddingBottom
+  }
+}, [isMobile])
+
   const [stepIndex, setStepIndex] =
     useState(0)
   const [targetRect, setTargetRect] =
@@ -138,6 +160,15 @@ const sectionStepCount =
 const guidePanelStyle = (() => {
   if (!targetRect) {
     return undefined
+  }
+    if (isMobile) {
+      return {
+        left: 12,
+        right: 12,
+        bottom: 12,
+        width: "auto",
+        maxHeight: "42vh",
+    }
   }
 
   const margin = 16
@@ -282,10 +313,26 @@ const guidePanelStyle = (() => {
     )
   }
 
+if (isMobile) {
+  const rect =
+    element.getBoundingClientRect()
+
+  const absoluteTop =
+    window.scrollY + rect.top
+
+  window.scrollTo({
+    top: Math.max(
+      0,
+      absoluteTop - 110
+    ),
+    behavior: "smooth",
+  })
+} else {
   element.scrollIntoView({
     behavior: "smooth",
     block: "center",
   })
+}
 
   updatePosition()
 
@@ -319,7 +366,7 @@ const guidePanelStyle = (() => {
       true
     )
   }
-}, [step.target])
+}, [step.target, isMobile])
 
   return (
     <ModalPortal>
@@ -344,10 +391,12 @@ const guidePanelStyle = (() => {
         }`}
         >
         <div
-            className={`pointer-events-auto overflow-hidden rounded-2xl border border-sky-400/25 bg-[#050b15] shadow-2xl ${
-                targetRect
-                ? "fixed"
-                : "w-full max-w-xl"
+            className={`pointer-events-auto rounded-2xl border border-sky-400/25 bg-[#050b15] shadow-2xl ${
+              targetRect
+                ? isMobile
+                  ? "fixed overflow-y-auto"
+                  : "fixed overflow-hidden"
+                : "w-full max-w-xl overflow-hidden"
             }`}
             style={
                 targetRect
@@ -377,7 +426,10 @@ const guidePanelStyle = (() => {
           {/* CONTENT */}
           <div className="px-6 py-7">
             <p className="mt-3 text-sm leading-6 text-blue-100/55">
-              {step.description}
+              {window.innerWidth < 768 &&
+              step.mobileDescription
+                ? step.mobileDescription
+                : step.description}
             </p>
 
           </div>

@@ -734,7 +734,7 @@ function StatisticsShowcase({
   return (
     <section
       data-guide="statistics-showcase"
-      className="relative px-20 pb-5 pt-6"
+      className="relative px-0 pb-5 pt-6 md:px-20"
     >
 
       {/* STATISTICS MODE */}
@@ -859,11 +859,11 @@ function StatisticsShowcase({
       <button
         type="button"
         onClick={showPreviousSlide}
-        className="absolute left-2 top-1/2 z-20 flex h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-gray-950/55 text-white shadow-xl backdrop-blur transition hover:scale-110 hover:border-white hover:bg-white/10"
+       className="absolute -left-1 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-gray-950/70 text-white shadow-xl backdrop-blur transition hover:scale-110 hover:border-white hover:bg-white/10 md:left-2 md:h-16 md:w-16"
       >
         <svg
           viewBox="0 0 32 32"
-          className="h-8 w-8"
+          className="h-4 w-4 md:h-8 md:w-8"
           fill="none"
           stroke="currentColor"
           strokeWidth="2.5"
@@ -878,11 +878,11 @@ function StatisticsShowcase({
       <button
         type="button"
         onClick={showNextSlide}
-        className="absolute right-2 top-1/2 z-20 flex h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-gray-950/55 text-white shadow-xl backdrop-blur transition hover:scale-110 hover:border-white hover:bg-white/10"
+        className="absolute -right-1 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/50 bg-gray-950/70 text-white shadow-xl backdrop-blur transition hover:scale-110 hover:border-white hover:bg-white/10 md:right-2 md:h-16 md:w-16"
       >
         <svg
           viewBox="0 0 32 32"
-          className="h-8 w-8"
+          className="h-4 w-4 md:h-8 md:w-8"
           fill="none"
           stroke="currentColor"
           strokeWidth="2.5"
@@ -905,22 +905,31 @@ function StatisticsShowcase({
         }
       >
         {/* PODIUM */}
-        <div className="relative z-10 flex min-h-[360px] items-end justify-center gap-6 px-14 pt-12">
+        <div className="relative z-10 flex min-h-[225px] items-end justify-center gap-1.5 px-12 pt-10 md:min-h-[360px] md:gap-6 md:px-14 md:pt-12">
 
           {/* 2ND */}
-          <div className="group flex w-[245px] shrink-0 flex-col items-center transition duration-300 ease-out hover:-translate-y-1">
+          <div className="group flex w-[82px] shrink-0 flex-col items-center transition duration-300 ease-out hover:-translate-y-1 md:w-[245px]">
 
-            <div
-              className={`relative h-[290px] w-[245px] overflow-hidden rounded-3xl bg-gray-900 shadow-xl transition duration-300 ease-out group-hover:shadow-2xl ${
-                isTripleFirstTie &&
+           <div
+              className={`relative h-[120px] w-[82px] rounded-xl md:h-[290px] md:w-[245px] md:rounded-3xl ${
+                !isTripleFirstTie &&
                 currentPlaces[1] === 1
-                  ? "triple-tie-shimmer shadow-[0_0_20px_rgba(236,72,153,0.22)] group-hover:shadow-[0_0_30px_rgba(236,72,153,0.38)]"
-                  : currentPlaces[1] === 1
-                    ? "animate-[winnerGlow_3s_ease-in-out_infinite] shadow-[0_0_20px_rgba(250,204,21,0.18)] group-hover:shadow-[0_0_30px_rgba(250,204,21,0.38)]"
-                    : "border-2 border-gray-400/70 group-hover:border-gray-300"
+                  ? "animate-[winnerGlow_3s_ease-in-out_infinite]"
+                  : ""
               }`}
             >
-              {currentUmas[1]?.avatar && (
+              {/* CARD */}
+              <div
+                className={`absolute inset-0 overflow-hidden rounded-xl bg-gray-900 transition duration-300 ease-out md:rounded-3xl ${
+                  isTripleFirstTie &&
+                  currentPlaces[1] === 1
+                    ? "triple-tie-shimmer shadow-[0_0_22px_rgba(236,72,153,0.22)] group-hover:shadow-[0_0_32px_rgba(236,72,153,0.38)]"
+                    : currentPlaces[1] === 1
+                      ? "shadow-[0_0_20px_rgba(250,204,21,0.18)] group-hover:shadow-[0_0_32px_rgba(250,204,21,0.38)]"
+                      : "border-2 border-gray-400/70 group-hover:border-gray-300"
+                }`}
+              >
+                {currentUmas[1]?.avatar && (
                   <UmaAvatarImage
                     avatar={currentUmas[1].avatar}
                     alt=""
@@ -928,15 +937,16 @@ function StatisticsShowcase({
                   />
                 )}
 
-              <div className="absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-black/95 via-black/65 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-black/95 via-black/65 to-transparent" />
 
-              <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-4 text-center">
-                <div className="truncate text-sm font-bold text-white drop-shadow-lg">
-                  {currentUmas[1]?.displayName ?? "—"}
-                </div>
+                <div className="absolute inset-x-0 bottom-0 z-20 px-1 pb-2 text-center md:px-4 md:pb-4">
+                  <div className="max-h-[20px] overflow-hidden text-[9px] font-bold leading-[10px] text-white drop-shadow-lg md:max-h-none md:truncate md:text-sm md:leading-normal">
+                    {currentUmas[1]?.displayName ?? "—"}
+                  </div>
 
-                <div className="mt-1 text-3xl font-black text-white drop-shadow-lg">
-                  {currentValues[1]}
+                  <div className="mt-0.5 text-xl font-black text-white drop-shadow-lg md:mt-1 md:text-3xl">
+                    {currentValues[1]}
+                  </div>
                 </div>
               </div>
 
@@ -951,7 +961,7 @@ function StatisticsShowcase({
             </div>
 
             <div
-              className={`mt-3 text-4xl font-black ${
+              className={`mt-2 flex h-8 items-center justify-center whitespace-nowrap text-base font-black md:mt-3 md:h-auto md:text-4xl ${
                 isTripleFirstTie &&
                 currentPlaces[1] === 1
                   ? "text-pink-400"
@@ -966,20 +976,20 @@ function StatisticsShowcase({
           </div>
 
           {/* 1ST */}
-          <div className="group flex -translate-y-6 flex-col items-center transition duration-300 ease-out hover:-translate-y-7">
+            <div className="group flex -translate-y-4 flex-col items-center transition duration-300 ease-out hover:-translate-y-5 md:-translate-y-6 md:hover:-translate-y-7">
 
-            <div
-              className={`relative h-[330px] w-[280px] rounded-3xl ${
-                !isTripleFirstTie &&
-                currentPlaces[0] === 1
-                  ? "animate-[winnerGlow_3s_ease-in-out_infinite]"
-                  : ""
-              }`}
-            >
+              <div
+                className={`relative h-[160px] w-[112px] rounded-xl md:h-[330px] md:w-[280px] md:rounded-3xl ${
+                  !isTripleFirstTie &&
+                  currentPlaces[0] === 1
+                    ? "animate-[winnerGlow_3s_ease-in-out_infinite]"
+                    : ""
+                }`}
+              >
 
               {/* CARD */}
               <div
-                className={`absolute inset-0 overflow-hidden rounded-3xl bg-gray-900 transition duration-300 ease-out ${
+                className={`absolute inset-0 overflow-hidden rounded-xl bg-gray-900 transition duration-300 ease-out md:rounded-3xl ${
                   isTripleFirstTie &&
                   currentPlaces[0] === 1
                     ? "triple-tie-shimmer shadow-[0_0_22px_rgba(236,72,153,0.22)] group-hover:shadow-[0_0_32px_rgba(236,72,153,0.38)]"
@@ -1000,13 +1010,13 @@ function StatisticsShowcase({
                 <div className="absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-black/95 via-black/65 to-transparent" />
 
                 {/* NAME + WIN RATE */}
-                <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-4 text-center">
+                <div className="absolute inset-x-0 bottom-0 z-20 px-1.5 pb-2 text-center md:px-4 md:pb-4">
 
-                  <div className="truncate text-sm font-bold text-white drop-shadow-lg">
+                  <div className="max-h-[22px] overflow-hidden text-[9px] font-bold leading-[10px] text-white drop-shadow-lg md:max-h-none md:truncate md:text-sm md:leading-normal">
                     {currentUmas[0]?.displayName ?? "—"}
                   </div>
 
-                  <div className="mt-1 text-4xl font-black text-white drop-shadow-lg">
+                  <div className="mt-0.5 text-2xl font-black text-white drop-shadow-lg md:mt-1 md:text-4xl">
                     {currentValues[0]}
                   </div>
 
@@ -1025,7 +1035,7 @@ function StatisticsShowcase({
 
             {/* PODIUM PLACE */}
             <div
-              className={`mt-3 text-4xl font-black ${
+              className={`mt-2 flex h-8 items-center justify-center whitespace-nowrap text-base font-black md:mt-3 md:h-auto md:text-4xl ${
                 isTripleFirstTie
                   ? "text-pink-400"
                   : "text-yellow-400"
@@ -1037,10 +1047,10 @@ function StatisticsShowcase({
           </div>
 
           {/* 3RD */}
-          <div className="group flex w-[245px] shrink-0 flex-col items-center transition duration-300 ease-out hover:-translate-y-1">
+          <div className="group flex w-[82px] shrink-0 flex-col items-center transition duration-300 ease-out hover:-translate-y-1 md:w-[245px]">
 
             <div
-              className={`relative h-[255px] w-[215px] overflow-hidden rounded-3xl bg-gray-900 shadow-lg transition duration-300 ease-out group-hover:shadow-2xl ${
+              className={`relative h-[110px] w-[82px] overflow-hidden rounded-xl md:h-[255px] md:w-[215px] md:rounded-3xl bg-gray-900 shadow-lg transition duration-300 ease-out group-hover:shadow-2xl ${
                 isTripleFirstTie &&
                 currentPlaces[2] === 1
                   ? "triple-tie-shimmer shadow-[0_0_20px_rgba(236,72,153,0.22)] group-hover:shadow-[0_0_30px_rgba(236,72,153,0.38)]"
@@ -1057,19 +1067,19 @@ function StatisticsShowcase({
 
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/95 via-black/65 to-transparent" />
 
-              <div className="absolute inset-x-0 bottom-0 px-4 pb-4 text-center">
-                <div className="truncate text-sm font-bold text-white drop-shadow-lg">
+              <div className="absolute inset-x-0 bottom-0 z-20 px-1 pb-2 text-center md:px-4 md:pb-4">
+                <div className="max-h-[20px] overflow-hidden text-[9px] font-bold leading-[10px] text-white drop-shadow-lg md:max-h-none md:truncate md:text-sm md:leading-normal">
                   {currentUmas[2]?.displayName ?? "—"}
                 </div>
 
-                <div className="mt-1 text-3xl font-black text-white drop-shadow-lg">
+                <div className="mt-0.5 text-xl font-black text-white drop-shadow-lg md:mt-1 md:text-3xl">
                   {currentValues[2]}
                 </div>
               </div>
             </div>
 
             <div
-              className={`mt-3 text-4xl font-black ${
+              className={`mt-2 flex h-8 items-center justify-center whitespace-nowrap text-base font-black md:mt-3 md:h-auto md:text-4xl ${
                 isTripleFirstTie &&
                 currentPlaces[2] === 1
                   ? "text-pink-400"
@@ -1085,7 +1095,7 @@ function StatisticsShowcase({
 
         {/* SLIDE TITLE */}
         <div className="relative z-10 mt-5 text-center">
-          <div className="text-3xl font-black uppercase tracking-wide text-white">
+          <div className="text-xl font-black uppercase tracking-wide text-white md:text-3xl">
             {currentSlideData.title}
           </div>
         </div>

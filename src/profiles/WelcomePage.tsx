@@ -65,7 +65,7 @@ function WelcomePage({
         </div>
 
         <p className="mt-7 text-center text-xs leading-5 text-blue-100/30">
-          Your tracker data is stored locally on your computer.
+          Your tracker data is stored locally on your computer or mobile.
         </p>
       </div>
     </div>

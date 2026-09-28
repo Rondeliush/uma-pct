@@ -592,48 +592,65 @@ const setDoubleStaminaCostEvent = (
 }
 
   // ALARM
-useEffect(() => {
-  if (
-    !isTimerLoaded ||
-    !isComplete ||
-    alarmPlayedRef.current
-  ) {
-    return
-  }
-
-  alarmPlayedRef.current =
-    true
-
-  const audio =
-    audioRef.current
-
-  if (audio) {
-    audio.currentTime = 0
-
-    void audio
-      .play()
-      .catch((error) => {
-        console.error(
-          "Could not play alarm sound:",
-          error
-        )
-      })
-  }
-if (autoRunNotifications) {
-  showBrowserNotification(
-    "AutoRun Complete!",
-    "Your AutoRun training should be finished."
-  )
-}
-}, [
-  isComplete,
-  isTimerLoaded,
-  autoRunNotifications,
-])
-  const startTimer = () => {
-    if (autoRunNotifications) {
-    void requestBrowserNotificationPermission()
+  useEffect(() => {
+    if (
+      !isTimerLoaded ||
+      !isComplete ||
+      alarmPlayedRef.current
+    ) {
+      return
     }
+
+    alarmPlayedRef.current = true
+
+    const isMobileLayout =
+      window.matchMedia(
+        "(max-width: 767px)"
+      ).matches
+
+    if (isMobileLayout) {
+      return
+    }
+
+    const audio = audioRef.current
+
+    if (audio) {
+      audio.currentTime = 0
+
+      void audio
+        .play()
+        .catch((error) => {
+          console.error(
+            "Could not play alarm sound:",
+            error
+          )
+        })
+    }
+
+    if (autoRunNotifications) {
+      showBrowserNotification(
+        "AutoRun Complete!",
+        "Your AutoRun training should be finished."
+      )
+    }
+  }, [
+    isComplete,
+    isTimerLoaded,
+    autoRunNotifications,
+  ])
+
+    const startTimer = () => {
+      const isMobileLayout =
+        window.matchMedia(
+          "(max-width: 767px)"
+        ).matches
+
+      if (
+        !isMobileLayout &&
+        autoRunNotifications
+      ) {
+        void requestBrowserNotificationPermission()
+      }
 
   if (
     useTrainingStamina &&
