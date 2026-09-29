@@ -134,10 +134,23 @@ function SplashScreen({
       setDisplayStatus(
         "Checking for updates..."
       )
+      const checkingStartedAt =
+        Date.now()
+
+      const ensureCheckingVisible =
+        async () => {
+          const elapsed =
+            Date.now() - checkingStartedAt
+
+          if (elapsed < 600) {
+            await delay(600 - elapsed)
+          }
+        }
 
       if (
         !("serviceWorker" in navigator)
       ) {
+        await ensureCheckingVisible()
         await finishSplash()
         return
       }
@@ -155,6 +168,7 @@ function SplashScreen({
           ))
 
         if (!registration) {
+          await ensureCheckingVisible()
           await finishSplash()
           return
         }
@@ -170,6 +184,7 @@ function SplashScreen({
           navigator.serviceWorker.controller &&
           registration.waiting
         ) {
+          await ensureCheckingVisible()
           setDisplayStatus("Updating...")
 
           await delay(400)
@@ -219,6 +234,7 @@ function SplashScreen({
             needsRefreshRef.current
           )
         ) {
+          await ensureCheckingVisible()
           setDisplayStatus("Updating...")
 
           await delay(400)
@@ -230,7 +246,8 @@ function SplashScreen({
           return
         }
 
-        await finishSplash()
+       await ensureCheckingVisible()
+       await finishSplash()
       } catch (error) {
         console.error(
           "Could not check for app updates:",
@@ -241,6 +258,7 @@ function SplashScreen({
          * No internet or update check failed.
          * Start the currently installed version.
          */
+        await ensureCheckingVisible()
         await finishSplash()
       }
     }
