@@ -898,23 +898,23 @@ const recentProgress =
                   </div>
                 </div>
 
-                <div className="text-center text-sm text-blue-100/15">
+                <div className="hidden text-center text-sm text-blue-100/15 md:block">
                   —
                 </div>
 
-                <div className="text-center text-sm text-blue-100/15">
+                <div className="hidden text-center text-sm text-blue-100/15 md:block">
                   —
                 </div>
 
-                <div className="text-center text-sm text-blue-100/15">
+                <div className="hidden text-center text-sm text-blue-100/15 md:block">
                   —
                 </div>
 
-                <div className="text-center text-sm text-blue-100/15">
+                <div className="hidden text-center text-sm text-blue-100/15 md:block">
                   —
                 </div>
 
-                <div className="text-right text-sm text-blue-100/15">
+                <div className="hidden text-right text-sm text-blue-100/15 md:block">
                   —
                 </div>
               </>
