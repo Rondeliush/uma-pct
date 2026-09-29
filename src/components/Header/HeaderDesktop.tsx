@@ -6,6 +6,7 @@ import {
 import UpdateNotification from "../UpdateNotification"
 
 import type { HeaderProps } from "./Header"
+import PwaInstallDesktop from "../../pwa/PwaInstallDesktop"
 
 
 function HeaderDesktop({
@@ -115,6 +116,8 @@ useEffect(() => {
         {/* SUBTLE BACKGROUND GLOW */}
         <div className="pointer-events-none absolute left-1/2 top-0 h-24 w-[520px] -translate-x-1/2 rounded-full bg-blue-500/[0.07] blur-3xl" />
 
+        <PwaInstallDesktop />
+
         <div className="relative mx-auto flex h-[68px] max-w-[1500px] items-center justify-center px-6">
 
           <div className="text-center">
@@ -126,10 +129,7 @@ useEffect(() => {
             <div className="mt-0.5 text-[22px] font-black tracking-tight text-white">
               Personal Competitive Tracker
             </div>
-
-
           </div>
-
         </div>
       </header>
 

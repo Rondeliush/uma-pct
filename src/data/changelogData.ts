@@ -7,6 +7,16 @@ export type ChangelogEntry = {
 }
 
 export const changelog: ChangelogEntry[] = [
+
+    {
+    version: "0.1.2",
+    date: "2026-09-29",
+
+    new: [
+      "Added support for installing UmaPCT as an app.",
+      "Added app installation controls to Settings.",
+    ],
+  },
     {
     version: "0.1.1",
     date: "2026-09-28",

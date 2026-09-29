@@ -21,6 +21,7 @@ import Header from "./components/Header/Header"
 import UpdateReviewModal from "./components/UpdateReviewModal"
 import SplashScreen from "./components/SplashScreen"
 import UmaAvatarImage from "./components/UmaAvatarImage"
+import { usePwaInstall } from "./pwa/usePwaInstall"
 
 import ProfileSelectionPage from "./profiles/ProfileSelectionPage"
 import CreateProfileModal from "./profiles/CreateProfileModal"
@@ -624,6 +625,7 @@ useEffect(() => {
 }
 
 function App() {
+  usePwaInstall()
   const [
     showSplash,
     setShowSplash,
@@ -1133,7 +1135,7 @@ function App() {
 
       link.href = url
       link.download =
-        `uma-tracker-${safeProfileName}.json`
+        `UmaPCT-${safeProfileName}.json`
 
       document.body.appendChild(link)
 

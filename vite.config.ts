@@ -17,6 +17,7 @@ export default defineConfig({
       manifest: {
         name: "UmaPCT",
         short_name: "UmaPCT",
+        orientation: "portrait",
 
         description:
           "Umamusume Performance & Competition Tracker",

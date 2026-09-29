@@ -1,6 +1,7 @@
 import { useSettings } from "./SettingsProvider"
 import AutoRunTest from "./AutoRunTest"
 import { useAutoRunTimer } from "../AutoRun/AutoRunTimerProvider"
+import PwaInstallSettings from "../pwa/PwaInstallSettings"
 
 
 function SettingsPage() {
@@ -34,6 +35,8 @@ const {
         Configure application behavior and notifications.
       </p>
     </div>
+
+    <PwaInstallSettings />
 
     {/* GENERAL */}
 <section className="overflow-hidden rounded-3xl border border-sky-300/15 bg-[#07111f]/95 shadow-2xl">

@@ -7,6 +7,7 @@ import {
 import UpdateNotification from "../UpdateNotification"
 
 import type { HeaderProps } from "./Header"
+import PwaInstallMobile from "../../pwa/PwaInstallMobile"
 
 function HeaderMobile({
   activePage,
@@ -98,6 +99,7 @@ function HeaderMobile({
           </div>
         </div>
       </header>
+      <PwaInstallMobile />
       {/* STICKY NAVIGATION + UPDATE */}
         <div
           ref={moreMenuRef}

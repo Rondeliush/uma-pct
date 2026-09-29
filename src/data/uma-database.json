@@ -1,6 +1,7 @@
 {
    "latestAddedVersionIds": [
-    "wonder-acute-original"
+    "daiwa-scarlet-christmas",
+    "vodka-christmas"
   ],
   "characters": [
     {
@@ -1108,6 +1109,22 @@
       "versionName": "Original",
       "archived": false,
       "avatar": "/Umas/chara_stand_1100_110001.png"
-    }
+    },
+    {
+      "id": "daiwa-scarlet-christmas",
+      "characterId": "daiwa-scarlet",
+      "displayName": "Daiwa Scarlet (Christmas)",
+      "versionName": "Christmas",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1009_100902.png"
+    },
+    {
+      "id": "vodka-christmas",
+      "characterId": "vodka",
+      "displayName": "Vodka (Christmas)",
+      "versionName": "Christmas",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1008_100802.png"
+    } 
   ]
 }

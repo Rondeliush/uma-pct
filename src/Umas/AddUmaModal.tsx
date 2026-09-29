@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import ModalPortal from "../components/ModalPortal"
 
+
 type AddUmaModalProps = {
   onClose: () => void
 }
