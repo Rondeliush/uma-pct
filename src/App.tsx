@@ -1165,6 +1165,9 @@ function App() {
   if (showSplash) {
     return (
       <SplashScreen
+        version={
+          changelog[0]?.version
+        }
         onFinished={() =>
           setShowSplash(false)
         }

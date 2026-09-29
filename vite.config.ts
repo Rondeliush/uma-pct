@@ -12,7 +12,7 @@ export default defineConfig({
     tailwindcss(),
 
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
 
       manifest: {
         name: "UmaPCT",
