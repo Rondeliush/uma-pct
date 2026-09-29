@@ -7,7 +7,22 @@ export type ChangelogEntry = {
 }
 
 export const changelog: ChangelogEntry[] = [
+    {
+    version: "0.1.3",
+    date: "2026-09-29",
 
+    new: [
+      "Added automatic update checks when UmaPCT starts.",
+    ],
+
+    improved: [
+      "Added the app version to the startup screen.",
+    ],
+
+    fixed: [
+      "Fixed Uma Performance layout on mobile when fewer than five Umas are available.",
+    ],
+  },      
     {
     version: "0.1.2",
     date: "2026-09-29",
