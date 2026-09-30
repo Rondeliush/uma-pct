@@ -1,8 +1,10 @@
+import { notifyStorageChanged } from "./storageChanges"
+
 const DATABASE_NAME = "uma-pct"
 const DATABASE_VERSION = 1
-const STORE_NAME = "app-data"
+export const STORE_NAME = "app-data"
 
-function openDatabase(): Promise<IDBDatabase> {
+export function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(
       DATABASE_NAME,
@@ -76,16 +78,18 @@ export async function setStoredValue<T>(
     const store =
       transaction.objectStore(STORE_NAME)
 
-    store.put(value, key)
+    let failure: unknown
+    try { store.put(value, key) } catch (error) { failure = error; transaction.abort() }
 
     transaction.oncomplete = () => {
       database.close()
+      notifyStorageChanged(key)
       resolve()
     }
 
-    transaction.onerror = () => {
+    transaction.onabort = () => {
       database.close()
-      reject(transaction.error)
+      reject(failure ?? transaction.error)
     }
   })
 }
@@ -104,16 +108,18 @@ export async function deleteStoredValue(
     const store =
       transaction.objectStore(STORE_NAME)
 
-    store.delete(key)
+    let failure: unknown
+    try { store.delete(key) } catch (error) { failure = error; transaction.abort() }
 
     transaction.oncomplete = () => {
       database.close()
+      notifyStorageChanged(key)
       resolve()
     }
 
-    transaction.onerror = () => {
+    transaction.onabort = () => {
       database.close()
-      reject(transaction.error)
+      reject(failure ?? transaction.error)
     }
   })
 }

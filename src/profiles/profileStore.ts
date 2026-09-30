@@ -1,5 +1,6 @@
 import {
-  getStoredValue,
+  openDatabase,
+  STORE_NAME,
   setStoredValue,
 } from "../storage/indexedDB"
 
@@ -15,16 +16,32 @@ const PROFILES_STORAGE_KEY = "profiles"
 export async function loadProfiles(): Promise<
   Profile[]
 > {
-  const profiles =
-    await getStoredValue<Profile[]>(
-      PROFILES_STORAGE_KEY
-    )
-
-  if (!Array.isArray(profiles)) {
-    return []
-  }
-
-  return profiles
+  // Retire old account links atomically, without touching any tracker data.
+  const database = await openDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(STORE_NAME, "readwrite")
+    const store = transaction.objectStore(STORE_NAME)
+    const request = store.get(PROFILES_STORAGE_KEY)
+    let profiles: Profile[] = []
+    let failure: unknown
+    request.onsuccess = () => {
+      try {
+        const stored = request.result
+        if (stored === undefined) return
+        if (!Array.isArray(stored)) throw new Error("Could not read the local profile list.")
+        profiles = stored.map((profile) => {
+          const local = { ...profile }
+          delete local.cloudOwnerUserId
+          return local
+        })
+        if (stored.some((profile) => "cloudOwnerUserId" in profile)) {
+          store.put(profiles, PROFILES_STORAGE_KEY)
+        }
+      } catch (error) { failure = error; transaction.abort() }
+    }
+    transaction.oncomplete = () => { database.close(); resolve(profiles) }
+    transaction.onabort = () => { database.close(); reject(failure ?? transaction.error) }
+  })
 }
 
 export async function saveProfiles(
@@ -35,7 +52,7 @@ export async function saveProfiles(
     profiles
   )
 }
-function createProfileId() {
+export function createProfileId() {
   if (
     typeof crypto !== "undefined" &&
     typeof crypto.randomUUID === "function"

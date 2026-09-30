@@ -59,7 +59,6 @@ import {
   saveProfileData,
   updateProfileData,
   deleteProfileData,
-  type ProfileData,
 } from "./profiles/profileDataStore"
 
 import { umaVersions } from "./data/umaData"
@@ -70,94 +69,13 @@ import {
   AutoRunTimerProvider,
 } from "./AutoRun/AutoRunTimerProvider"
 
-type ImportedProfileFile = {
-  format: "uma-tracker-profile"
-  version: 1
-
-  profile: {
-    sourceProfileId: string
-    name: string
-  }
-
-  data: ProfileData
-}
-
-function isRecord(
-  value: unknown
-): value is Record<string, unknown> {
-  return (
-    typeof value === "object" &&
-    value !== null
-  )
-}
-
-function isProfileData(
-  value: unknown
-): value is ProfileData {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  const customUmaDatabase =
-    value.customUmaDatabase
-
-  if (!isRecord(customUmaDatabase)) {
-    return false
-  }
-
-  return (
-    Array.isArray(value.cms) &&
-    Array.isArray(value.lohs) &&
-    Array.isArray(
-      customUmaDatabase.customCharacters
-    ) &&
-    Array.isArray(
-      customUmaDatabase.customVersions
-    ) &&
-    Array.isArray(
-      customUmaDatabase.archivedVersionIds
-    ) &&
-    typeof value.favoriteUmaId ===
-      "string" &&
-    (
-      value.cmViewMode === "detailed" ||
-      value.cmViewMode === "compact"
-    ) &&
-    Array.isArray(
-      value.seenOfficialVersionIds
-    ) &&
-    value.seenOfficialVersionIds.every(
-      (id) => typeof id === "string"
-    )
-  )
-}
-
-function isImportedProfileFile(
-  value: unknown
-): value is ImportedProfileFile {
-  if (!isRecord(value)) {
-    return false
-  }
-
-  if (
-    value.format !==
-      "uma-tracker-profile" ||
-    value.version !== 1 ||
-    !isRecord(value.profile)
-  ) {
-    return false
-  }
-
-  return (
-    typeof value.profile
-      .sourceProfileId === "string" &&
-    value.profile.sourceProfileId !== "" &&
-    typeof value.profile.name ===
-      "string" &&
-    value.profile.name.trim() !== "" &&
-    isProfileData(value.data)
-  )
-}
+import {
+  isImportedProfileFile,
+  importProfileToDevice,
+  type ImportedProfileFile,
+} from "./profiles/profileTransfer"
+import { localBackup } from "./backup/localBackup"
+import BackupNotice from "./backup/BackupNotice"
 
 type AppContentProps = {
   profileId: string
@@ -603,7 +521,10 @@ useEffect(() => {
         {/* SETTINGS */}
         {activePage === "settings" && (
           <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
-            <SettingsPage />
+            <SettingsPage
+              profileId={profileId}
+              profileName={profileName}
+            />
           </div>
         )}
 
@@ -624,7 +545,7 @@ useEffect(() => {
   )
 }
 
-function App() {
+function TrackerApp() {
   usePwaInstall()
   const [
     showSplash,
@@ -659,6 +580,9 @@ function App() {
   ] = useState<string | null>(
     null
   )
+
+  const [isImporting, setIsImporting] = useState(false)
+  const importInProgress = useRef(false)
 
   const [
     importPreview,
@@ -750,6 +674,9 @@ function App() {
       setProfileError(null)
 
       try {
+        const stored = (await loadProfiles()).find((item) => item.id === profile.id)
+        if (!stored) throw new Error("Profile could not be found.")
+        profile = stored
         const profileData =
           await loadProfileData(
             profile.id
@@ -779,6 +706,11 @@ function App() {
         )
       }
     }
+  useEffect(() => {
+    void localBackup.setProfile(activeProfile)
+    return () => { void localBackup.setProfile(null) }
+  }, [activeProfile])
+
   const handleRenameProfile =
   async (
     profile: Profile,
@@ -787,6 +719,8 @@ function App() {
     setProfileError(null)
 
     try {
+      const stored = (await loadProfiles()).find((item) => item.id === profile.id)
+      if (!stored) throw new Error("Profile could not be found.")
       const updatedProfiles =
         await renameProfile(
           profile.id,
@@ -906,6 +840,8 @@ function App() {
     setProfileError(null)
 
     try {
+      const stored = (await loadProfiles()).find((item) => item.id === profile.id)
+      if (!stored) throw new Error("Profile could not be found.")
       await deleteProfileData(
         profile.id
       )
@@ -992,102 +928,36 @@ function App() {
       input.click()
     }
 
-  const handleConfirmImportProfile =
-  async () => {
-    if (!importPreview) {
-      return
-    }
-
+  const handleConfirmImportProfile = async (asCopy = false) => {
+    if (!importPreview || importInProgress.current) return
+    importInProgress.current = true
+    setIsImporting(true)
     setProfileError(null)
-
-    const sourceProfileId =
-      importPreview.profile
-        .sourceProfileId
-
-    const alreadyExists =
-      profiles.some(
-        (profile) =>
-          (
-            profile.sourceProfileId ??
-            profile.id
-          ) === sourceProfileId
-      )
-
-    if (alreadyExists) {
-      return
-    }
-
-    let createdProfile:
-      | Profile
-      | null = null
-
     try {
-      createdProfile =
-        await createProfile(
-          importPreview.profile.name,
-          sourceProfileId
-        )
-
-      await saveProfileData(
-        createdProfile.id,
-        importPreview.data
-      )
-
-      setProfiles((current) => [
-        ...current,
-        createdProfile as Profile,
-      ])
-
+      const createdProfile = await importProfileToDevice(importPreview, asCopy)
+      setProfiles((current) => [...current, createdProfile])
       setImportPreview(null)
     } catch (error) {
-      console.error(
-        "Could not import profile:",
-        error
-      )
-
-      if (createdProfile) {
-        try {
-          await deleteProfileData(
-            createdProfile.id
-          )
-
-          const updatedProfiles =
-            await deleteProfile(
-              createdProfile.id
-            )
-
-          setProfiles(
-            updatedProfiles
-          )
-        } catch (rollbackError) {
-          console.error(
-            "Could not rollback imported profile:",
-            rollbackError
-          )
-        }
-      }
-
-      setProfileError(
-        "Could not import profile."
-      )
+      setProfileError(error instanceof Error ? error.message : "Could not import profile.")
+    } finally {
+      importInProgress.current = false
+      setIsImporting(false)
     }
   }
-
 
   const handleExportProfile =
   async (profile: Profile) => {
     setProfileError(null)
 
     try {
+      const stored = (await loadProfiles()).find((item) => item.id === profile.id)
+      if (!stored) throw new Error("Profile could not be found.")
+      profile = stored
       const profileData =
         await loadProfileData(profile.id)
 
       if (!profileData) {
-        setProfileError(
-          "Profile data could not be found."
-        )
-
-        return
+        throw new Error("Profile data could not be found.")
       }
 
       const exportData = {
@@ -1365,7 +1235,7 @@ function App() {
               </div>
 
               <div className="mt-1 text-xs leading-relaxed text-red-100/55">
-                Delete the existing profile before importing this backup.
+                Import the backup as a separate restored profile. Your existing profile and its data will be kept.
               </div>
             </div>
           )}
@@ -1374,6 +1244,7 @@ function App() {
         <div className="flex justify-end gap-2 border-t border-white/[0.07] px-6 py-4">
           <button
             type="button"
+            disabled={isImporting}
             onClick={() =>
               setImportPreview(null)
             }
@@ -1384,13 +1255,13 @@ function App() {
 
           <button
             type="button"
-            disabled={alreadyExists}
+            disabled={isImporting}
             onClick={() => {
-              void handleConfirmImportProfile()
+              void handleConfirmImportProfile(alreadyExists)
             }}
             className="rounded-lg border border-violet-300/25 bg-violet-400/[0.10] px-4 py-2 text-xs font-black text-violet-200 transition hover:border-violet-300/45 hover:bg-violet-400/[0.16] disabled:cursor-not-allowed disabled:opacity-30"
           >
-            Import Profile
+            {isImporting ? "Importing..." : alreadyExists ? "Import as restored copy" : "Import Profile"}
           </button>
         </div>
 
@@ -1417,13 +1288,24 @@ function App() {
       profileId={activeProfile.id}
       profileName={activeProfile.name}
       onProfilesClick={() => {
-        void clearActiveProfileId()
-        setActiveProfile(null)
+        void (async () => {
+          await localBackup.saveNow()
+          await clearActiveProfileId()
+          setActiveProfile(null)
+        })().catch(() => setProfileError("Could not return to Profiles."))
       }}
     />
   </AutoRunTimerProvider>
 </UmaDatabaseProvider>
   )
+}
+
+function App() {
+  useEffect(() => localBackup.listen(), [])
+  return <>
+    <TrackerApp />
+    <BackupNotice />
+  </>
 }
 
 export default App

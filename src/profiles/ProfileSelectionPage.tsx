@@ -3,6 +3,8 @@ import type { Profile } from "./profileStore"
 import { loadProfileData } from "./profileDataStore"
 import { umaVersions } from "../data/umaData"
 import UmaAvatarImage from "../components/UmaAvatarImage"
+import { getProfileAvatar } from "./profileAvatar"
+import type { UmaVersion } from "../types/types"
 
 type ProfileSelectionPageProps = {
   profiles: Profile[]
@@ -31,34 +33,31 @@ function ProfileSelectionPage({
   onImportProfile,
 }: ProfileSelectionPageProps) {
 
-const [favoriteUmaIds, setFavoriteUmaIds] = useState<Record<string, string>>({})
+const [favoriteUmas, setFavoriteUmas] = useState<Record<string, UmaVersion | null>>({})
 
 useEffect(() => {
+  let cancelled = false
   const loadFavoriteUmaIds = async () => {
     const entries = await Promise.all(
       profiles.map(async (profile) => {
-        const data = await loadProfileData(profile.id)
-
-        return [profile.id, data?.favoriteUmaId ?? ""] as const
+        try {
+          const data = await loadProfileData(profile.id)
+          return [profile.id, getProfileAvatar(data, umaVersions)] as const
+        } catch {
+          return [profile.id, null] as const
+        }
       })
     )
 
-    setFavoriteUmaIds(Object.fromEntries(entries))
+    if (!cancelled) setFavoriteUmas(Object.fromEntries(entries))
   }
 
   void loadFavoriteUmaIds()
+  return () => { cancelled = true }
 }, [profiles])
 
 const getFavoriteUma = (profileId: string) => {
-  const favoriteUmaId = favoriteUmaIds[profileId]
-
-  if (!favoriteUmaId) {
-    return null
-  }
-
-  return umaVersions.find(
-  (version) => version.id === favoriteUmaId
-) ?? null
+  return favoriteUmas[profileId] ?? null
 }
 
 const [

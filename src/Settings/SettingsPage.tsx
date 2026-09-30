@@ -2,9 +2,18 @@ import { useSettings } from "./SettingsProvider"
 import AutoRunTest from "./AutoRunTest"
 import { useAutoRunTimer } from "../AutoRun/AutoRunTimerProvider"
 import PwaInstallSettings from "../pwa/PwaInstallSettings"
+import LocalBackupSection from "../backup/LocalBackupSection"
 
 
-function SettingsPage() {
+type SettingsPageProps = {
+  profileId: string
+  profileName: string
+}
+
+function SettingsPage({
+  profileId,
+  profileName,
+}: SettingsPageProps) {
   const {
   autoRunNotifications,
   setAutoRunNotifications,
@@ -35,6 +44,7 @@ const {
         Configure application behavior and notifications.
       </p>
     </div>
+    <LocalBackupSection key={profileId} profileName={profileName} />
 
     <PwaInstallSettings />
 

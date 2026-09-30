@@ -7,6 +7,15 @@ export type ChangelogEntry = {
 }
 
 export const changelog: ChangelogEntry[] = [
+  {
+    version: "0.1.4",
+    date: "2026-09-30",
+    new: [
+      "Added automatic file backups for the open profile, with a separate backup file for each profile. Available in supported browsers while the app is open.",
+      "Added backup status, last successful save time, and notices for unsupported browsers, missing file permissions, or save errors.",
+      "Added the option to import a backup as a separate restored profile when the original already exists, preserving current data.",
+    ],
+  },
     {
     version: "0.1.3",
     date: "2026-09-29",
