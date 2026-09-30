@@ -77,7 +77,8 @@ import {
 } from "./profiles/profileTransfer"
 import { localBackup } from "./backup/localBackup"
 import BackupNotice from "./backup/BackupNotice"
-import { chooseBackupFile, supportsAutomaticBackup, withBackupFileLock, writeProfileBackupFile } from "./backup/backupFile"
+import AppMessageDialog from "./components/AppMessageDialog"
+import { chooseBackupFile, supportsAutomaticBackup, withBackupFileLock, writeProfileBackupFile, type BackupDestination } from "./backup/backupFile"
 import { readProfileBackup } from "./backup/profileBackup"
 
 type AppContentProps = {
@@ -950,7 +951,7 @@ function TrackerApp() {
   }
 
   const handleExportProfile =
-  async (profile: Profile) => {
+  async (profile: Profile, destination: BackupDestination = "folder") => {
     if (exportInProgress.current) return
     exportInProgress.current = true
     setProfileError(null)
@@ -960,7 +961,7 @@ function TrackerApp() {
         .join("").replace(/[<>:"/\\|?*]/g, "_").slice(0, 80).replace(/[. ]+$/g, "") || "profile"
       // Open the picker during the click, before reading the profile from storage.
       const handle = supportsAutomaticBackup()
-        ? await chooseBackupFile(`UmaPCT-${safeProfileName}.json`)
+        ? await chooseBackupFile(`UmaPCT-${safeProfileName}.json`, destination)
         : null
       const exportData = await readProfileBackup(profile.id)
       if (handle) {
@@ -1075,8 +1076,8 @@ function TrackerApp() {
         onDeleteProfile={(profile) => {
           void handleDeleteProfile(profile)
         }}
-        onExportProfile={(profile) => {
-        void handleExportProfile(profile)
+        onExportProfile={(profile, destination) => {
+        void handleExportProfile(profile, destination)
       }}
         onImportProfile={() => {
           void handleChooseImportProfile()
@@ -1084,9 +1085,7 @@ function TrackerApp() {
       />
       )}
         {profileError && (
-          <div className="fixed left-1/2 top-6 z-[1200] -translate-x-1/2 rounded-lg border border-red-300/20 bg-red-950/90 px-4 py-2 text-xs font-bold text-red-100 shadow-xl">
-            {profileError}
-          </div>
+          <AppMessageDialog title="Profile operation could not be completed" message={profileError} onClose={() => setProfileError(null)} />
         )}
 
         {isCreateProfileOpen && (

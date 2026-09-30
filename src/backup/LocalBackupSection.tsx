@@ -21,10 +21,13 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
     </p>
     {supported ? <>
       <p className="mt-3 text-xs font-bold text-emerald-300">Automatic file backup is supported in this browser.</p>
-      <p className="mt-2 text-xs leading-5 text-blue-100/50">Select where to save the automatic backup. The Save dialog creates or selects the destination file; to restore data, use Profiles → Import Profile. Your browser may ask you to allow access again after restarting. The file contains the latest saved version; previous versions are replaced.</p>
+      <p className="mt-2 text-xs leading-5 text-blue-100/50">Choose a folder to create this profile's backup, or select an existing backup file. Existing content is checked before any changes are made. Selecting a file here sets where future backups are written; it does not import its data. Restore data through Profiles → Import Profile.</p>
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.selectFile()) }}>
-          {state.configured ? "Change save location" : "Set up automatic backup"}
+          {state.configured ? "Change backup folder" : "Choose backup folder"}
+        </button>
+        <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.selectFile("existing")) }}>
+          Use existing backup file
         </button>
         {state.configured && <>
           <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.resume()) }}>
@@ -33,6 +36,7 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
           <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.disable()) }}>Turn off</button>
         </>}
       </div>
+      {state.configured && <p className="mt-3 text-xs leading-5 text-blue-100/50">Change backup folder saves future copies in another folder. The previous backup file stays on your device and is no longer updated.</p>}
     </> : <p className="mt-3 text-xs leading-5 text-amber-200">
       This browser does not support automatic writing to a selected file. Your profile still saves in this browser. Use Profiles → Export Profile for a manual file backup.
     </p>}

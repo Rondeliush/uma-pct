@@ -13,24 +13,44 @@ export type BackupFile = {
 }
 
 type PickerWindow = Window & {
-  showSaveFilePicker?: (options: {
-    suggestedName: string
+  showOpenFilePicker?: (options: {
+    multiple: false
     types: { description: string; accept: Record<string, string[]> }[]
-  }) => Promise<BackupFile>
+  }) => Promise<BackupFile[]>
+  showDirectoryPicker?: (options: { mode: "readwrite" }) => Promise<{
+    getFileHandle(name: string, options: { create: true }): Promise<BackupFile>
+  }>
 }
 
+export type BackupDestination = "folder" | "existing"
+
 export function supportsAutomaticBackup() {
-  return typeof window !== "undefined" && typeof (window as PickerWindow).showSaveFilePicker === "function"
+  if (typeof window === "undefined") return false
+  const pickerWindow = window as PickerWindow
+  return typeof pickerWindow.showDirectoryPicker === "function" && typeof pickerWindow.showOpenFilePicker === "function"
 }
 
 // Call directly from a click, before reading IndexedDB or awaiting other work.
-export function chooseBackupFile(suggestedName: string): Promise<BackupFile> {
+export async function chooseBackupFile(suggestedName: string, destination: BackupDestination = "folder"): Promise<BackupFile> {
   const pickerWindow = window as PickerWindow
-  if (!pickerWindow.showSaveFilePicker) throw new Error("This browser does not support automatic file backups. Use Profiles → Export Profile instead.")
-  return pickerWindow.showSaveFilePicker({
-    suggestedName,
-    types: [{ description: "UmaPCT profile backup", accept: { "application/json": [".json"] } }],
-  })
+  if (destination === "existing") {
+    if (!pickerWindow.showOpenFilePicker) throw new Error("This browser cannot safely select an existing backup file.")
+    const [handle] = await pickerWindow.showOpenFilePicker({
+      multiple: false,
+      types: [{ description: "UmaPCT profile backup", accept: { "application/json": [".json"] } }],
+    })
+    if (!handle) throw new DOMException("No file selected.", "AbortError")
+    // The open picker restores user activation, allowing this permission request.
+    if (await handle.requestPermission({ mode: "readwrite" }) !== "granted") {
+      throw new DOMException("File access was not granted. The file was not changed.", "NotAllowedError")
+    }
+    return handle
+  }
+  if (!pickerWindow.showDirectoryPicker) throw new Error("This browser cannot safely create a backup in a selected folder.")
+  const folder = await pickerWindow.showDirectoryPicker({ mode: "readwrite" })
+  // getFileHandle(create: true) preserves an existing file. A save picker can
+  // truncate it before we get a chance to inspect its profile identity.
+  return folder.getFileHandle(suggestedName, { create: true })
 }
 
 export function withBackupFileLock(task: () => Promise<void>): Promise<void> {
@@ -41,7 +61,7 @@ export function withBackupFileLock(task: () => Promise<void>): Promise<void> {
 
 export async function assertBackupFileOwner(handle: BackupFile, sourceProfileId: string) {
   const text = await (await handle.getFile()).text()
-  if (text.length === 0) return // The picker creates an empty file for a new path.
+  if (text.length === 0) return // getFileHandle creates an empty file for a new path.
   let existing: unknown
   try { existing = JSON.parse(text) } catch { /* Reject unrecognized content below. */ }
   if (!isImportedProfileFile(existing)) {

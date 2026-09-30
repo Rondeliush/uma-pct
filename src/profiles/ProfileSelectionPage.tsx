@@ -5,7 +5,7 @@ import { umaVersions } from "../data/umaData"
 import UmaAvatarImage from "../components/UmaAvatarImage"
 import { getProfileAvatar } from "./profileAvatar"
 import type { UmaVersion } from "../types/types"
-import { supportsAutomaticBackup } from "../backup/backupFile"
+import { supportsAutomaticBackup, type BackupDestination } from "../backup/backupFile"
 
 type ProfileSelectionPageProps = {
   profiles: Profile[]
@@ -19,7 +19,8 @@ type ProfileSelectionPageProps = {
     profile: Profile
     ) => void
   onExportProfile: (
-    profile: Profile
+    profile: Profile,
+    destination: BackupDestination,
     ) => void
   onImportProfile: () => void
 }
@@ -70,6 +71,7 @@ const [
   profileToExport,
   setProfileToExport,
 ] = useState<Profile | null>(null)
+const [exportToExistingFile, setExportToExistingFile] = useState(false)
 
 const [
   profileToDelete,
@@ -115,6 +117,7 @@ const [
                 disabled={profiles.length === 0}
                 onClick={() => {
                     setProfileToExport(null)
+                    setExportToExistingFile(false)
                     setIsExportOpen(true)
                 }}
                 className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5 text-xs font-bold text-blue-100/50 transition hover:border-violet-300/25 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 md:flex-none md:py-2"
@@ -425,9 +428,13 @@ const [
         </div>
         <p className="mt-2 text-xs leading-5 text-blue-100/50">
           {supportsAutomaticBackup()
-            ? "Choose a new file or this profile's existing backup. Files belonging to another profile cannot be overwritten."
+            ? "Choose a folder to export this profile, or select the option below to update an existing backup. Files belonging to another profile cannot be overwritten."
             : "A new copy will be downloaded with a unique filename. If asked where to save, keep a new filename: this browser cannot check an existing file before replacing it."}
         </p>
+        {supportsAutomaticBackup() && <label className="mt-3 flex items-center gap-2 text-xs text-blue-100/70">
+          <input type="checkbox" checked={exportToExistingFile} onChange={(event) => setExportToExistingFile(event.target.checked)} />
+          Update an existing backup file
+        </label>}
       </div>
 
       {/* PROFILE LIST */}
@@ -522,7 +529,7 @@ const [
             setIsExportOpen(false)
             setProfileToExport(null)
 
-            onExportProfile(profile)
+            onExportProfile(profile, exportToExistingFile ? "existing" : "folder")
           }}
           className="rounded-lg border border-violet-300/25 bg-violet-400/[0.10] px-4 py-2 text-xs font-black text-violet-200 transition hover:border-violet-300/45 hover:bg-violet-400/[0.16] disabled:cursor-not-allowed disabled:opacity-30"
         >

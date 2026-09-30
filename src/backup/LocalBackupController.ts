@@ -1,6 +1,6 @@
 import type { Profile } from "../profiles/profileStore"
 import type { ImportedProfileFile } from "../profiles/profileTransfer"
-import { assertBackupFileOwner, writeProfileBackupFile, type BackupFile } from "./backupFile"
+import { assertBackupFileOwner, writeProfileBackupFile, type BackupFile, type BackupDestination } from "./backupFile"
 export type BackupConfig = { id: string; handle: BackupFile; lastSavedAt: string | null }
 type Phase = "off" | "loading" | "ready" | "pending" | "saving" | "permission" | "error"
 export type BackupState = {
@@ -16,7 +16,7 @@ type Dependencies = {
   readConfig(id: string): Promise<BackupConfig | undefined>
   writeConfig(id: string, value: BackupConfig | undefined): Promise<void>
   readBackup(id: string): Promise<ImportedProfileFile>
-  pickFile(name: string): Promise<BackupFile>
+  pickFile(name: string, destination: BackupDestination): Promise<BackupFile>
   withLock(task: () => Promise<void>): Promise<void>
   delay?: number
 }
@@ -66,15 +66,15 @@ export class LocalBackupController {
     } catch (error) { if (generation === this.generation) this.fail(error) }
   }
 
-  async selectFile() {
+  async selectFile(destination: BackupDestination = "folder") {
     if (!this.profile) return
     const profile = this.profile
     const generation = this.generation
     const name = Array.from(profile.name, (char) => char.charCodeAt(0) < 32 ? "_" : char)
-      .join("").replace(/[<>:"/\\|?*]/g, "_").replace(/[. ]+$/g, "") || "profile"
+      .join("").replace(/[<>:"/\\|?*]/g, "_").slice(0, 80).replace(/[. ]+$/g, "") || "profile"
     try {
       // The picker must run directly from the user's click, before any await.
-      const handle = await this.deps.pickFile(`UmaPCT-${name}.json`)
+      const handle = await this.deps.pickFile(`UmaPCT-${name}.json`, destination)
       if (generation !== this.generation) return
       await assertBackupFileOwner(handle, profile.sourceProfileId ?? profile.id)
       if (generation !== this.generation) return
