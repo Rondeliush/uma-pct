@@ -221,7 +221,7 @@ function CMModal({
                     Surface
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.surface}
                   </div>
                 </div>
@@ -254,7 +254,7 @@ function CMModal({
                     Distance
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.distance}m
                   </div>
                 </div>
@@ -284,7 +284,7 @@ function CMModal({
                     Length
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.length}
                   </div>
                 </div>
@@ -313,7 +313,7 @@ function CMModal({
                     Direction
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.direction}
                   </div>
                 </div>
@@ -351,7 +351,7 @@ function CMModal({
                     Weather
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.weather}
                   </div>
                 </div>
@@ -421,7 +421,7 @@ function CMModal({
                     Season
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.season}
                   </div>
                 </div>
@@ -450,7 +450,7 @@ function CMModal({
                     Condition
                   </div>
 
-                  <div className="text-base font-bold text-white">
+                  <div className="truncate text-sm font-bold text-white md:text-base">
                     {cm.condition}
                   </div>
                 </div>
