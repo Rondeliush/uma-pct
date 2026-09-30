@@ -5,6 +5,7 @@ import { umaVersions } from "../data/umaData"
 import UmaAvatarImage from "../components/UmaAvatarImage"
 import { getProfileAvatar } from "./profileAvatar"
 import type { UmaVersion } from "../types/types"
+import { supportsAutomaticBackup } from "../backup/backupFile"
 
 type ProfileSelectionPageProps = {
   profiles: Profile[]
@@ -422,6 +423,11 @@ const [
         <div className="mt-1 text-sm text-blue-100/35">
           Choose the trainer profile you want to export.
         </div>
+        <p className="mt-2 text-xs leading-5 text-blue-100/50">
+          {supportsAutomaticBackup()
+            ? "Choose a new file or this profile's existing backup. Files belonging to another profile cannot be overwritten."
+            : "A new copy will be downloaded with a unique filename. If asked where to save, keep a new filename: this browser cannot check an existing file before replacing it."}
+        </p>
       </div>
 
       {/* PROFILE LIST */}

@@ -15,6 +15,7 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
   }
   return <section className="rounded-3xl border border-violet-300/15 bg-[#07111f]/95 px-6 py-5">
     <h2 className="text-sm font-black text-white">Automatic file backup</h2>
+    <p className="mt-2 text-xs leading-5 text-blue-100/60">Before every file save, UmaPCT checks which profile the existing backup belongs to. A backup of another profile will not be overwritten, even if both profiles have the same name.</p>
     <p className="mt-2 text-xs leading-5 text-blue-100/60">
       Save {profileName} to a file on this device. While this profile is open, changes update its selected file after about 2 seconds. Each profile has its own backup file.
     </p>

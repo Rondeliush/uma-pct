@@ -41,6 +41,7 @@ import type { Profile } from "./profiles/profileStore"
 
 import {
   createProfile,
+  createProfileId,
   loadProfiles,
   renameProfile,
   saveProfiles,
@@ -76,6 +77,8 @@ import {
 } from "./profiles/profileTransfer"
 import { localBackup } from "./backup/localBackup"
 import BackupNotice from "./backup/BackupNotice"
+import { chooseBackupFile, supportsAutomaticBackup, withBackupFileLock, writeProfileBackupFile } from "./backup/backupFile"
+import { readProfileBackup } from "./backup/profileBackup"
 
 type AppContentProps = {
   profileId: string
@@ -583,6 +586,7 @@ function TrackerApp() {
 
   const [isImporting, setIsImporting] = useState(false)
   const importInProgress = useRef(false)
+  const exportInProgress = useRef(false)
 
   const [
     importPreview,
@@ -947,42 +951,22 @@ function TrackerApp() {
 
   const handleExportProfile =
   async (profile: Profile) => {
+    if (exportInProgress.current) return
+    exportInProgress.current = true
     setProfileError(null)
 
     try {
-      const stored = (await loadProfiles()).find((item) => item.id === profile.id)
-      if (!stored) throw new Error("Profile could not be found.")
-      profile = stored
-      const profileData =
-        await loadProfileData(profile.id)
-
-      if (!profileData) {
-        throw new Error("Profile data could not be found.")
+      const safeProfileName = Array.from(profile.name.trim(), (char) => char.charCodeAt(0) < 32 ? "_" : char)
+        .join("").replace(/[<>:"/\\|?*]/g, "_").slice(0, 80).replace(/[. ]+$/g, "") || "profile"
+      // Open the picker during the click, before reading the profile from storage.
+      const handle = supportsAutomaticBackup()
+        ? await chooseBackupFile(`UmaPCT-${safeProfileName}.json`)
+        : null
+      const exportData = await readProfileBackup(profile.id)
+      if (handle) {
+        await withBackupFileLock(async () => { await writeProfileBackupFile(handle, exportData) })
+        return
       }
-
-      const exportData = {
-        format: "uma-tracker-profile",
-        version: 1,
-
-        profile: {
-          sourceProfileId:
-          profile.sourceProfileId ??
-          profile.id,
-          name: profile.name,
-        },
-
-        data: profileData,
-      }
-
-      const safeProfileName =
-        profile.name
-          .trim()
-          .replace(
-            /[<>:"/\\|?*\x00-\x1F]/g,
-            "_"
-          )
-          .replace(/[. ]+$/g, "") ||
-        "profile"
 
       const json = JSON.stringify(
         exportData,
@@ -1004,8 +988,10 @@ function TrackerApp() {
         document.createElement("a")
 
       link.href = url
+      // Downloads cannot inspect the user's destination. Suggest a fresh name
+      // so normal exports do not target an existing backup.
       link.download =
-        `UmaPCT-${safeProfileName}.json`
+        `UmaPCT-${safeProfileName}-${Date.now()}-${createProfileId()}.json`
 
       document.body.appendChild(link)
 
@@ -1016,6 +1002,7 @@ function TrackerApp() {
         URL.revokeObjectURL(url)
       }, 0)
     } catch (error) {
+  if (error instanceof Error && error.name === "AbortError") return
   console.error(
     "Could not export profile:",
     error
@@ -1029,6 +1016,8 @@ function TrackerApp() {
   setProfileError(
     `Could not export profile: ${message}`
   )
+} finally {
+  exportInProgress.current = false
 }
   }
 

@@ -1,17 +1,6 @@
 import type { Profile } from "../profiles/profileStore"
-import { isImportedProfileFile, type ImportedProfileFile } from "../profiles/profileTransfer"
-
-export type BackupFile = {
-  name: string
-  queryPermission(options: { mode: "readwrite" }): Promise<PermissionState>
-  requestPermission(options: { mode: "readwrite" }): Promise<PermissionState>
-  getFile(): Promise<{ text(): Promise<string> }>
-  createWritable(): Promise<{
-    write(data: string): Promise<void>
-    close(): Promise<void>
-    abort(): Promise<void>
-  }>
-}
+import type { ImportedProfileFile } from "../profiles/profileTransfer"
+import { assertBackupFileOwner, writeProfileBackupFile, type BackupFile } from "./backupFile"
 export type BackupConfig = { id: string; handle: BackupFile; lastSavedAt: string | null }
 type Phase = "off" | "loading" | "ready" | "pending" | "saving" | "permission" | "error"
 export type BackupState = {
@@ -87,14 +76,7 @@ export class LocalBackupController {
       // The picker must run directly from the user's click, before any await.
       const handle = await this.deps.pickFile(`UmaPCT-${name}.json`)
       if (generation !== this.generation) return
-      const existingText = await (await handle.getFile()).text()
-      if (existingText.trim()) {
-        let existing: unknown
-        try { existing = JSON.parse(existingText) } catch { /* Reject unrelated files below. */ }
-        if (!isImportedProfileFile(existing) || existing.profile.sourceProfileId !== (profile.sourceProfileId ?? profile.id)) {
-          throw new Error("Choose a new file or a backup of this profile. This file belongs to different data and was not changed.")
-        }
-      }
+      await assertBackupFileOwner(handle, profile.sourceProfileId ?? profile.id)
       if (generation !== this.generation) return
       this.cancelTimer()
       await this.queue
@@ -159,15 +141,11 @@ export class LocalBackupController {
         this.update({ phase: "saving", error: "" })
         const backup = await this.deps.readBackup(profile.id)
         if (generation !== this.generation) return
-        const json = JSON.stringify(backup, null, 2)
-        const stream = await config.handle.createWritable()
-        try {
-          await stream.write(json)
-          await stream.close()
-        } catch (error) {
-          try { await stream.abort() } catch { /* The original error explains the failure. */ }
-          throw error
+        if (backup.profile.sourceProfileId !== (profile.sourceProfileId ?? profile.id)) {
+          throw new Error("The profile identity changed. Reopen the profile before saving a backup.")
         }
+        const saved = await writeProfileBackupFile(config.handle, backup, () => generation === this.generation)
+        if (!saved) return
         // Report success only after the file has been committed with close().
         const lastSavedAt = new Date().toISOString()
         await this.deps.writeConfig(profile.id, { ...config, lastSavedAt })

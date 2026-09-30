@@ -1,18 +1,9 @@
 import { getStoredValue, setStoredValue, deleteStoredValue } from "../storage/indexedDB"
 import { STORAGE_CHANGE_CHANNEL, STORAGE_CHANGE_EVENT } from "../storage/storageChanges"
-import { LocalBackupController, type BackupFile, type BackupConfig } from "./LocalBackupController"
+import { LocalBackupController, type BackupConfig } from "./LocalBackupController"
 import { readProfileBackup } from "./profileBackup"
-
-type PickerWindow = Window & {
-  showSaveFilePicker?: (options: {
-    suggestedName: string
-    types: { description: string; accept: Record<string, string[]> }[]
-  }) => Promise<BackupFile>
-}
-
-export function supportsAutomaticBackup() {
-  return typeof window !== "undefined" && typeof (window as PickerWindow).showSaveFilePicker === "function"
-}
+import { chooseBackupFile, withBackupFileLock } from "./backupFile"
+export { supportsAutomaticBackup } from "./backupFile"
 
 const controller = new LocalBackupController({
   readConfig: (id) => getStoredValue<BackupConfig>(`backup:profile:${id}`),
@@ -20,17 +11,8 @@ const controller = new LocalBackupController({
     ? setStoredValue(`backup:profile:${id}`, value)
     : deleteStoredValue(`backup:profile:${id}`),
   readBackup: readProfileBackup,
-  pickFile: (suggestedName) => {
-    const pickerWindow = window as PickerWindow
-    if (!pickerWindow.showSaveFilePicker) throw new Error("This browser does not support automatic file backups. Use Profiles → Export Profile instead.")
-    return pickerWindow.showSaveFilePicker({
-      suggestedName,
-      types: [{ description: "UmaPCT profile backup", accept: { "application/json": [".json"] } }],
-    })
-  },
-  withLock: (task) => typeof navigator !== "undefined" && navigator.locks
-    ? navigator.locks.request("uma-profile-backup-write", task)
-    : task(),
+  pickFile: chooseBackupFile,
+  withLock: withBackupFileLock,
 })
 
 export const localBackup = Object.assign(controller, {
