@@ -9,7 +9,7 @@ function BackupFailure({ state }: { state: BackupState }) {
   return <>
     {!dismissed && <AppMessageDialog
       title={title}
-      message={`${state.profileName}: ${state.error}\n\nYour profile data remains saved in this browser. Check the backup settings before trying again.`}
+      message={`${state.profileName}: ${state.error}\n\nYour profile data remains saved locally on this device. Check the backup settings before trying again.`}
       onClose={() => setDismissed(true)}
     />}
     <aside role="status" className="fixed bottom-4 right-4 z-[1300] max-w-[min(24rem,calc(100vw-2rem))] rounded-xl border border-violet-300/25 bg-[#07111f] px-4 py-3 text-xs text-blue-100 shadow-xl">

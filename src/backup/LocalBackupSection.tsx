@@ -8,6 +8,22 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
   const [working, setWorking] = useState(false)
   const supported = supportsAutomaticBackup()
   const busy = working || state.phase === "loading" || state.phase === "saving"
+  const statusLabel = !supported ? "Unavailable" : {
+    off: "Off",
+    loading: "Loading...",
+    ready: "On",
+    pending: "Waiting to save",
+    saving: "Saving...",
+    permission: "Needs permission",
+    error: "Paused",
+  }[state.phase]
+  const statusColor = !supported || state.phase === "permission" || state.phase === "error"
+    ? "border-amber-300/20 bg-amber-400/10 text-amber-200"
+    : state.phase === "ready"
+      ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-200"
+      : state.phase === "pending" || state.phase === "saving"
+        ? "border-sky-300/20 bg-sky-400/10 text-sky-200"
+        : "border-white/10 bg-white/5 text-blue-100/60"
   const run = async (action: () => Promise<void>) => {
     if (working) return
     setWorking(true)
@@ -15,13 +31,36 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
   }
   return <section className="rounded-3xl border border-violet-300/15 bg-[#07111f]/95 px-6 py-5">
     <h2 className="text-sm font-black text-white">Automatic file backup</h2>
-    <p className="mt-2 text-xs leading-5 text-blue-100/60">Before every file save, UmaPCT checks which profile the existing backup belongs to. A backup of another profile will not be overwritten, even if both profiles have the same name.</p>
     <p className="mt-2 text-xs leading-5 text-blue-100/60">
-      Save {profileName} to a file on this device. While this profile is open, changes update its selected file after about 2 seconds. Each profile has its own backup file.
+      Keep a file backup of <span className="font-bold text-blue-100/85">{profileName}</span>. Changes save after about 2 seconds while the profile is open.
     </p>
+
+    <div role="status" aria-live="polite" aria-atomic="true" className="mt-5 overflow-hidden rounded-2xl border border-violet-300/20 bg-black/25">
+      <dl className="grid grid-cols-1 sm:grid-cols-2">
+        <div className="min-w-0 border-b border-white/[0.08] px-4 py-4 sm:col-span-2">
+          <dt className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-100/45">Backup file</dt>
+          <dd className="mt-2 break-all font-mono text-sm font-semibold text-white">{state.fileName || "No file selected"}</dd>
+        </div>
+        <div className="border-b border-white/[0.08] px-4 py-4 sm:border-b-0 sm:border-r">
+          <dt className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-100/45">Automatic backup</dt>
+          <dd className="mt-2">
+            <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold ${statusColor}`}>
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
+              {statusLabel}
+            </span>
+          </dd>
+        </div>
+        <div className="min-w-0 px-4 py-4">
+          <dt className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-100/45">Last successful backup</dt>
+          <dd className="mt-2 text-sm font-semibold text-blue-100/90">
+            {state.lastSavedAt ? <time dateTime={state.lastSavedAt}>{new Date(state.lastSavedAt).toLocaleString()}</time> : "Not saved yet"}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
     {supported ? <>
-      <p className="mt-3 text-xs font-bold text-emerald-300">Automatic file backup is supported in this browser.</p>
-      <p className="mt-2 text-xs leading-5 text-blue-100/50">Choose a folder to create this profile's backup, or select an existing backup file. Existing content is checked before any changes are made. Selecting a file here sets where future backups are written; it does not import its data. Restore data through Profiles → Import Profile.</p>
+      {!state.configured && <p className="mt-4 text-xs leading-5 text-blue-100/60">Choose a folder for a new backup, or connect this profile's existing file.</p>}
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.selectFile()) }}>
           {state.configured ? "Change backup folder" : "Choose backup folder"}
@@ -36,21 +75,21 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
           <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.disable()) }}>Turn off</button>
         </>}
       </div>
-      {state.configured && <p className="mt-3 text-xs leading-5 text-blue-100/50">Change backup folder saves future copies in another folder. The previous backup file stays on your device and is no longer updated.</p>}
     </> : <p className="mt-3 text-xs leading-5 text-amber-200">
-      This browser does not support automatic writing to a selected file. Your profile still saves in this browser. Use Profiles → Export Profile for a manual file backup.
+      Automatic file backup is unavailable here. Use Profiles → Export Profile to download a copy.
     </p>}
-    <p className="mt-3 text-xs leading-5 text-blue-100/50">Supported browsers include Chrome and Edge on desktop, and Chrome 132 or later on Android. Installed UmaPCT apps use the capabilities of their browser. File access requires your permission, and automatic backup runs while the app is open.</p>
-    <div role="status" className="mt-3 space-y-1 text-xs text-blue-100/60">
-      {state.fileName && <p>File: {state.fileName}</p>}
-      {state.phase === "off" && <p>Automatic file backup is off. Your data still saves in this browser.</p>}
-      {state.phase === "loading" && <p>Loading backup settings...</p>}
-      {state.phase === "pending" && <p>Changes waiting to be saved to the file...</p>}
-      {state.phase === "saving" && <p>Saving backup file...</p>}
-      {state.phase === "ready" && <p>Automatic file backup is on.</p>}
-      {state.lastSavedAt && <p>Last file backup: {new Date(state.lastSavedAt).toLocaleString()}</p>}
-    </div>
-    {state.error && <p role="alert" className="mt-3 text-xs text-amber-200">{state.error}</p>}
-    <p className="mt-3 text-xs leading-5 text-blue-100/50">Wait for saving to finish before closing the app. Restore this JSON through Profiles → Import Profile or the welcome screen. Turn off keeps your existing backup file.</p>
+    {state.error && <p role="alert" className="mt-4 rounded-xl border border-amber-300/20 bg-amber-400/5 px-4 py-3 text-xs leading-5 text-amber-200">{state.error}</p>}
+    <p className="mt-4 text-xs leading-5 text-blue-100/50">Your profile is also saved locally on this device.</p>
+    <details className="mt-4 border-t border-white/[0.07] pt-3 text-xs text-blue-100/60">
+      <summary className="cursor-pointer font-bold text-violet-200/80">How backups work</summary>
+      <ul className="mt-3 list-disc space-y-2 pl-4 leading-5">
+        <li>Each profile uses its own file. Files belonging to another profile cannot be overwritten.</li>
+        <li>The file keeps the latest saved version. Wait for saving to finish before closing the app.</li>
+        <li>Changing folders or turning backup off keeps the previous file on your device.</li>
+        <li>Connecting an existing file sets the save destination. To restore data, use Profiles → Import Profile.</li>
+        <li>You may need to allow file access again after restarting.</li>
+        <li>Supported browsers include Chrome and Edge on desktop, and Chrome 132 or later on Android. Installed apps use the capabilities of their browser.</li>
+      </ul>
+    </details>
   </section>
 }

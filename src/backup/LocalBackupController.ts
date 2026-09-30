@@ -100,7 +100,7 @@ export class LocalBackupController {
       const permission = await this.config.handle.requestPermission({ mode: "readwrite" })
       if (generation !== this.generation) return
       if (permission !== "granted") {
-        this.update({ phase: "permission", error: "File access was not granted. Browser data is still saved locally." })
+        this.update({ phase: "permission", error: "File access was not granted. Your profile data is still saved locally on this device." })
         return
       }
       await this.saveNow()
