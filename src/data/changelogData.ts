@@ -7,6 +7,14 @@ export type ChangelogEntry = {
 }
 
 export const changelog: ChangelogEntry[] = [
+    {
+    version: "0.1.5",
+    date: "2026-10-05",
+    improved: [
+      "Updated the Uma Database design.",
+      "Improved Uma Database usability on desktop and mobile.",
+    ],
+  },
   {
     version: "0.1.4",
     date: "2026-09-30",

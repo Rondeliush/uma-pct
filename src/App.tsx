@@ -510,8 +510,8 @@ useEffect(() => {
 
         {/* UMA DATABASE */}
         {activePage === "umaDatabase" && (
-          <div className="relative z-10 mx-auto min-h-screen max-w-[1500px] border-x-2 border-gray-600 bg-gray-900/90">
-            <main className="px-6 py-6">
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
+            <main>
               <UmaDatabase
                 cms={cms}
                 hasUpdateNotification={
