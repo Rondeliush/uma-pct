@@ -1,7 +1,6 @@
 {
    "latestAddedVersionIds": [
-    "daiwa-scarlet-christmas",
-    "vodka-christmas"
+    "zenno-rob-roy"
   ],
   "characters": [
     {
@@ -275,6 +274,10 @@
     {
       "id": "wonder-acute",
       "name": "Wonder Acute"
+    },
+    {
+      "id": "zenno-rob-roy",
+      "name": "Zenno Rob Roy"
     }
   ],
   "versions": [
@@ -1125,6 +1128,22 @@
       "versionName": "Christmas",
       "archived": false,
       "avatar": "/Umas/chara_stand_1008_100802.png"
+    } ,
+    {
+      "id": "zenno-rob-roy",
+      "characterId": "zenno-rob-roy",
+      "displayName": "Zenno Rob Roy",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_104701.png"
+    },
+    {
+      "id": "special-week-commander",
+      "characterId": "special-week",
+      "displayName": "Special Week (Comman",
+      "versionName": "Commander",
+      "archived": false,
+      "avatar": "/Umas/char_stand_100103.png"
     } 
-  ]
+  ] 
 }
