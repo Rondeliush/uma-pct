@@ -133,6 +133,7 @@ export async function importProfileToDevice(file: ImportedProfileFile, asCopy = 
       id: createProfileId(),
       name: file.profile.name.trim() + (asCopy ? " (restored)" : ""),
       sourceProfileId: asCopy ? createProfileId() : file.profile.sourceProfileId,
+      ...(asCopy ? { importedFromSourceProfileId: file.profile.sourceProfileId } : {}),
       createdAt: new Date().toISOString(),
     }
 

@@ -1,5 +1,6 @@
-import { useState, useSyncExternalStore } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 import { localBackup, supportsAutomaticBackup } from "./localBackup"
+import BackupRelinkDialog from "./BackupRelinkDialog"
 
 const buttonClass = "rounded-xl border border-violet-300/20 bg-violet-400/10 px-4 py-2 text-xs font-bold text-violet-200 disabled:opacity-40"
 
@@ -7,7 +8,8 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
   const state = useSyncExternalStore(localBackup.subscribe, localBackup.getSnapshot, localBackup.getSnapshot)
   const [working, setWorking] = useState(false)
   const supported = supportsAutomaticBackup()
-  const busy = working || state.phase === "loading" || state.phase === "saving"
+  const busy = working || !!state.relink || state.phase === "loading" || state.phase === "saving"
+  useEffect(() => () => localBackup.cancelRelink(), [])
   const statusLabel = !supported ? "Unavailable" : {
     off: "Off",
     loading: "Loading...",
@@ -30,6 +32,7 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
     try { await action() } finally { setWorking(false) }
   }
   return <section className="rounded-3xl border border-violet-300/15 bg-[#07111f]/95 px-6 py-5">
+    {state.relink && <BackupRelinkDialog onCancel={() => localBackup.cancelRelink()} onConfirm={() => { void run(() => localBackup.confirmRelink()) }} />}
     <h2 className="text-sm font-black text-white">Automatic file backup</h2>
     <p className="mt-2 text-xs leading-5 text-blue-100/60">
       Keep a file backup of <span className="font-bold text-blue-100/85">{profileName}</span>. Changes save after about 2 seconds while the profile is open.

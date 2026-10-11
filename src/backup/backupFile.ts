@@ -1,4 +1,5 @@
 import { isImportedProfileFile, type ImportedProfileFile } from "../profiles/profileTransfer"
+import type { Profile } from "../profiles/profileStore"
 
 export type BackupFile = {
   name: string
@@ -59,17 +60,29 @@ export function withBackupFileLock(task: () => Promise<void>): Promise<void> {
     : task()
 }
 
-export async function assertBackupFileOwner(handle: BackupFile, sourceProfileId: string) {
+export async function readBackupFile(handle: BackupFile): Promise<ImportedProfileFile | null> {
   const text = await (await handle.getFile()).text()
-  if (text.length === 0) return // getFileHandle creates an empty file for a new path.
+  if (text.length === 0) return null // getFileHandle creates an empty file for a new path.
   let existing: unknown
   try { existing = JSON.parse(text) } catch { /* Reject unrecognized content below. */ }
   if (!isImportedProfileFile(existing)) {
     throw new Error("This file is not a valid profile backup. Choose a new file. Nothing was overwritten.")
   }
+  return existing
+}
+
+export async function assertBackupFileOwner(handle: BackupFile, sourceProfileId: string) {
+  const existing = await readBackupFile(handle)
+  if (!existing) return
   if (existing.profile.sourceProfileId !== sourceProfileId) {
     throw new Error(`This backup belongs to profile "${existing.profile.name}". Choose a different file. Nothing was overwritten.`)
   }
+}
+
+export function canRelinkBackupFile(profile: Profile, backup: ImportedProfileFile): boolean {
+  return typeof profile.importedFromSourceProfileId === "string" &&
+    profile.importedFromSourceProfileId === backup.profile.sourceProfileId &&
+    backup.profile.sourceProfileId !== (profile.sourceProfileId ?? profile.id)
 }
 
 // Call under withBackupFileLock. Re-read the destination immediately before
@@ -82,11 +95,34 @@ export async function writeProfileBackupFile(
   if (!isImportedProfileFile(backup)) throw new Error("Profile data is invalid. Nothing was overwritten.")
   const json = JSON.stringify(backup, null, 2)
   await assertBackupFileOwner(handle, backup.profile.sourceProfileId)
+  return commitBackupFile(handle, json, canWrite)
+}
+
+// Only the explicit relink confirmation uses this path. Normal saves and exports
+// still require the file's owner to match the current profile exactly.
+export async function relinkProfileBackupFile(
+  handle: BackupFile,
+  backup: ImportedProfileFile,
+  profile: Profile,
+  canWrite: () => boolean = () => true,
+): Promise<boolean> {
+  if (!isImportedProfileFile(backup) || backup.profile.sourceProfileId !== (profile.sourceProfileId ?? profile.id)) {
+    throw new Error("The profile identity changed. Reopen the profile before linking a backup.")
+  }
+  const existing = await readBackupFile(handle)
+  if (!existing || !canRelinkBackupFile(profile, existing)) {
+    throw new Error("The selected backup changed or belongs to another profile. Select the file again. Nothing was overwritten.")
+  }
+  return commitBackupFile(handle, JSON.stringify(backup, null, 2), canWrite)
+}
+
+async function commitBackupFile(handle: BackupFile, json: string, canWrite: () => boolean): Promise<boolean> {
   if (!canWrite()) return false
   const stream = await handle.createWritable()
   try {
     if (!canWrite()) { await stream.abort(); return false }
     await stream.write(json)
+    if (!canWrite()) { await stream.abort(); return false }
     await stream.close()
     return true
   } catch (error) {

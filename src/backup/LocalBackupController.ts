@@ -1,6 +1,6 @@
 import type { Profile } from "../profiles/profileStore"
 import type { ImportedProfileFile } from "../profiles/profileTransfer"
-import { assertBackupFileOwner, writeProfileBackupFile, type BackupFile, type BackupDestination } from "./backupFile"
+import { assertBackupFileOwner, readBackupFile, canRelinkBackupFile, relinkProfileBackupFile, writeProfileBackupFile, type BackupFile, type BackupDestination } from "./backupFile"
 export type BackupConfig = { id: string; handle: BackupFile; lastSavedAt: string | null }
 type Phase = "off" | "loading" | "ready" | "pending" | "saving" | "permission" | "error"
 export type BackupState = {
@@ -11,6 +11,7 @@ export type BackupState = {
   lastSavedAt: string | null
   error: string
   configured: boolean
+  relink: { fileName: string } | null
 }
 type Dependencies = {
   readConfig(id: string): Promise<BackupConfig | undefined>
@@ -25,13 +26,16 @@ export class LocalBackupController {
   private deps: Dependencies
   private profile: Profile | null = null
   private config: BackupConfig | undefined
+  private pendingRelink: { handle: BackupFile; configId: string | undefined } | undefined
+  private relinkGeneration: number | undefined
+  private changedDuringRelink = false
   private generation = 0
   private timer: ReturnType<typeof setTimeout> | undefined
   private queue: Promise<void> = Promise.resolve()
   private listeners = new Set<() => void>()
   private state: BackupState = {
     profileId: null, profileName: "", fileName: "", phase: "off",
-    lastSavedAt: null, error: "", configured: false,
+    lastSavedAt: null, error: "", configured: false, relink: null,
   }
 
   constructor(deps: Dependencies) { this.deps = deps }
@@ -55,7 +59,10 @@ export class LocalBackupController {
     this.cancelTimer()
     this.profile = profile
     this.config = undefined
-    this.update({ profileId: profile?.id ?? null, profileName: profile?.name ?? "", fileName: "", lastSavedAt: null, error: "", configured: false, phase: profile ? "loading" : "off" })
+    this.pendingRelink = undefined
+    this.relinkGeneration = undefined
+    this.changedDuringRelink = false
+    this.update({ profileId: profile?.id ?? null, profileName: profile?.name ?? "", fileName: "", lastSavedAt: null, error: "", configured: false, relink: null, phase: profile ? "loading" : "off" })
     if (!profile) return
     try {
       const config = await this.deps.readConfig(profile.id)
@@ -70,12 +77,23 @@ export class LocalBackupController {
     if (!this.profile) return
     const profile = this.profile
     const generation = this.generation
+    this.cancelRelink()
     const name = Array.from(profile.name, (char) => char.charCodeAt(0) < 32 ? "_" : char)
       .join("").replace(/[<>:"/\\|?*]/g, "_").slice(0, 80).replace(/[. ]+$/g, "") || "profile"
     try {
       // The picker must run directly from the user's click, before any await.
       const handle = await this.deps.pickFile(`UmaPCT-${name}.json`, destination)
       if (generation !== this.generation) return
+      const existing = await readBackupFile(handle)
+      if (generation !== this.generation) return
+      if (!existing && destination === "existing") {
+        throw new Error("This file is not a valid profile backup. Choose a new file. Nothing was overwritten.")
+      }
+      if (existing && canRelinkBackupFile(profile, existing)) {
+        this.pendingRelink = { handle, configId: this.config?.id }
+        this.update({ relink: { fileName: handle.name }, error: "", ...(!this.config ? { phase: "off" as const } : {}) })
+        return
+      }
       await assertBackupFileOwner(handle, profile.sourceProfileId ?? profile.id)
       if (generation !== this.generation) return
       this.cancelTimer()
@@ -93,6 +111,53 @@ export class LocalBackupController {
     }
   }
 
+  cancelRelink() {
+    this.pendingRelink = undefined
+    if (this.state.relink) this.update({ relink: null })
+  }
+
+  confirmRelink(): Promise<void> {
+    const pending = this.pendingRelink
+    const profile = this.profile
+    const generation = this.generation
+    if (!pending || !profile) return Promise.resolve()
+    this.cancelRelink()
+    this.cancelTimer()
+    this.relinkGeneration = generation
+    this.queue = this.queue.then(() => this.deps.withLock(async () => {
+      if (generation !== this.generation) return
+      try {
+        const currentConfig = await this.deps.readConfig(profile.id)
+        if (generation !== this.generation) return
+        if (currentConfig?.id !== pending.configId) {
+          throw new Error("Backup settings changed in another tab. Reopen this profile before linking a backup.")
+        }
+        if (await pending.handle.queryPermission({ mode: "readwrite" }) !== "granted") {
+          throw new DOMException("File access was not granted. The file was not changed.", "NotAllowedError")
+        }
+        if (generation !== this.generation) return
+        this.update({ phase: "saving", error: "" })
+        const backup = await this.deps.readBackup(profile.id)
+        if (generation !== this.generation) return
+        const saved = await relinkProfileBackupFile(pending.handle, backup, profile, () => generation === this.generation)
+        if (!saved || generation !== this.generation) return
+        const config = { id: crypto.randomUUID(), handle: pending.handle, lastSavedAt: new Date().toISOString() }
+        await this.deps.writeConfig(profile.id, config)
+        if (generation === this.generation) {
+          this.config = config
+          this.update({ configured: true, fileName: pending.handle.name, lastSavedAt: config.lastSavedAt, phase: "ready", error: "" })
+        }
+      } catch (error) { if (generation === this.generation) this.fail(error) }
+    })).catch((error: unknown) => { if (generation === this.generation) this.fail(error) }).finally(() => {
+      if (this.relinkGeneration !== generation) return
+      this.relinkGeneration = undefined
+      const changed = this.changedDuringRelink
+      this.changedDuringRelink = false
+      if (changed && generation === this.generation && this.state.phase === "ready") this.changed(`profile:${profile.id}:data`)
+    })
+    return this.queue
+  }
+
   async resume() {
     const generation = this.generation
     if (!this.config) return
@@ -108,7 +173,9 @@ export class LocalBackupController {
   }
 
   changed(key: string) {
-    if (!this.profile || !this.config || (key !== "profiles" && key !== `profile:${this.profile.id}:data`)) return
+    if (!this.profile || (key !== "profiles" && key !== `profile:${this.profile.id}:data`)) return
+    if (this.relinkGeneration === this.generation) { this.changedDuringRelink = true; return }
+    if (!this.config) return
     if (this.state.phase === "permission" || this.state.phase === "error") return
     if (!this.timer) {
       this.update({ phase: "pending" })
@@ -118,6 +185,7 @@ export class LocalBackupController {
   }
 
   saveNow(): Promise<void> {
+    if (this.relinkGeneration === this.generation) return this.queue
     this.cancelTimer()
     const profile = this.profile
     const config = this.config
@@ -163,6 +231,9 @@ export class LocalBackupController {
     if (!profile) return
     const generation = ++this.generation
     this.cancelTimer()
+    this.cancelRelink()
+    this.relinkGeneration = undefined
+    this.changedDuringRelink = false
     this.config = undefined
     this.update({ phase: "loading" })
     try {

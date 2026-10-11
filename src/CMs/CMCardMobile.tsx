@@ -172,7 +172,7 @@ function CMCardMobile({
                             title={
                             umaVersion.displayName
                             }
-                            className={`relative h-10 w-10 overflow-hidden rounded-lg border border-black/40 ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
+                            className={`relative h-10 w-10 overflow-hidden rounded-lg border ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
                             cmUma.won
                                 ? "ring-2 ring-yellow-400"
                                 : ""
@@ -452,7 +452,7 @@ function CMCardMobile({
                     className="min-w-0"
                     >
                     <div
-                        className={`relative aspect-square overflow-hidden rounded-lg border border-black/40 ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
+                        className={`relative aspect-square overflow-hidden rounded-lg border ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
                         cmUma.won
                             ? "ring-2 ring-yellow-400"
                             : ""

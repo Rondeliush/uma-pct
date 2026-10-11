@@ -344,7 +344,7 @@ if (compact) {
   >
     {/* AVATAR */}
     <div
-      className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border border-black/40 ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
+      className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
         cmUma.won
           ? "ring-2 ring-yellow-400"
           : ""

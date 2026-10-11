@@ -9,6 +9,7 @@ export type Profile = {
   name: string
   createdAt: string
   sourceProfileId?: string
+  readonly importedFromSourceProfileId?: string
 }
 
 const PROFILES_STORAGE_KEY = "profiles"
