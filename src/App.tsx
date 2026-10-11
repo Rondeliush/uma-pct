@@ -27,6 +27,7 @@ import ModalPortal from "./components/ModalPortal"
 import { usePwaInstall } from "./pwa/usePwaInstall"
 
 import ProfileSelectionPage from "./profiles/ProfileSelectionPage"
+import ProfileRestoreDialog from "./profiles/ProfileRestoreDialog"
 import CreateProfileModal from "./profiles/CreateProfileModal"
 import WelcomePage from "./profiles/WelcomePage"
 import ProfileGuide from "./onboarding/ProfileGuide"
@@ -62,6 +63,7 @@ import {
   loadProfileData,
   saveProfileData,
   updateProfileData,
+  withProfileDataUpdateQueue,
   deleteProfileData,
 } from "./profiles/profileDataStore"
 
@@ -76,6 +78,7 @@ import {
 import {
   isImportedProfileFile,
   importProfileToDevice,
+  restoreProfileFromBackup,
   type ImportedProfileFile,
 } from "./profiles/profileTransfer"
 import { localBackup } from "./backup/localBackup"
@@ -617,6 +620,11 @@ function TrackerApp() {
   const [isImporting, setIsImporting] = useState(false)
   const importInProgress = useRef(false)
   const exportInProgress = useRef(false)
+  const restoreInProgress = useRef(false)
+  const restoreRequest = useRef(0)
+  const [isRestoring, setIsRestoring] = useState(false)
+  const [restorePreview, setRestorePreview] = useState<{ profile: Profile; file: ImportedProfileFile } | null>(null)
+  const [profileDataRevisions, setProfileDataRevisions] = useState<Record<string, number>>({})
 
   const [
     importPreview,
@@ -982,6 +990,47 @@ function TrackerApp() {
     }
   }
 
+  const handleChooseRestoreProfile = (profile: Profile) => {
+    if (restoreInProgress.current) return
+    setProfileError(null)
+    const request = ++restoreRequest.current
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = ".json,application/json"
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      try {
+        const parsed: unknown = JSON.parse(await file.text())
+        if (!isImportedProfileFile(parsed)) throw new Error("Invalid profile backup")
+        if (request === restoreRequest.current) setRestorePreview({ profile, file: parsed })
+      } catch {
+        if (request === restoreRequest.current) setProfileError("This file is not a valid UmaPCT profile backup. The profile was not changed.")
+      }
+    }
+    input.click()
+  }
+
+  const handleConfirmRestoreProfile = async () => {
+    if (!restorePreview || restoreInProgress.current) return
+    const { profile, file } = restorePreview
+    restoreInProgress.current = true
+    setIsRestoring(true)
+    setProfileError(null)
+    try {
+      await withProfileDataUpdateQueue(profile.id, () => restoreProfileFromBackup(profile, file))
+      setProfiles((current) => [...current])
+      // Reload active data and its custom Uma database without selecting a profile.
+      setProfileDataRevisions((current) => ({ ...current, [profile.id]: (current[profile.id] ?? 0) + 1 }))
+      setRestorePreview(null)
+    } catch {
+      setProfileError("Could not restore the profile. Its existing data was not changed.")
+    } finally {
+      restoreInProgress.current = false
+      setIsRestoring(false)
+    }
+  }
+
   const handleExportProfile =
   async (profile: Profile, destination: BackupDestination = "folder") => {
     if (exportInProgress.current) return
@@ -1118,11 +1167,20 @@ function TrackerApp() {
         onImportProfile={() => {
           void handleChooseImportProfile()
         }}
+        onRestoreProfile={handleChooseRestoreProfile}
       />
       )}
         {profileError && (
           <AppMessageDialog title="Profile operation could not be completed" message={profileError} onClose={() => setProfileError(null)} />
         )}
+
+        {restorePreview && <ProfileRestoreDialog
+          profile={restorePreview.profile}
+          file={restorePreview.file}
+          restoring={isRestoring}
+          onCancel={() => setRestorePreview(null)}
+          onConfirm={() => { void handleConfirmRestoreProfile() }}
+        />}
 
         {isCreateProfileOpen && (
           <CreateProfileModal
@@ -1171,7 +1229,7 @@ function TrackerApp() {
           </div>
 
           <div className="mt-1 text-sm text-blue-100/35">
-            Review the profile before importing it.
+            Creates a new profile from an exported profile or backup file.
           </div>
         </div>
 
@@ -1302,7 +1360,7 @@ function TrackerApp() {
 
   return (
     <UmaDatabaseProvider
-  key={activeProfile.id}
+  key={`${activeProfile.id}:${profileDataRevisions[activeProfile.id] ?? 0}`}
   profileId={activeProfile.id}
 >
   <AutoRunTimerProvider

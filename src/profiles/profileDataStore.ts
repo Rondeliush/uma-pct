@@ -109,6 +109,15 @@ export function updateProfileData(
     currentData: ProfileData
   ) => ProfileData
 ): Promise<void> {
+  return withProfileDataUpdateQueue(profileId, async () => {
+    const currentData = await loadProfileData(profileId)
+    if (!currentData) throw new Error(`Profile data not found: ${profileId}`)
+    await saveProfileData(profileId, updater(currentData))
+  })
+}
+
+// Serialize confirmed restores with existing in-flight profile updates.
+export function withProfileDataUpdateQueue(profileId: string, task: () => Promise<void>): Promise<void> {
   const previousUpdate =
     profileUpdateQueues.get(profileId) ??
     Promise.resolve()
@@ -118,24 +127,7 @@ export function updateProfileData(
       // Pozwalamy kolejnym zapisom działać,
       // nawet jeśli poprzedni zapis się nie udał.
     })
-    .then(async () => {
-      const currentData =
-        await loadProfileData(profileId)
-
-      if (!currentData) {
-        throw new Error(
-          `Profile data not found: ${profileId}`
-        )
-      }
-
-      const updatedData =
-        updater(currentData)
-
-      await saveProfileData(
-        profileId,
-        updatedData
-      )
-    })
+    .then(task)
 
   profileUpdateQueues.set(
     profileId,

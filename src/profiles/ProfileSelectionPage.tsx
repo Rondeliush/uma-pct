@@ -6,6 +6,7 @@ import UmaAvatarImage from "../components/UmaAvatarImage"
 import { getProfileAvatar } from "./profileAvatar"
 import type { UmaVersion } from "../types/types"
 import { supportsAutomaticBackup, type BackupDestination } from "../backup/backupFile"
+import ProfileActionsMenu from "./ProfileActionsMenu"
 
 type ProfileSelectionPageProps = {
   profiles: Profile[]
@@ -23,6 +24,7 @@ type ProfileSelectionPageProps = {
     destination: BackupDestination,
     ) => void
   onImportProfile: () => void
+  onRestoreProfile: (profile: Profile) => void
 }
 
 function ProfileSelectionPage({
@@ -33,6 +35,7 @@ function ProfileSelectionPage({
   onDeleteProfile,
   onExportProfile,
   onImportProfile,
+  onRestoreProfile,
 }: ProfileSelectionPageProps) {
 
 const [favoriteUmas, setFavoriteUmas] = useState<Record<string, UmaVersion | null>>({})
@@ -128,6 +131,7 @@ const [
             <button
               type="button"
               onClick={onImportProfile}
+              title="Creates a new profile from an exported profile or backup file."
               className="flex-1 rounded-lg border border-violet-300/20 bg-violet-400/[0.06] px-3 py-2.5 text-xs font-black text-violet-200/80 transition hover:border-violet-300/40 hover:bg-violet-400/[0.10] hover:text-violet-100 md:flex-none md:py-2"
             >
               Import Profile
@@ -180,26 +184,15 @@ const [
                         Continue →
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={() => {
+                    <ProfileActionsMenu
+                        profile={profile}
+                        onRename={() => {
                             setProfileToRename(profile)
                             setRenameName(profile.name)
                         }}
-                        className="rounded-md border border-white/[0.07] bg-white/[0.02] px-2.5 py-1.5 text-[10px] font-bold text-blue-100/35 transition hover:border-violet-300/25 hover:text-violet-200"
-                        >
-                        Rename
-                        </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                        setProfileToDelete(profile)
-                        }
-                        className="rounded-md border border-red-300/[0.10] bg-red-400/[0.025] px-2.5 py-1.5 text-[10px] font-bold text-red-200/40 transition hover:border-red-300/30 hover:bg-red-400/[0.06] hover:text-red-200"
-                    >
-                        Delete
-                    </button>
+                        onRestore={() => onRestoreProfile(profile)}
+                        onDelete={() => setProfileToDelete(profile)}
+                    />
                     </div>
               </div>
             </div>

@@ -69,7 +69,7 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
           {state.configured ? "Change backup folder" : "Choose backup folder"}
         </button>
         <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.selectFile("existing")) }}>
-          Use existing backup file
+          Link backup file
         </button>
         {state.configured && <>
           <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.resume()) }}>
@@ -78,6 +78,7 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
           <button type="button" disabled={busy} className={buttonClass} onClick={() => { void run(() => localBackup.disable()) }}>Turn off</button>
         </>}
       </div>
+      <p className="mt-3 text-xs leading-5 text-blue-100/60">Choose an existing backup file for Automatic Backup to update. This does not import or replace your current profile data.</p>
     </> : <p className="mt-3 text-xs leading-5 text-amber-200">
       Automatic file backup is unavailable here. Use Profiles → Export Profile to download a copy.
     </p>}
@@ -86,10 +87,10 @@ export default function LocalBackupSection({ profileName }: { profileName: strin
     <details className="mt-4 border-t border-white/[0.07] pt-3 text-xs text-blue-100/60">
       <summary className="cursor-pointer font-bold text-violet-200/80">How backups work</summary>
       <ul className="mt-3 list-disc space-y-2 pl-4 leading-5">
-        <li>Each profile uses its own file. Files belonging to another profile cannot be overwritten.</li>
+        <li>Each profile uses its own file. Files belonging to unrelated profiles cannot be overwritten.</li>
         <li>The file keeps the latest saved version. Wait for saving to finish before closing the app.</li>
         <li>Changing folders or turning backup off keeps the previous file on your device.</li>
-        <li>Connecting an existing file sets the save destination. To restore data, use Profiles → Import Profile.</li>
+        <li>Link backup file sets the save destination. To replace an existing profile's data, use Profiles → profile actions → Restore from Backup. Import Profile creates a new profile.</li>
         <li>You may need to allow file access again after restarting.</li>
         <li>Supported browsers include Chrome and Edge on desktop, and Chrome 132 or later on Android. Installed apps use the capabilities of their browser.</li>
       </ul>

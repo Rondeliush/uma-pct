@@ -168,3 +168,40 @@ export async function importProfileToDevice(file: ImportedProfileFile, asCopy = 
     }
   })
 }
+
+// Restore changes only data, never the target's identity, name or backup handle.
+// Call through the profile data update queue after the user confirms the preview.
+export async function restoreProfileFromBackup(profile: Profile, file: ImportedProfileFile): Promise<void> {
+  if (!isImportedProfileFile(file)) throw new Error("This is not a valid UmaPCT profile backup. Nothing was changed.")
+  const data = { ...migrateProfileData(file.data), onboardingCompleted: true, cmLineupGuideCompleted: true }
+  const database = await openDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(STORE_NAME, "readwrite")
+    const store = transaction.objectStore(STORE_NAME)
+    const profiles = store.get("profiles")
+    let failure: unknown
+    profiles.onsuccess = () => {
+      try {
+        const target: Profile | undefined = Array.isArray(profiles.result)
+          ? profiles.result.find((item: Profile) => item.id === profile.id) : undefined
+        if (!target) {
+          throw new Error("The target profile is missing. Nothing was changed.")
+        }
+        if ((target.sourceProfileId ?? target.id) !== (profile.sourceProfileId ?? profile.id)) {
+          throw new Error("The target profile changed. Select it again before restoring. Nothing was changed.")
+        }
+        // A restored existing profile must not start either new-profile Guide.
+        store.put(data, `profile:${profile.id}:data`)
+      } catch (error) { failure = error; transaction.abort() }
+    }
+    transaction.oncomplete = () => {
+      database.close()
+      notifyStorageChanged(`profile:${profile.id}:data`)
+      resolve()
+    }
+    transaction.onabort = () => {
+      database.close()
+      reject(failure ?? transaction.error ?? new Error("Could not restore the profile. Nothing was changed."))
+    }
+  })
+}
