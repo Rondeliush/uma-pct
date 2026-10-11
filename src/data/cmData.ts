@@ -1,4 +1,5 @@
 export const umaStyleClasses = {
+  "": "border-gray-700 bg-gray-950",
   Runaway:
     "border-violet-400/70 bg-gradient-to-b from-violet-950/85 via-purple-900/75 to-gray-950 shadow-[0_0_10px_rgba(168,85,247,0.10)]",
 

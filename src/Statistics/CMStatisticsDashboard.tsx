@@ -1,45 +1,27 @@
 import { useState } from "react"
 
-import type {
-  Dispatch,
-  SetStateAction,
-} from "react"
-
 import type { CM } from "../types/types"
+import { getCMFinalResults, getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 
 import { calculateFinalQualificationFromAttempts } from "../CMs/CMCalculations"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import { getTrackImage } from "../data/trackData"
-import CMModal from "../CMs/CMModal"
 import UmaAvatarImage from "../components/UmaAvatarImage"
 
 type CMStatisticsDashboardProps = {
   cms: CM[]
-  setCms: Dispatch<SetStateAction<CM[]>>
+  onOpenCm: (cmNumber: CM["number"]) => void
 }
 
 function CMStatisticsDashboard({
   cms,
-  setCms,
+  onOpenCm,
 }: CMStatisticsDashboardProps) {
 
 const { versions } = useUmaDatabase()
 
-  const [
-  selectedRecentCmNumber,
-  setSelectedRecentCmNumber,
-] = useState<number | null>(null)
-
 const [showMobileUmaStats, setShowMobileUmaStats] =
   useState(false)
-
-const selectedRecentCm =
-  selectedRecentCmNumber !== null
-    ? cms.find(
-        (cm) =>
-          cm.number === selectedRecentCmNumber
-      ) ?? null
-    : null
 
   const totalRaces = cms.reduce(
     (total, cm) =>
@@ -139,55 +121,22 @@ const eliminatedCount = cms.filter(
     const finalUmaIds =
       new Set<string>()
 
-    ;(cm.participants ?? []).forEach(
-      (participant) => {
-        const performance =
-          getUmaPerformance(
-            participant.umaId
-          )
-
-        let appeared = false
-
-        ;(cm.attempts ?? []).forEach(
-          (attempt) => {
-            const result =
-              attempt.umaWins.find(
-                (item) =>
-                  item.cmUmaId ===
-                  participant.cmUmaId
-              )
-
-            if (!result) {
-              return
-            }
-
-            performance.races +=
-              attempt.racesPlayed
-
-            performance.wins +=
-              result.wins
-
-            appeared = true
-          }
-        )
-
-        if (
-          participant.finalParticipant
-        ) {
-          finalUmaIds.add(
-            participant.umaId
-          )
-
-          appeared = true
-        }
-
-        if (appeared) {
-          appearedUmaIds.add(
-            participant.umaId
-          )
-        }
+    for (const attempt of cm.attempts ?? []) {
+      for (const result of attempt.umaWins) {
+        const versionId = getResultConfiguration(cm, result).umaVersionId
+        if (versionId === null) continue
+        const performance = getUmaPerformance(versionId)
+        performance.races += attempt.racesPlayed
+        performance.wins += result.wins
+        appearedUmaIds.add(versionId)
       }
-    )
+    }
+    for (const result of getCMFinalResults(cm)) {
+      const versionId = result.configuration.umaVersionId
+      if (versionId === null) continue
+      finalUmaIds.add(versionId)
+      appearedUmaIds.add(versionId)
+    }
 
     appearedUmaIds.forEach(
       (umaId) => {
@@ -945,7 +894,7 @@ const recentProgress =
   tabIndex={bestEvent ? 0 : undefined}
   onClick={() => {
     if (bestEvent) {
-      setSelectedRecentCmNumber(
+      onOpenCm(
         bestEvent.cm.number
       )
     }
@@ -961,7 +910,7 @@ const recentProgress =
     ) {
       event.preventDefault()
 
-      setSelectedRecentCmNumber(
+      onOpenCm(
         bestEvent.cm.number
       )
     }
@@ -1389,7 +1338,7 @@ const recentProgress =
                 key={event.cm.number}
                 type="button"
                 onClick={() =>
-                setSelectedRecentCmNumber(
+                onOpenCm(
                   event.cm.number
                 )
               }
@@ -1487,16 +1436,6 @@ const recentProgress =
     )}
 
   </div>
-      {selectedRecentCm && (
-      <CMModal
-        cm={selectedRecentCm}
-        setCms={setCms}
-        onClose={() =>
-          setSelectedRecentCmNumber(null)
-        }
-      />
-    )}
-
 </section>
 </div>
     </div>

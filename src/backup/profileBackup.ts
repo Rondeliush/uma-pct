@@ -1,5 +1,6 @@
 import { openDatabase, STORE_NAME } from "../storage/indexedDB"
 import { isImportedProfileFile, type ImportedProfileFile } from "../profiles/profileTransfer"
+import { migrateProfileData } from "../profiles/profileDataMigration"
 import type { Profile } from "../profiles/profileStore"
 
 // Read the name and complete tracker data from the same committed snapshot.
@@ -24,7 +25,12 @@ export async function readProfileBackup(profileId: string): Promise<ImportedProf
         reject(new Error("Profile data is missing or invalid. The backup file was not changed."))
         return
       }
-      resolve(backup)
+      try {
+        backup.data = migrateProfileData(backup.data)
+        resolve(backup)
+      } catch (error) {
+        reject(error)
+      }
     }
   })
 }

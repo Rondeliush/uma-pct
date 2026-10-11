@@ -1,5 +1,6 @@
 import {
   getStoredValue,
+  migrateStoredValue,
   setStoredValue,
 } from "./indexedDB"
 
@@ -9,6 +10,7 @@ import type {
   UmaCharacter,
   UmaVersion,
 } from "../types/types"
+import { migrateCMConfiguration } from "../profiles/profileDataMigration"
 
 const APP_STORE_PREFIX = "app:"
 
@@ -18,8 +20,11 @@ function getAppStoreKey(key: string) {
 
 export async function loadCmsFromStore(): Promise<CM[]> {
   return (
-    (await getStoredValue<CM[]>(
-      getAppStoreKey("cms")
+    (await migrateStoredValue<CM[]>(
+      getAppStoreKey("cms"), (cms) => {
+        const migrated = cms.map(migrateCMConfiguration)
+        return migrated.every((cm, index) => cm === cms[index]) ? cms : migrated
+      },
     )) ?? []
   )
 }
@@ -37,7 +42,7 @@ export async function saveCmsToStore(
 ) {
   await setStoredValue(
     getAppStoreKey("cms"),
-    cms
+    cms.map(migrateCMConfiguration)
   )
 }
 

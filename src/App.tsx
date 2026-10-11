@@ -13,14 +13,17 @@ import { useUmaDatabase } from "./context/UmaDatabaseContext"
 import UmaDatabase from "./Umas/UmaDatabase"
 import HomePage from "./Home/HomePage"
 import ChampionsMeetingPage from "./CMs/ChampionsMeetingPage/ChampionsMeetingPage"
-import LeagueOfHeroesPage from "./LoH/LeagueOfHeroesPage"
 import StatisticsPage from "./Statistics/StatisticsPage"
-import StatisticsShowcase from "./Statistics/StatisticsShowcase"
+import { normalizeUmaComparisonSlots } from "./Statistics/umaComparisonSelection"
+import { navigateAppRoute, subscribeStatisticsNavigation } from "./Statistics/statisticsRoute"
+import useStatisticsNavigation from "./Statistics/useStatisticsNavigation"
 
 import Header from "./components/Header/Header"
+import UnavailablePage from "./components/UnavailablePage"
 import UpdateReviewModal from "./components/UpdateReviewModal"
 import SplashScreen from "./components/SplashScreen"
 import UmaAvatarImage from "./components/UmaAvatarImage"
+import ModalPortal from "./components/ModalPortal"
 import { usePwaInstall } from "./pwa/usePwaInstall"
 
 import ProfileSelectionPage from "./profiles/ProfileSelectionPage"
@@ -85,12 +88,14 @@ type AppContentProps = {
   profileId: string
   profileName: string
   onProfilesClick: () => void
+  navigation: ReturnType<typeof useStatisticsNavigation>
 }
 
 function AppContent({
   profileId,
   profileName,
   onProfilesClick,
+  navigation: statisticsNavigation,
 }: AppContentProps) {
   const { newOfficialVersions } =
     useUmaDatabase()
@@ -127,20 +132,14 @@ const [
   const skipNextLohsSave =
     useRef(false)
 
-  const [
-    activePage,
-    setActivePage,
-  ] = useState<
-    | "home"
-    | "cms"
-    | "loh"
-    | "statistics"
-    | "autoRunTimer"
-    | "umaDatabase"
-    | "settings"
-    | "about"
-    | "changelog"
-  >("home")
+  const [umaComparisonSlots, setUmaComparisonSlots] =
+    useState<(string | null)[]>(() => normalizeUmaComparisonSlots(undefined))
+  const skipNextUmaComparisonSave = useRef(false)
+
+  const routePage = statisticsNavigation.appRoute?.page
+  const navigatePage = statisticsNavigation.navigatePage
+  const activePage = routePage === "profiles" ? "home" : routePage ?? "home"
+  const statisticsSection = statisticsNavigation.route?.section ?? "landing"
 
   const latestChangelogVersion =
   changelog[0]?.version ?? null
@@ -178,14 +177,13 @@ useEffect(() => {
 ])
 
   const [
-    openCmNumber,
-    setOpenCmNumber,
-  ] = useState<number | null>(null)
-
-  const [
     isUpdateReviewOpen,
     setIsUpdateReviewOpen,
   ] = useState(false)
+
+  const [contextualCmNumber, setContextualCmNumber] = useState<CM["number"] | null>(null)
+
+  useEffect(() => subscribeStatisticsNavigation(() => setContextualCmNumber(null)), [])
 
   useEffect(() => {
     let cancelled = false
@@ -205,9 +203,11 @@ useEffect(() => {
 
       skipNextCmsSave.current = true
       skipNextLohsSave.current = true
+      skipNextUmaComparisonSave.current = true
 
       setCms(profileData.cms)
       setLohs(profileData.lohs)
+      setUmaComparisonSlots(normalizeUmaComparisonSlots(profileData.umaComparisonSlots))
 
       setShowProfileGuide(
         profileData.onboardingCompleted === false
@@ -246,13 +246,15 @@ useEffect(() => {
     return
   }
 
-  setActivePage("cms")
+  if (routePage === "home") navigatePage("cms")
   setShowCmLineupGuide(true)
 }, [
   cms.length,
   isStoreReady,
   showProfileGuide,
   cmLineupGuideCompleted,
+  routePage,
+  navigatePage,
 ])
 
   useEffect(() => {
@@ -301,6 +303,18 @@ useEffect(() => {
     profileId,
   ])
 
+  useEffect(() => {
+    if (!isStoreReady) return
+    if (skipNextUmaComparisonSave.current) {
+      skipNextUmaComparisonSave.current = false
+      return
+    }
+    void updateProfileData(profileId, (currentData) => ({
+      ...currentData,
+      umaComparisonSlots: normalizeUmaComparisonSlots(umaComparisonSlots),
+    })).catch((error: unknown) => console.error("Could not save Uma comparison selections:", error))
+  }, [umaComparisonSlots, isStoreReady, profileId])
+
   const handleCompleteProfileGuide = () => {
   setShowProfileGuide(false)
 
@@ -331,6 +345,8 @@ useEffect(() => {
       (version) =>
         version.displayName
     )
+        const hasStatisticsBackground =
+          activePage === "statistics" && (statisticsSection === "uma" || statisticsSection === "tracks")
         const pageBackground =
           activePage === "umaDatabase"
             ? `${import.meta.env.BASE_URL}uma-database-background.jpg`
@@ -338,21 +354,39 @@ useEffect(() => {
               ? `${import.meta.env.BASE_URL}settings-background.jpg`
               : `${import.meta.env.BASE_URL}background.jpg`
   
-  const openedCm =
-    openCmNumber !== null
+  const routedCm =
+    statisticsNavigation.appRoute?.page === "cms" && statisticsNavigation.appRoute.cmId !== null
       ? cms.find(
           (cm) =>
-            cm.number === openCmNumber
+            String(cm.number) === statisticsNavigation.appRoute?.cmId
         ) ?? null
-      : null           
+      : null
+  const contextualCm = activePage === "statistics" && contextualCmNumber !== null
+    ? cms.find((cm) => cm.number === contextualCmNumber) ?? null : null
+  const openedCm = routedCm ?? contextualCm
+  const unavailable = statisticsNavigation.unavailable || (
+    isStoreReady && statisticsNavigation.appRoute?.page === "cms" && statisticsNavigation.appRoute.cmId !== null && !routedCm
+  )
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
+    <div data-app-shell className={`min-h-screen bg-gray-950 text-gray-100${hasStatisticsBackground ? " uma-statistics-page-layout" : ""}`}>
+
+      {hasStatisticsBackground && (
+        <ModalPortal>
+          <div
+            className="uma-statistics-page-background"
+            aria-hidden="true"
+            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}Statistic/${statisticsSection === "tracks" ? "statistic_track_overview_background.png" : "statistic_uma_overview_background.png"}")` }}
+          >
+            <div className="uma-statistics-background-overlay" />
+          </div>
+        </ModalPortal>
+      )}
 
       {/* HEADER */}
       <Header
         activePage={activePage}
-        onPageChange={setActivePage}
+        onPageChange={statisticsNavigation.navigatePage}
         newOfficialUmaNames={
           newOfficialUmaNames
         }
@@ -365,19 +399,24 @@ useEffect(() => {
       />
       {openedCm && (
         <CMModal
+          key={openedCm.number}
           cm={openedCm}
           setCms={setCms}
-          onClose={() =>
-            setOpenCmNumber(null)
-          }
+          onClose={routedCm ? statisticsNavigation.closeCm : () => setContextualCmNumber(null)}
+        />
+      )}
+      {activePage === "statistics" && isStoreReady && contextualCmNumber !== null && !contextualCm && (
+        <AppMessageDialog
+          title="Champions Meeting unavailable"
+          message="This page doesn't exist or is unavailable."
+          onClose={() => setContextualCmNumber(null)}
         />
       )}
       
       {showProfileGuide && (
         <ProfileGuide
-          onNavigate={(page) => {
-            setActivePage(page)
-          }}
+          currentPage={activePage}
+          onNavigate={statisticsNavigation.navigatePage}
           onComplete={
             handleCompleteProfileGuide
           }
@@ -399,9 +438,12 @@ useEffect(() => {
 
       {/* FULL WIDTH PAGE BACKGROUND */}
       <div
-        className="relative min-h-screen bg-cover bg-center bg-scroll md:bg-fixed"
+        data-app-content
+        className={hasStatisticsBackground ? "relative min-h-screen" : "relative min-h-screen bg-cover bg-center bg-scroll md:bg-fixed"}
         style={{
-          backgroundImage: `url("${pageBackground}")`,
+          backgroundImage: hasStatisticsBackground
+            ? undefined
+            : `url("${pageBackground}")`,
         }}
       >
         {isUpdateReviewOpen && (
@@ -419,33 +461,20 @@ useEffect(() => {
         )}
 
         {/* DARK OVERLAY */}
-          <div className="absolute inset-0 bg-gray-950/70" />
+          {!hasStatisticsBackground && <div className="absolute inset-0 bg-gray-950/70" />}
 
-        {/* STATISTICS SHOWCASE */}
+        {/* STATISTICS */}
+        {unavailable ? <UnavailablePage /> : <>
         {activePage ===
           "statistics" && (
-          <div className="relative z-10 mx-auto mb-8 w-full max-w-[1500px] px-6 pt-6">
-            <StatisticsShowcase
-              cms={cms}
-            />
-          </div>
-        )}
-
-        {/* STATISTICS DASHBOARD */}
-        {activePage ===
-          "statistics" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-6 pb-10">
+          <div data-statistics-content className={`relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6${statisticsSection === "landing" ? " lg:max-w-[1680px]" : ""}`}>
             <StatisticsPage
               cms={cms}
-              setCms={setCms}
+              navigation={statisticsNavigation}
+              onOpenCm={setContextualCmNumber}
+              comparisonSlots={umaComparisonSlots}
+              setComparisonSlots={setUmaComparisonSlots}
             />
-          </div>
-        )}
-
-        {/* LEAGUE OF HEROES */}
-        {activePage === "loh" && (
-          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
-            <LeagueOfHeroesPage />
           </div>
         )}
 
@@ -457,11 +486,9 @@ useEffect(() => {
               profileId={profileId}
               hasNewChangelog={hasNewChangelog}
               onOpenChangelog={() =>
-                setActivePage("changelog")
+                statisticsNavigation.navigatePage("changelog")
               }
-              onOpenCm={(cmNumber) => {
-                setOpenCmNumber(cmNumber)
-              }}
+              onOpenCm={statisticsNavigation.navigateCm}
             />
           </div>
         )}
@@ -502,7 +529,7 @@ useEffect(() => {
             <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
               <AutoRunTimerPage
           onOpenSettings={() =>
-            setActivePage("settings")
+            statisticsNavigation.navigatePage("settings")
           }
 />
             </div>
@@ -544,6 +571,7 @@ useEffect(() => {
             <AboutPage />
           </div>
         )}
+        </>}
           </div>
       </div>
   )
@@ -551,6 +579,7 @@ useEffect(() => {
 
 function TrackerApp() {
   usePwaInstall()
+  const navigation = useStatisticsNavigation()
   const [
     showSplash,
     setShowSplash,
@@ -700,6 +729,7 @@ function TrackerApp() {
         )
 
         setActiveProfile(profile)
+        if (navigation.appRoute?.page === "profiles") navigation.navigatePage("home")
       } catch (error) {
         console.error(
           "Could not open profile:",
@@ -797,6 +827,8 @@ function TrackerApp() {
             createdProfile as Profile,
           ]
         )
+
+        if (profileData.onboardingCompleted === false) navigation.navigatePage("home")
 
         setActiveProfile(
           createdProfile
@@ -1043,7 +1075,11 @@ function TrackerApp() {
     )
   }
 
-  if (!activeProfile) {
+  if (!activeProfile && navigation.unavailable) {
+    return <div data-app-shell className="min-h-screen bg-gray-950 text-gray-100"><div data-app-content><UnavailablePage /></div></div>
+  }
+
+  if (!activeProfile || navigation.appRoute?.page === "profiles") {
     return (
       <>
          {profiles.length === 0 ? (
@@ -1275,11 +1311,11 @@ function TrackerApp() {
     <AppContent
       profileId={activeProfile.id}
       profileName={activeProfile.name}
+      navigation={navigation}
       onProfilesClick={() => {
         void (async () => {
           await localBackup.saveNow()
-          await clearActiveProfileId()
-          setActiveProfile(null)
+          navigateAppRoute("profiles", null, import.meta.env.BASE_URL)
         })().catch(() => setProfileError("Could not return to Profiles."))
       }}
     />

@@ -123,3 +123,36 @@ export async function deleteStoredValue(
     }
   })
 }
+
+/** Read and migrate in one transaction so another save cannot be overwritten by a stale read. */
+export async function migrateStoredValue<T>(key: string, migrate: (value: T) => T): Promise<T | undefined> {
+  const database = await openDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(STORE_NAME, "readwrite")
+    const store = transaction.objectStore(STORE_NAME)
+    let value: T | undefined
+    let changed = false
+    let failure: unknown
+    const request = store.get(key)
+    request.onsuccess = () => {
+      try {
+        const original = request.result as T | undefined
+        value = original === undefined ? undefined : migrate(original)
+        changed = value !== original
+        if (changed) store.put(value, key)
+      } catch (error) {
+        failure = error
+        transaction.abort()
+      }
+    }
+    transaction.oncomplete = () => {
+      database.close()
+      if (changed) notifyStorageChanged(key)
+      resolve(value)
+    }
+    transaction.onabort = () => {
+      database.close()
+      reject(failure ?? transaction.error)
+    }
+  })
+}

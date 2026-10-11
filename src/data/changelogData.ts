@@ -8,6 +8,26 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
     {
+    version: "0.1.6",
+    date: "2026-10-11",
+
+    new: [
+      "Added detailed Uma Statistics with performance breakdowns, event history, highlights, and Champions Meeting results.",
+      "Added Uma Compare for comparing up to five Umas across general and Champions Meeting statistics.",
+      "Added Track Statistics with track performance, detailed track pages, course data, race conditions, and event history.",
+      "Added individual Champions Meeting Final placements for each Uma.",
+      "Added dedicated routes for the main app pages and detailed Statistics pages.",
+    ],
+
+    improved: [
+      "Expanded the Statistics section with separate Events, Uma, and Tracks pages.",
+      "Improved Champions Meeting historical data by preserving participant configuration such as running style, role, and entry source.",
+      "Improved Uma and Track Statistics layouts across desktop and mobile.",
+      "Improved navigation with browser Back and Forward support, refresh-safe routes, and better page scroll behavior.",
+      "Simplified the onboarding Statistics guide to match the new Statistics hub.",
+    ],
+  },    
+    {
     version: "0.1.5",
     date: "2026-10-05",
     improved: [

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaAvatarImage from "../components/UmaAvatarImage"
 import type { CM } from "../types/types"
+import { getCMFinalResults, getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 
 type UmaStatistics = {
   umaId: string
@@ -191,51 +192,27 @@ function StatisticsShowcase({
     const appearedUmaIds = new Set<string>()
     const finalUmaIds = new Set<string>()
 
-    cm.participants.forEach((participant) => {
-      const stats = getOrCreateStats(
-        participant.umaId
-      )
-
-      let appearedInCm = false
-
-      cm.attempts.forEach((attempt) => {
-        const result = attempt.umaWins.find(
-          (item) =>
-            item.cmUmaId === participant.cmUmaId
-        )
-
-        if (!result) {
-          return
-        }
-
+    for (const attempt of cm.attempts) {
+      for (const result of attempt.umaWins) {
+        const versionId = getResultConfiguration(cm, result).umaVersionId
+        if (versionId === null) continue
+        const stats = getOrCreateStats(versionId)
         stats.cm.wins += result.wins
         stats.cm.races += attempt.racesPlayed
-
-        appearedInCm = true
-      })
-
-      const appearedInFinal =
-        cm.finalPlace !== "" &&
-        participant.finalParticipant
-
-      if (appearedInFinal) {
+        appearedUmaIds.add(versionId)
+      }
+    }
+    if (cm.finalPlace !== "") {
+      for (const result of getCMFinalResults(cm)) {
+        const versionId = result.configuration.umaVersionId
+        if (versionId === null) continue
+        const stats = getOrCreateStats(versionId)
         stats.cm.races += 1
-        appearedInCm = true
-
-        finalUmaIds.add(participant.umaId)
-
-        if (
-          cm.finalPlace === "1st" &&
-          participant.won
-        ) {
-          stats.cm.wins += 1
-        }
+        if (cm.finalPlace === "1st" && result.won) stats.cm.wins += 1
+        finalUmaIds.add(versionId)
+        appearedUmaIds.add(versionId)
       }
-
-      if (appearedInCm) {
-        appearedUmaIds.add(participant.umaId)
-      }
-    })
+    }
 
     appearedUmaIds.forEach((umaId) => {
       getOrCreateStats(umaId).cm.appearances += 1

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import type { CM, CMUma, UmaStyle } from "../types/types"
 import UmaForm from "./UmaForm"
 import { getTrackImage } from "../data/trackData"
+import { normalizeRunningStyle } from "./cmParticipantConfiguration"
 
 type UmaFormData = {
   id: string
@@ -101,7 +102,7 @@ function AddCMButton({
     (uma, index) => ({
       cmUmaId: `cm${cmNumber}-uma-${index + 1}`,
       umaId: uma.id,
-      style: uma.style as UmaStyle,
+      runningStyle: normalizeRunningStyle(uma.style),
       ace: uma.ace,
       debuffer: uma.debuffer,
       won: false,

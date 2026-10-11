@@ -5,6 +5,23 @@ export type UmaStyle =
   | "Late Surger"
   | "End Closer"
 
+export type RunningStyle =
+  | "runaway"
+  | "front_runner"
+  | "pace_chaser"
+  | "late_surger"
+  | "end_closer"
+
+/** Ace and Debuffer are independent roles in the existing lineup editor. */
+export type CMParticipantConfiguration = Readonly<{
+  umaVersionId: string | null
+  runningStyle: RunningStyle | null
+  ace: boolean | null
+  debuffer: boolean | null
+  entrySource: "manual" | "autorun" | null
+  configurationSource: "recorded" | "legacy_inferred"
+}>
+
 export type UmaCharacter = {
   id: string
   name: string
@@ -22,17 +39,29 @@ export type UmaVersion = {
 export type CMUma = {
   cmUmaId: string
   umaId: string
-  style: UmaStyle
-  ace: boolean
-  debuffer: boolean
+  runningStyle: RunningStyle | null
+  ace?: boolean
+  debuffer?: boolean
   won: boolean
-  autoRun: boolean
+  autoRun?: boolean
   finalParticipant: boolean
 }
 
 export type CMAttemptUmaResult = {
   cmUmaId: string
   wins: number
+  configuration: CMParticipantConfiguration
+}
+
+export type CMFinalPlacement = "first" | "second" | "third" | "fourth_or_lower"
+
+export type CMFinalUmaResult = {
+  cmUmaId: string
+  placement: CMFinalPlacement | null
+  /** Allows incomplete legacy finals to remain unknown without relaxing new result validation. */
+  placementSource: "recorded" | "legacy_inferred"
+  won: boolean
+  configuration: CMParticipantConfiguration
 }
 
 export type CMAttempt = {
@@ -57,6 +86,7 @@ export type CMLogEntryType =
   | "finalLineupSet"
   | "finalPlaceUpdated"
   | "winnerSelected"
+  | "finalParticipantPlacementUpdated"
   | "completed"
   | "eliminated"
 
@@ -78,29 +108,17 @@ export type TrackLength =
   | "Medium" 
   | "Long"
 
-export type TrackDirection = 
-  | "Left" 
-  | "Right" 
-  | "Straight"
+export const TRACK_DIRECTIONS = ["Left", "Right", "Straight"] as const
+export type TrackDirection = (typeof TRACK_DIRECTIONS)[number]
 
-export type TrackWeather = 
-  | "Sunny" 
-  | "Cloudy" 
-  | "Rainy" 
-  | "Snowy"
+export const TRACK_WEATHER = ["Sunny", "Cloudy", "Rainy", "Snowy"] as const
+export type TrackWeather = (typeof TRACK_WEATHER)[number]
 
-export type TrackSeason = 
-  | "Spring" 
-  | "Summer" 
-  | "Autumn" 
-  | "Winter"
+export const TRACK_SEASONS = ["Spring", "Summer", "Autumn", "Winter"] as const
+export type TrackSeason = (typeof TRACK_SEASONS)[number]
 
-export type TrackCondition = 
-  | "Firm" 
-  | "Good" 
-  | "Yielding" 
-  | "Soft" 
-  | "Heavy"
+export const TRACK_CONDITIONS = ["Firm", "Good", "Yielding", "Soft", "Heavy"] as const
+export type TrackCondition = (typeof TRACK_CONDITIONS)[number]
 
 
 export type CM = {
@@ -122,6 +140,7 @@ export type CM = {
   participants: CMUma[]
   currentLineup: string[]
   attempts: CMAttempt[]
+  finalResults?: CMFinalUmaResult[]
   log: CMLogEntry[]
   notes?: string
   finalPlace: string

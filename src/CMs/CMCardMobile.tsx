@@ -3,8 +3,10 @@ import type { CM } from "../types/types"
 import { getTrackImage } from "../data/trackData"
 
 import { umaStyleClasses } from "../data/cmData"
+import { getRunningStyleLabel } from "./cmParticipantConfiguration"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaAvatarImage from "../components/UmaAvatarImage"
+import CMFinalPlacementBadge from "./CMFinalPlacementBadge"
 
 type CMCardMobileProps = {
   cm: CM
@@ -170,7 +172,7 @@ function CMCardMobile({
                             title={
                             umaVersion.displayName
                             }
-                            className={`relative h-10 w-10 overflow-hidden rounded-lg border border-black/40 ${umaStyleClasses[cmUma.style]} ${
+                            className={`relative h-10 w-10 overflow-hidden rounded-lg border border-black/40 ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
                             cmUma.won
                                 ? "ring-2 ring-yellow-400"
                                 : ""
@@ -192,6 +194,7 @@ function CMCardMobile({
                             </div>
                             )}
 
+                            <CMFinalPlacementBadge placement={showFinalLineup ? cm.finalResults?.find((result) => result.cmUmaId === cmUma.cmUmaId)?.placement : null} location="compact-card" />
                             {cmUma.ace && (
                             <span className="absolute bottom-0 left-0 flex h-4 w-4 items-center justify-center rounded-tr bg-black/70 text-[9px] text-yellow-300">
                                 ★
@@ -449,7 +452,7 @@ function CMCardMobile({
                     className="min-w-0"
                     >
                     <div
-                        className={`relative aspect-square overflow-hidden rounded-lg border border-black/40 ${umaStyleClasses[cmUma.style]} ${
+                        className={`relative aspect-square overflow-hidden rounded-lg border border-black/40 ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
                         cmUma.won
                             ? "ring-2 ring-yellow-400"
                             : ""
@@ -469,6 +472,7 @@ function CMCardMobile({
                         </div>
                         )}
 
+                        <CMFinalPlacementBadge placement={showFinalLineup ? cm.finalResults?.find((result) => result.cmUmaId === cmUma.cmUmaId)?.placement : null} location="card" />
                         {(cmUma.debuffer ||
                         cmUma.autoRun) && (
                             <div className="absolute right-1 top-1 flex flex-col gap-0.5">

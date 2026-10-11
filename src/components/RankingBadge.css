@@ -1,0 +1,4 @@
+.ranking-badge { padding: 4px 7px; border: 1px solid rgba(125, 211, 252, 0.25); border-radius: 5px; background: rgba(7, 17, 31, 0.9); color: #c2d3e5; font-size: 12px; font-weight: 800; line-height: 1.2; }
+.ranking-badge[data-medal="gold"] { border-color: rgba(233, 200, 121, 0.65); background: rgba(47, 36, 15, 0.9); color: var(--uma-gold, #e9c879); }
+.ranking-badge[data-medal="silver"] { border-color: rgba(203, 213, 225, 0.65); background: rgba(32, 40, 52, 0.9); color: #d9e2ef; }
+.ranking-badge[data-medal="bronze"] { border-color: rgba(216, 157, 111, 0.65); background: rgba(46, 29, 21, 0.9); color: #d89d6f; }

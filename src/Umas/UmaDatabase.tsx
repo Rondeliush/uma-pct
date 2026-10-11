@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import { useIsMobile } from "../responsive/useIsMobile"
 import type { CM, UmaVersion } from "../types/types"
+import { getCMVersionIds } from "../CMs/cmParticipantConfiguration"
 import AddUmaModal from "./AddUmaModal"
 import DeleteUmaVersionDialog from "./DeleteUmaVersionDialog"
 import UmaCharacterBrowser from "./UmaCharacterBrowser"
@@ -50,9 +51,7 @@ function UmaDatabase({ cms, hasUpdateNotification }: UmaDatabaseProps) {
 
   const isVersionUsed = (versionId: string) =>
     cms.some((cm) =>
-      (cm.participants ?? []).some(
-        (participant) => participant.umaId === versionId
-      )
+      getCMVersionIds(cm).includes(versionId)
     )
 
   const deleteCustomVersion = (versionId: string, characterId: string) => {

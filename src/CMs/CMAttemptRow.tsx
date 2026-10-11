@@ -5,7 +5,11 @@ import type {
   SetStateAction,
 } from "react"
 
-import type { CM, CMAttempt } from "../types/types"
+import type { CM } from "../types/types"
+import { getResultConfiguration, snapshotAttemptResults, snapshotParticipantConfiguration } from "./cmParticipantConfiguration"
+import ParticipantConfigurationBadges from "./ParticipantConfigurationBadges"
+import CMParticipantName from "./CMParticipantName"
+import { getRunningStyleVisual } from "./runningStyleVisuals"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 
 type CMAttemptRowProps = {
@@ -63,12 +67,10 @@ function CMAttemptRow({
       (item) => item.cmUmaId === cmUmaId
     )
 
-    if (!participant) {
-      return "Unknown Uma"
-    }
-
+    const savedResult = existingAttempt?.umaWins.find((result) => result.cmUmaId === cmUmaId)
+    const versionId = savedResult ? getResultConfiguration(cm, savedResult).umaVersionId : participant?.umaId
     const version = versions.find(
-      (item) => item.id === participant.umaId
+      (item) => item.id === versionId
     )
 
     return version?.displayName ?? "Unknown Uma"
@@ -141,7 +143,7 @@ const canSave =
     return
   }
 
-  const newAttempt: CMAttempt = {
+  const draftAttempt = {
   day,
   attempt: attemptNumber,
 
@@ -179,6 +181,7 @@ const canSave =
       )
 
       const isNewAttempt = !previousAttempt
+      const newAttempt = snapshotAttemptResults(item, draftAttempt)
 
       const updatedAttempts = [
         ...otherAttempts,
@@ -358,6 +361,7 @@ return {
         finalPlace: qualifiedForFinal
           ? item.finalPlace
           : "",
+        ...(!qualifiedForFinal ? { finalResults: undefined } : {}),
 
         participants: qualifiedForFinal
           ? item.participants
@@ -398,16 +402,23 @@ const isRound2 = day === 3 || day === 4
 
     {/* UMA RESULTS */}
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_72px] gap-x-3 gap-y-2">
-      {participantIds.map((cmUmaId, index) => (
+      {participantIds.map((cmUmaId, index) => {
+        const configuration = existingAttempt
+          ? existingAttempt.umaWins.find((result) => result.cmUmaId === cmUmaId)?.configuration
+          : snapshotParticipantConfiguration(participants.find((participant) => participant.cmUmaId === cmUmaId))
+        return (
         <div key={cmUmaId} className="contents">
-          <div className="flex min-w-0 items-center">
-            <span className="truncate text-xs font-medium text-blue-100/75">
-              {getParticipantName(cmUmaId)}
-            </span>
+          <div className="cm-attempt-participant" style={getRunningStyleVisual(configuration?.runningStyle ?? null).style}
+            data-running-style={configuration?.runningStyle ?? "unknown"}>
+            <div className="cm-attempt-participant-heading flex min-w-0 items-center gap-[3px]">
+              <CMParticipantName name={getParticipantName(cmUmaId)} className="min-w-0 truncate text-xs font-medium text-blue-100/75" />
+              {configuration && <ParticipantConfigurationBadges configuration={configuration} compact showRoles={false} showAutoRun={false} />}
+            </div>
+            {configuration && <ParticipantConfigurationBadges configuration={configuration} compact showRunningStyle={false} />}
           </div>
 
           {noRacesPlayed ? (
-            <div className="flex h-8 items-center justify-center rounded-md border border-white/[0.08] bg-black/10 text-xs font-bold text-blue-100/25">
+            <div className="flex h-8 self-center items-center justify-center rounded-md border border-white/[0.08] bg-black/10 text-xs font-bold text-blue-100/25">
               —
             </div>
           ) : (
@@ -426,7 +437,7 @@ const isRound2 = day === 3 || day === 4
                   )
                 )
               }}
-              className={`h-8 w-full appearance-none rounded-md border bg-[#050d1b]/70 px-2 text-center text-xs font-bold text-white outline-none transition [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none ${
+              className={`h-8 w-full self-center appearance-none rounded-md border bg-[#050d1b]/70 px-2 text-center text-xs font-bold text-white outline-none transition [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none ${
                 isRound2
                   ? "border-violet-400/20 focus:border-violet-300/55"
                   : "border-sky-400/20 focus:border-cyan-300/55"
@@ -434,7 +445,8 @@ const isRound2 = day === 3 || day === 4
             />
           )}
         </div>
-      ))}
+        )
+      })}
     </div>
 
     {/* RETIRED */}

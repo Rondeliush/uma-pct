@@ -4,6 +4,10 @@ import type { Dispatch, SetStateAction } from "react"
 import CMDayResults from "./CMDayResults"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaAvatarImage from "../components/UmaAvatarImage"
+import { completeCMFinal } from "./cmParticipantConfiguration"
+import { getCMFinalValidationErrors } from "./cmFinalPlacements"
+import CMFinalResultEditor from "./CMFinalResultEditor"
+import CMFinalPlacementBadge from "./CMFinalPlacementBadge"
 
 import {
   getDayAttemptTotals,
@@ -168,13 +172,9 @@ function CMResults({ cm, setCms }: CMResultsProps) {
     (participant) => participant.finalParticipant
   )
 
-  const selectedWinnerId =
-    cm.participants.find((participant) => participant.won)?.cmUmaId ?? ""
-
   const canCompleteCM =
     cm.phase === "finalResult" &&
-    cm.finalPlace !== "" &&
-    (cm.finalPlace !== "1st" || selectedWinnerId !== "")
+    getCMFinalValidationErrors(cm, { requireWinner: true }).length === 0
 
   const currentLineupParticipants = (cm.currentLineup ?? []).flatMap(
     (cmUmaId) => {
@@ -237,8 +237,7 @@ function CMResults({ cm, setCms }: CMResultsProps) {
         }
 
         return {
-          ...item,
-          phase: "completed",
+          ...completeCMFinal(item),
           log: [
             ...(item.log ?? []),
             {
@@ -273,6 +272,10 @@ const avatarSideFadeMask = {
       {/* ======================================= */}
 
       <section className="relative min-h-[390px] overflow-visible">
+
+        {cm.phase === "completed" && (
+          <CMFinalResultEditor cm={cm} setCms={setCms} onComplete={handleCompleteCM} />
+        )}
 
         {/* FINAL BANNER BACKGROUND */}
         <div
@@ -345,7 +348,7 @@ const avatarSideFadeMask = {
               </div>
 
               {/* FINAL LINEUP - FREE STANDING AVATARS */}
-              <div className="mx-auto mt-auto flex h-[220px] w-full max-w-[560px] translate-y-8 items-end justify-center gap-0 pt-2">
+              <div className="cm-final-result-portraits mx-auto mt-auto flex h-[220px] w-full max-w-[560px] translate-y-8 items-end justify-center gap-0 pt-2">
                 {displayedBannerParticipants.map((participant) => {
                   const version = versions.find(
                     (item) => item.id === participant.umaId
@@ -362,6 +365,7 @@ const avatarSideFadeMask = {
                           : "z-20 scale-100"
                       }`}
                     >
+                      <CMFinalPlacementBadge placement={cm.finalResults?.find((result) => result.cmUmaId === participant.cmUmaId)?.placement} location="hero" />
                       {isWinner && (
                       <div
                         className="pointer-events-none absolute bottom-[-10px] left-1/2 z-0 h-[225px] w-[215px] -translate-x-1/2 rounded-[50%]"
@@ -1051,200 +1055,7 @@ const avatarSideFadeMask = {
       {/* ======================================= */}
 
       {cm.phase === "finalResult" && (
-        <section className="mx-3 mt-3 border-l-2 border-violet-400/45 bg-gradient-to-r from-violet-400/[0.045] via-blue-400/[0.018] to-transparent px-4 py-3 md:mx-5">
-          <div className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-violet-200/40">
-          Final Result Setup
-        </div>
-          <div className="grid grid-cols-2 items-end gap-3">
-            {/* FINAL PLACE */}
-            <div>
-              <div className="mb-1.5 text-xs font-bold text-violet-200/45">
-                Final Place
-              </div>
-
-              <select
-                value={cm.finalPlace}
-                onChange={(event) => {
-                  const finalPlace = event.target.value
-
-                  setCms((current) =>
-                    current.map((item) => {
-                      if (item.number !== cm.number) {
-                        return item
-                      }
-
-                      if (item.finalPlace === finalPlace) {
-                        return item
-                      }
-
-                      const previousFinalPlace =
-                        item.finalPlace || "Not set"
-
-                      const newFinalPlace = finalPlace || "Not set"
-
-                      return {
-                        ...item,
-                        finalPlace,
-                        participants:
-                          finalPlace === "1st"
-                            ? item.participants
-                            : item.participants.map((participant) => ({
-                                ...participant,
-                                won: false,
-                              })),
-                        log: [
-                          ...(item.log ?? []),
-                          {
-                            id: `cm${item.number}-final-place-${Date.now()}`,
-                            timestamp: new Date().toISOString(),
-                            type: "finalPlaceUpdated",
-                            message:
-                              item.finalPlace === ""
-                                ? "Final result set."
-                                : "Final result updated.",
-                            details: [
-                              `Place: ${previousFinalPlace} → ${newFinalPlace}`,
-                            ],
-                          },
-                        ],
-                      }
-                    })
-                  )
-                }}
-                className="h-10 w-full rounded-lg border border-violet-400/25 bg-[#071426]/90 px-3 text-sm font-black text-white outline-none transition hover:border-violet-300/45 focus:border-violet-300/65"
-              >
-                <option value="">Select place</option>
-                <option value="1st">1st</option>
-                <option value="2nd">2nd</option>
-                <option value="3rd">3rd</option>
-              </select>
-            </div>
-
-            {/* CM WINNER */}
-            {cm.finalPlace === "1st" ? (
-              <div>
-                <div className="mb-1.5 text-xs font-bold text-amber-200/55">
-                  CM Winner
-                </div>
-
-                <select
-                  value={selectedWinnerId}
-                  onChange={(event) => {
-                    const winnerId = event.target.value
-
-                    setCms((current) =>
-                      current.map((item) => {
-                        if (item.number !== cm.number) {
-                          return item
-                        }
-
-                        const previousWinner = item.participants.find(
-                          (participant) => participant.won
-                        )
-
-                        const previousWinnerId =
-                          previousWinner?.cmUmaId ?? ""
-
-                        if (previousWinnerId === winnerId) {
-                          return item
-                        }
-
-                        const newWinner = item.participants.find(
-                          (participant) =>
-                            participant.cmUmaId === winnerId
-                        )
-
-                        const previousWinnerVersion = versions.find(
-                          (version) =>
-                            version.id === previousWinner?.umaId
-                        )
-
-                        const newWinnerVersion = versions.find(
-                          (version) => version.id === newWinner?.umaId
-                        )
-
-                        const previousWinnerName =
-                          previousWinnerVersion?.displayName ?? "None"
-
-                        const newWinnerName =
-                          newWinnerVersion?.displayName ?? "None"
-
-                        return {
-                          ...item,
-                          participants: item.participants.map(
-                            (participant) => ({
-                              ...participant,
-                              won:
-                                participant.cmUmaId === winnerId &&
-                                participant.finalParticipant,
-                            })
-                          ),
-                          log: [
-                            ...(item.log ?? []),
-                            {
-                              id: `cm${item.number}-winner-${Date.now()}`,
-                              timestamp: new Date().toISOString(),
-                              type: "winnerSelected",
-                              message:
-                                previousWinnerId === ""
-                                  ? "CM Winner selected."
-                                  : winnerId === ""
-                                    ? "CM Winner cleared."
-                                    : "CM Winner updated.",
-                              details: [
-                                `Winner: ${previousWinnerName} → ${newWinnerName}`,
-                              ],
-                            },
-                          ],
-                        }
-                      })
-                    )
-                  }}
-                  className="h-10 w-full rounded-lg border border-amber-400/30 bg-[#071426]/90 px-3 text-sm font-black text-white outline-none transition hover:border-amber-300/50 focus:border-amber-300/65"
-                >
-                  <option value="">Select Winner</option>
-
-                  {finalParticipants.map((participant) => {
-                    const version = versions.find(
-                      (item) => item.id === participant.umaId
-                    )
-
-                    return (
-                      <option
-                        key={participant.cmUmaId}
-                        value={participant.cmUmaId}
-                      >
-                        {version?.displayName ?? "Unknown Uma"}
-                      </option>
-                    )
-                  })}
-                </select>
-              </div>
-            ) : (
-              <div className="flex h-10 min-w-0 flex-1 items-center rounded-lg border border-blue-400/10 bg-blue-950/15 px-3 text-xs font-semibold text-blue-100/35">
-                  CM Winner is only selected for 1st place.
-                </div>
-            )}
-          
-
-          <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-end md:gap-4">
-            {cm.finalPlace === "1st" && selectedWinnerId === "" && (
-              <div className="text-xs font-semibold text-amber-300/75">
-                Select the CM Winner before completing the CM.
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleCompleteCM}
-              disabled={!canCompleteCM}
-               className="h-10 w-full shrink-0 md:w-auto md:min-w-[150px] rounded-lg border border-emerald-400/35 bg-emerald-700/80 px-5 text-sm font-black text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.04] disabled:text-white/25"
-            >
-              Complete CM
-            </button>
-          </div>
-          </div>
-        </section>
+        <CMFinalResultEditor cm={cm} setCms={setCms} onComplete={handleCompleteCM} />
       )}
     </div>
   )

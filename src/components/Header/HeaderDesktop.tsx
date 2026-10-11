@@ -134,7 +134,7 @@ useEffect(() => {
       </header>
 
       {/* STICKY NAVIGATION + UPDATE */}
-        <div className="sticky top-0 z-50 w-full">
+        <div data-app-sticky-header className="sticky top-0 z-50 w-full">
 
         {/* NAVIGATION */}
         <nav className="border-b border-sky-400/[0.10] bg-[#081221]/95 shadow-[0_8px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">

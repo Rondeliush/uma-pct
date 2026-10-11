@@ -1,0 +1,63 @@
+/* Fill the space below the existing header only while the fallback is shown. */
+[data-app-shell]:has(.unavailable-page) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+[data-app-shell]:has(.unavailable-page) > [data-app-content] {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+[data-app-shell]:has(.unavailable-page) [data-statistics-content] {
+  display: flex;
+  max-width: none;
+  padding: 0;
+}
+
+.unavailable-page {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  flex: 1;
+  place-items: center;
+  width: 100%;
+  min-height: 320px;
+  padding: 40px 24px;
+  background-color: #030811;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.unavailable-page-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid rgb(125 211 252 / 20%);
+  border-radius: 8px;
+  background: rgb(7 17 31 / 85%);
+  color: #bae6fd;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background-color 150ms, color 150ms;
+}
+
+.unavailable-page-action:hover {
+  background: rgb(56 189 248 / 10%);
+  color: white;
+}
+
+.unavailable-page-action:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+}
+
+.unavailable-page-action svg {
+  width: 16px;
+  height: 16px;
+}

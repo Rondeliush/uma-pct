@@ -9,10 +9,19 @@ import type { CM } from "../types/types"
 
 import CMStatisticsDashboard from "./CMStatisticsDashboard"
 import LoHStatisticsDashboard from "./LoHStatisticsDashboard"
+import StatisticsLanding from "./StatisticsLanding"
+import StatisticsShowcase from "./StatisticsShowcase"
+import UmaStatisticsPage from "./UmaStatisticsPage"
+import TrackStatisticsPage from "./TrackStatisticsPage"
+import type useStatisticsNavigation from "./useStatisticsNavigation"
+import { trackImages } from "../data/trackData"
 
 type StatisticsPageProps = {
   cms: CM[]
-  setCms: Dispatch<SetStateAction<CM[]>>
+  navigation: ReturnType<typeof useStatisticsNavigation>
+  onOpenCm: (cmNumber: CM["number"]) => void
+  comparisonSlots: (string | null)[]
+  setComparisonSlots: Dispatch<SetStateAction<(string | null)[]>>
 }
 
 type StatisticsMode =
@@ -21,13 +30,76 @@ type StatisticsMode =
 
 function StatisticsPage({
   cms,
-  setCms,
+  navigation,
+  onOpenCm,
+  comparisonSlots,
+  setComparisonSlots,
 }: StatisticsPageProps) {
   const [dashboardMode, setDashboardMode] =
     useState<StatisticsMode>("cm")
+  const { route, navigateSection, navigateTrack, navigateUma } = navigation
+  const section = route?.section ?? "landing"
+  const trackId = route?.trackId ?? null
+  const trackDetailsOpen = section === "tracks" && trackId !== null
+  const trackName = trackImages.find((track) => track.id === trackId)?.name ?? "Track Details"
+
+  if (section === "landing") {
+    return <StatisticsLanding onSelect={navigateSection} />
+  }
+
+  const sectionNavigation = (
+    <nav aria-label="Statistics navigation" className={`flex items-center gap-3 text-sm${trackDetailsOpen ? " flex-wrap" : ""}`}>
+      <button
+        type="button"
+        onClick={() => navigateSection("landing")}
+        className="flex min-h-11 items-center gap-2 rounded-lg px-2 font-bold text-sky-200 transition hover:bg-sky-400/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m14 6-6 6 6 6M8 12h12" />
+        </svg>
+        Statistics
+      </button>
+      <span aria-hidden="true" className="text-blue-100/30">/</span>
+      {trackDetailsOpen ? <>
+        <button type="button" onClick={() => navigateSection("tracks")} className="min-h-11 rounded-lg px-2 font-semibold text-blue-100/70 transition hover:bg-sky-400/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300">Tracks</button>
+        <span aria-hidden="true" className="text-blue-100/30">/</span>
+        <span aria-current="page" className="font-semibold text-blue-100/70">{trackName}</span>
+      </> : <span aria-current="page" className="font-semibold text-blue-100/70">
+        {section === "events" ? "Events" : section === "uma" ? "Uma" : "Tracks"}
+      </span>}
+    </nav>
+  )
+
+  if (section === "tracks") {
+    return <TrackStatisticsPage cms={cms} navigation={sectionNavigation} trackId={trackId} onOpenTrack={navigateTrack} onBack={() => navigateSection("tracks")} onOpenCm={onOpenCm} />
+  }
+
+  if (section === "uma") {
+    return <UmaStatisticsPage cms={cms} navigation={sectionNavigation} umaVersionId={route?.umaVersionId ?? null} onOpenUma={navigateUma} onBack={() => navigateSection("uma")} onOpenCm={onOpenCm} comparisonSlots={comparisonSlots} setComparisonSlots={setComparisonSlots} />
+  }
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6">
+
+      <div className="uma-statistics">
+        {sectionNavigation}
+        <header className="uma-statistics-header">
+          <div>
+            <h1>Event Statistics</h1>
+            <p>Explore the competitive performance of your events.</p>
+          </div>
+        </header>
+      </div>
+      <StatisticsShowcase cms={cms} />
 
       {/* STATISTICS MODE */}
       <div className="text-center">
@@ -84,13 +156,13 @@ function StatisticsPage({
       {dashboardMode === "cm" ? (
         <CMStatisticsDashboard
           cms={cms}
-          setCms={setCms}
+          onOpenCm={onOpenCm}
         />
       ) : (
         <LoHStatisticsDashboard />
       )}
 
-    </div>
+    </main>
   )
 }
 

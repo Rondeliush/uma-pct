@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import type { CM } from "../types/types"
+import { getCMFinalResults, getCMVersionIds, getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 import { getTrackImage } from "../data/trackData"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaAvatarImage from "../components/UmaAvatarImage"
@@ -226,29 +227,12 @@ const latestWinRate =
 
   const favoriteAppearances = favoriteUma
   ? cms.filter((cm) =>
-      (cm.participants ?? []).some(
-        (participant) =>
-          participant.umaId === favoriteUma.id
-      )
+      getCMVersionIds(cm).includes(favoriteUma.id)
     ).length
   : 0
 
 const favoriteRaceWins = favoriteUma
   ? cms.reduce((total, cm) => {
-      const favoriteParticipantIds =
-        new Set(
-          (cm.participants ?? [])
-            .filter(
-              (participant) =>
-                participant.umaId ===
-                favoriteUma.id
-            )
-            .map(
-              (participant) =>
-                participant.cmUmaId
-            )
-        )
-
       return (
         total +
         (cm.attempts ?? []).reduce(
@@ -256,9 +240,7 @@ const favoriteRaceWins = favoriteUma
             attemptTotal +
             (attempt.umaWins ?? []).reduce(
               (wins, result) =>
-                favoriteParticipantIds.has(
-                  result.cmUmaId
-                )
+                getResultConfiguration(cm, result).umaVersionId === favoriteUma.id
                   ? wins + result.wins
                   : wins,
               0
@@ -271,20 +253,6 @@ const favoriteRaceWins = favoriteUma
 
 const favoriteRaceCount = favoriteUma
   ? cms.reduce((total, cm) => {
-      const favoriteParticipantIds =
-        new Set(
-          (cm.participants ?? [])
-            .filter(
-              (participant) =>
-                participant.umaId ===
-                favoriteUma.id
-            )
-            .map(
-              (participant) =>
-                participant.cmUmaId
-            )
-        )
-
       return (
         total +
         (cm.attempts ?? []).reduce(
@@ -292,9 +260,7 @@ const favoriteRaceCount = favoriteUma
             const wasUsed =
               (attempt.umaWins ?? []).some(
                 (result) =>
-                  favoriteParticipantIds.has(
-                    result.cmUmaId
-                  )
+                  getResultConfiguration(cm, result).umaVersionId === favoriteUma.id
               )
 
             return wasUsed
@@ -318,21 +284,13 @@ const favoriteWinRate =
 
 const favoriteFinalAppearances = favoriteUma
   ? cms.filter((cm) =>
-      (cm.participants ?? []).some(
-        (participant) =>
-          participant.umaId === favoriteUma.id &&
-          participant.finalParticipant
-      )
+      getCMFinalResults(cm).some((result) => result.configuration.umaVersionId === favoriteUma.id)
     ).length
   : 0
 
 const favoriteFinalWins = favoriteUma
   ? cms.filter((cm) =>
-      (cm.participants ?? []).some(
-        (participant) =>
-          participant.umaId === favoriteUma.id &&
-          participant.won
-      )
+      getCMFinalResults(cm).some((result) => result.configuration.umaVersionId === favoriteUma.id && result.won)
     ).length
   : 0
 

@@ -4,6 +4,7 @@ import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaForm from "./UmaForm"
 import ModalPortal from "../components/ModalPortal"
 import { getTrackImage } from "../data/trackData"
+import { getRunningStyleLabel, normalizeRunningStyle } from "./cmParticipantConfiguration"
 
 type EditCMModalProps = {
   cm: CM
@@ -41,7 +42,7 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
     return {
       id: cmUma?.umaId ?? "",
       name: umaCharacter?.name ?? "",
-      style: cmUma?.style ?? "Runaway",
+      style: getRunningStyleLabel(cmUma?.runningStyle),
       ace: cmUma?.ace ?? false,
       debuffer: cmUma?.debuffer ?? false,
       autoRun: cmUma?.autoRun ?? false,
@@ -132,8 +133,8 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
                   existingParticipant.cmUmaId
                     ? {
                         ...participant,
-                        style:
-                          selectedUma.style as UmaStyle,
+                        runningStyle:
+                          normalizeRunningStyle(selectedUma.style),
                         ace: selectedUma.ace,
                         debuffer:
                           selectedUma.debuffer,
@@ -151,8 +152,8 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
           const newParticipant: CMUma = {
             cmUmaId: `cm${item.number}-uma-${nextParticipantNumber}`,
             umaId: selectedUma.id,
-            style:
-              selectedUma.style as UmaStyle,
+            runningStyle:
+              normalizeRunningStyle(selectedUma.style),
             ace: selectedUma.ace,
             debuffer:
               selectedUma.debuffer,
@@ -336,10 +337,10 @@ umas.forEach((selectedUma) => {
   const umaLogDetails: string[] = []
 
   if (
-    oldParticipant.style !== selectedUma.style
+    oldParticipant.runningStyle !== normalizeRunningStyle(selectedUma.style)
   ) {
     umaLogDetails.push(
-      `Style: ${oldParticipant.style} → ${selectedUma.style}`
+      `Style: ${getRunningStyleLabel(oldParticipant.runningStyle)} → ${selectedUma.style}`
     )
   }
 

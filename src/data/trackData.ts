@@ -10,19 +10,19 @@ export const trackImages: TrackImageEntry[] = [
     id: "sapporo",
     name: "Sapporo",
     aliases: ["sapporo racecourse"],
-    image: `${import.meta.env.BASE_URL}Tracks/sapporo.png`,
+    image: `${import.meta.env.BASE_URL}/Tracks/sapporo.png`,
   },
   {
     id: "hakodate",
     name: "Hakodate",
     aliases: ["hakodate racecourse"],
-    image: `${import.meta.env.BASE_URL}Tracks/hakodate.png`,
+    image: `${import.meta.env.BASE_URL}/Tracks/hakodate.png`,
   },
   {
     id: "niigata",
     name: "Niigata",
     aliases: ["niigata racecourse"],
-    image: `${import.meta.env.BASE_URL}Tracks/niigata.png`,
+    image: `${import.meta.env.BASE_URL}/Tracks/niigata.png`,
   },
   {
     id: "fukushima",

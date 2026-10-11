@@ -3,6 +3,7 @@ import {
   useState,
 } from "react"
 import ModalPortal from "../components/ModalPortal"
+import type { HeaderPage } from "../components/Header/Header"
 import { useIsMobile } from "../responsive/useIsMobile"
 
 type GuidePage =
@@ -13,6 +14,7 @@ type GuidePage =
   | "umaDatabase"
 
 type ProfileGuideProps = {
+  currentPage: HeaderPage
   onNavigate: (page: GuidePage) => void
   onComplete: () => void
 }
@@ -68,27 +70,10 @@ const guideSteps = [
     },
     {
     section: "Statistics",
-    title: "Uma Rankings",
+    title: "Statistics",
     description:
-        "See which Umamusume stand out across your Champions Meeting history, including race wins, appearances, and finals.",
+      "Here you can explore statistics for competitive events, individual Umas, and racetracks. Each section provides more detailed performance data and history.",
     page: "statistics" as const,
-    target: "statistics-showcase",
-    },
-    {
-    section: "Statistics",
-    title: "Career Overview",
-    description:
-        "Track your overall Champions Meeting record, including events, finals, race wins, total races, and win rate.",
-    page: "statistics" as const,
-    target: "statistics-career-overview",
-    },
-    {
-    section: "Statistics",
-    title: "Uma Performance",
-    description:
-        "Compare the performance of individual Umamusume across your tracked Champions Meetings.",
-    page: "statistics" as const,
-    target: "statistics-uma-performance",
     },
         {
         section: "AutoRun Timer",
@@ -111,6 +96,7 @@ const guideSteps = [
 ]
 
 function ProfileGuide({
+  currentPage,
   onNavigate,
   onComplete,
 }: ProfileGuideProps) {
@@ -292,14 +278,14 @@ const guidePanelStyle = (() => {
 })()
 
   useEffect(() => {
-  if (!step.target) {
-    setTargetRect(null)
-    return
-  }
+  if (!step.target || currentPage !== step.page) return
 
+  let cleanupPosition: (() => void) | undefined
+
+  const findTarget = () => {
   const element =
     document.querySelector<HTMLElement>(
-      `[data-guide="${step.target}"]`
+      step.target.startsWith("#") ? step.target : `[data-guide="${step.target}"]`
     )
 
   if (!element) {
@@ -352,7 +338,7 @@ if (isMobile) {
     true
   )
 
-  return () => {
+  cleanupPosition = () => {
     window.clearTimeout(timeoutId)
 
     window.removeEventListener(
@@ -366,7 +352,23 @@ if (isMobile) {
       true
     )
   }
-}, [step.target, isMobile])
+  return true
+  }
+
+  const observer = new MutationObserver(() => {
+    if (findTarget()) observer.disconnect()
+  })
+  if (!findTarget()) observer.observe(document.body, { childList: true, subtree: true })
+
+  return () => {
+    observer.disconnect()
+    cleanupPosition?.()
+  }
+}, [step.target, step.page, currentPage, isMobile])
+
+  if (currentPage !== step.page || (step.target && !targetRect)) {
+    return null
+  }
 
   return (
     <ModalPortal>
@@ -467,10 +469,11 @@ if (isMobile) {
                   onClick={() => {
                     const previousIndex = stepIndex - 1
 
-                    setStepIndex(previousIndex)
+                    setTargetRect(null)
                     onNavigate(
                         guideSteps[previousIndex].page
                     )
+                    setStepIndex(previousIndex)
                     }}
                   className="rounded-lg border border-white/[0.08] px-4 py-2 text-sm font-bold text-blue-100/60 transition hover:bg-white/[0.04] hover:text-white"
                 >
@@ -492,10 +495,11 @@ if (isMobile) {
                   onClick={() => {
                     const nextIndex = stepIndex + 1
 
-                    setStepIndex(nextIndex)
+                    setTargetRect(null)
                     onNavigate(
                         guideSteps[nextIndex].page
                     )
+                    setStepIndex(nextIndex)
                     }}
                   className="rounded-lg border border-sky-400/30 bg-sky-500/15 px-5 py-2 text-sm font-black text-sky-100 transition hover:bg-sky-500/25"
                 >

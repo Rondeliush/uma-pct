@@ -1,0 +1,28 @@
+.track-detail-hero { height: clamp(140px, 18vw, 240px); overflow: hidden; border: 1px solid var(--uma-border); border-radius: 12px; }
+.track-detail-hero img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.track-detail-summary { display: grid; gap: 24px; min-width: 0; }
+.track-detail-panels { display: grid; gap: 16px; min-width: 0; margin-top: 16px; }
+.track-detail-breakdowns { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 16px; min-width: 0; margin-top: 16px; }
+.track-course-table :is(th, td) { overflow-wrap: anywhere; }
+.track-course-table :is(th, td):nth-child(2), .track-course-table :is(th, td):nth-child(3) { text-align: left; }
+.track-course-compact-label { display: none; }
+
+@media (min-width: 640px) {
+  .track-detail-overall .uma-statistics-overall-values { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .track-detail-breakdowns { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  .track-detail-weather-season { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .track-detail-summary { grid-template-columns: minmax(0, 3fr) minmax(0, 5fr); gap: 16px; }
+  .track-detail-hero { position: relative; height: auto; }
+  .track-detail-hero img { position: absolute; inset: 0; }
+  .track-detail-overall .uma-statistics-overall-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .track-detail-hero { height: clamp(120px, 38vw, 164px); }
+  .track-course-table { font-size: 10px; }
+  .track-course-table :is(th, td) { padding-inline: 2px; }
+  .track-course-table thead { font-size: 9px; }
+  .track-course-wide-label { display: none; }
+  .track-course-compact-label { display: inline; }
+}

@@ -103,6 +103,7 @@ function HeaderMobile({
       {/* STICKY NAVIGATION + UPDATE */}
         <div
           ref={moreMenuRef}
+          data-app-sticky-header
           className="sticky top-0 z-50 w-full"
         >
 

@@ -4,8 +4,9 @@ import {
 } from "react"
 import type { CM } from "../types/types"
 import { umaStyleClasses } from "../data/cmData"
+import { getRunningStyleLabel } from "./cmParticipantConfiguration"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
-import CMModal from "./CMModal"
+import { navigateAppRoute } from "../Statistics/statisticsRoute"
 import EditCMModal from "./EditCMModal"
 import CMNotesModal from "./CMNotesModal"
 import {
@@ -16,6 +17,7 @@ import ModalPortal from "../components/ModalPortal"
 import UmaAvatarImage from "../components/UmaAvatarImage"
 import { getTrackImage } from "../data/trackData"
 import CMCardMobile from "./CMCardMobile"
+import CMFinalPlacementBadge from "./CMFinalPlacementBadge"
 
 
 type CMCardProps = {
@@ -48,7 +50,7 @@ function CMCard({
     ? "Eliminated"
     : finalQualification
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const openCm = () => navigateAppRoute("cms", String(cm.number), import.meta.env.BASE_URL)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false)
@@ -161,9 +163,7 @@ if (mobile) {
       <CMCardMobile
         cm={cm}
         compact={compact}
-        onOpen={() =>
-          setIsModalOpen(true)
-        }
+        onOpen={openCm}
         onEdit={() =>
           setIsEditModalOpen(true)
         }
@@ -176,16 +176,6 @@ if (mobile) {
           displayedFinalQualification
         }
       />
-
-      {isModalOpen && (
-        <CMModal
-          cm={cm}
-          setCms={setCms}
-          onClose={() =>
-            setIsModalOpen(false)
-          }
-        />
-      )}
 
       {isEditModalOpen && (
         <EditCMModal
@@ -272,7 +262,7 @@ if (compact) {
           ? "scale-[0.99] opacity-70"
           : "scale-100 opacity-100"
       }`}
-        onClick={() => setIsModalOpen(true)}
+        onClick={openCm}
       >
         
       {/* CM NUMBER */}
@@ -354,7 +344,7 @@ if (compact) {
   >
     {/* AVATAR */}
     <div
-      className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border border-black/40 ${umaStyleClasses[cmUma.style]} ${
+      className={`relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border border-black/40 ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
         cmUma.won
           ? "ring-2 ring-yellow-400"
           : ""
@@ -372,6 +362,7 @@ if (compact) {
         </span>
       )}
 
+      <CMFinalPlacementBadge placement={showFinalLineup ? cm.finalResults?.find((result) => result.cmUmaId === cmUma.cmUmaId)?.placement : null} location="compact-card" />
       {cmUma.won && (
         <span className="absolute -right-1 -top-1 text-[10px]">
           👑
@@ -451,13 +442,6 @@ if (compact) {
       </div>
           </div>
 
-      {isModalOpen && (
-        <CMModal
-          cm={cm}
-          setCms={setCms}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
       {isEditModalOpen && (
       <EditCMModal
         cm={cm}
@@ -520,7 +504,7 @@ return (
       <div
         data-guide="cm-card"
         className="cm-card-sweep relative cursor-pointer overflow-hidden rounded-xl border border-sky-400/50 bg-gray-950/90 shadow-[0_0_14px_rgba(56,189,248,0.18),0_0_30px_rgba(37,99,235,0.10)] transition-[transform,background-color,box-shadow,border-color] duration-200 ease-out group-hover:-translate-y-1 group-hover:scale-[1.01] group-hover:border-sky-300/70 group-hover:bg-gray-900/95 group-hover:shadow-[0_0_20px_rgba(56,189,248,0.28),0_0_42px_rgba(37,99,235,0.18)]"
-        onClick={() => setIsModalOpen(true)}
+        onClick={openCm}
       >
         <div className="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_0_12px_rgba(56,189,248,0.08)]" />
         
@@ -750,7 +734,7 @@ return (
       return (
         <div
           key={cmUma.cmUmaId}
-          className={`relative flex h-[150px] w-[150px] shrink-0 flex-col overflow-hidden rounded-xl border shadow-md ${umaStyleClasses[cmUma.style]} ${
+          className={`relative flex h-[150px] w-[150px] shrink-0 flex-col overflow-hidden rounded-xl border shadow-md ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
             cmUma.won
               ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-gray-950"
               : ""
@@ -775,6 +759,7 @@ return (
                   </div>
                 )}
               </div>
+          <CMFinalPlacementBadge placement={showFinalLineup ? cm.finalResults?.find((result) => result.cmUmaId === cmUma.cmUmaId)?.placement : null} location="card" />
           {/* STATUS ICONS */}
           {(cmUma.debuffer || cmUma.autoRun) && (
             <div className="absolute right-1 top-1 z-30 flex flex-col gap-0.5">
@@ -932,17 +917,6 @@ return (
 
         </div>
       </div>
-
-      {/* CM MODAL */}
-      {isModalOpen && (
-        <CMModal
-          cm={cm}
-          setCms={setCms}
-          onClose={() =>
-            setIsModalOpen(false)
-          }
-        />
-      )}
 
       {/* EDIT MODAL */}
       {isEditModalOpen && (

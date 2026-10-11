@@ -4,6 +4,7 @@ import {
 } from "react"
 
 import type { CM } from "../../types/types"
+import { getCMVersionIds } from "../cmParticipantConfiguration"
 
 import type {
   CMFinalFilter,
@@ -260,12 +261,7 @@ const {
 
 const umaIdsInCms = Array.from(
   new Set(
-    cms.flatMap((cm) =>
-      (cm.participants ?? []).map(
-        (participant) =>
-          participant.umaId
-      )
-    )
+    cms.flatMap(getCMVersionIds)
   )
 )
 
@@ -286,12 +282,7 @@ const filteredCms = cms.filter((cm) => {
 
   const matchesUma =
     selectedUmaIds.length === 0 ||
-    (cm.participants ?? []).some(
-      (participant) =>
-        selectedUmaIds.includes(
-          participant.umaId
-        )
-    )
+    getCMVersionIds(cm).some((id) => selectedUmaIds.includes(id))
 
   const finalQualification =
     calculateFinalQualificationFromAttempts(

@@ -1,7 +1,8 @@
 import { useState } from "react"
 import type { CM } from "../types/types"
+import { getCMFinalResults } from "./cmParticipantConfiguration"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
-import UmaAvatarImage from "../components/UmaAvatarImage"
+import CMLogParticipantCell from "./CMLogParticipantCell"
 import {
   calculateFinalQualificationFromAttempts,
   calculateRound2GroupFromAttempts,
@@ -23,9 +24,7 @@ function CMLog({ cm }: CMLogProps) {
   const round2Group =
     calculateRound2GroupFromAttempts(cm.attempts)
 
-  const finalParticipants = cm.participants.filter(
-    (participant) => participant.finalParticipant
-  )
+  const finalParticipants = getCMFinalResults(cm)
 
   const rounds = [
     {
@@ -232,64 +231,11 @@ function CMLog({ cm }: CMLogProps) {
 
                                 {/* UMAS */}
                                 <div className="mt-2.5 grid grid-cols-3 overflow-hidden rounded-md border border-white/[0.06] bg-black/10">
-                                  {attempt.umaWins.map((result, index) => {
-                                    const participant = cm.participants.find(
-                                      (item) => item.cmUmaId === result.cmUmaId
-                                    )
-
-                                    if (!participant) {
-                                      return null
-                                    }
-
-                                    const version = versions.find(
-                                      (item) => item.id === participant.umaId
-                                    )
-
-                                    if (!version) {
-                                      return null
-                                    }
-
-                                    return (
-                                      <div
-                                        key={result.cmUmaId}
-                                        className={`flex min-w-0 flex-col items-center justify-center gap-1 px-2 py-2 md:flex-row md:justify-start md:gap-2.5 md:px-3 ${
-                                          index > 0 ? "border-l border-white/[0.06]" : ""
-                                        }`}
-                                      >
-                                        {/* AVATAR */}
-                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black/20 md:h-10 md:w-10">
-                                          {version.avatar ? (
-                                            <UmaAvatarImage
-                                              avatar={version.avatar}
-                                              alt={version.displayName}
-                                              className="h-full w-full object-contain"
-                                            />
-                                          ) : (
-                                            <span className="font-bold text-blue-100/20">
-                                              ?
-                                            </span>
-                                          )}
-                                        </div>
-
-                                        {/* UMA INFO */}
-                                        <div className="min-w-0">
-                                          <div className="hidden truncate text-sm font-bold text-white/90 md:block">
-                                            {version.displayName}
-                                          </div>
-
-                                          <div className="text-center text-xs font-medium text-blue-100/50 md:mt-0.5 md:text-left md:text-blue-100/40">
-                                            {attempt.racesPlayed === 0
-                                              ? "—"
-                                              : `${result.wins} ${
-                                                  result.wins === 1
-                                                    ? "Win"
-                                                    : "Wins"
-                                                }`}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )
-                                  })}
+                                  {attempt.umaWins.map((result) => (
+                                    <CMLogParticipantCell key={result.cmUmaId} configuration={result.configuration}
+                                      version={versions.find((version) => version.id === result.configuration.umaVersionId)}
+                                      resultText={attempt.racesPlayed === 0 ? "—" : String(result.wins) + (result.wins === 1 ? " Win" : " Wins")} />
+                                  ))}
                                 </div>
                               </div>
                           )
@@ -365,81 +311,11 @@ function CMLog({ cm }: CMLogProps) {
   ) : (
     <div className="rounded-lg border border-amber-400/15 bg-amber-400/[0.02] px-3 py-2.5">
       <div className="grid grid-cols-3 overflow-hidden rounded-md border border-white/[0.06] bg-black/10">
-        {finalParticipants.map((participant, index) => {
-          const version = versions.find(
-            (item) => item.id === participant.umaId
-          )
-
-          if (!version) {
-            return null
-          }
-
-          return (
-            <div
-              key={participant.cmUmaId}
-              className={`relative flex min-w-0 items-center gap-2.5 px-3 py-2 ${
-                index > 0
-                  ? "border-l border-white/[0.06]"
-                  : ""
-              } ${
-                participant.won
-                  ? "bg-amber-300/[0.035]"
-                  : ""
-              }`}
-            >
-              {/* AVATAR */}
-              <div
-                className={`relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-black/20 ${
-                  participant.won
-                    ? "ring-1 ring-amber-300/60"
-                    : ""
-                }`}
-              >
-                {version.avatar ? (
-                  <UmaAvatarImage
-                    avatar={version.avatar}
-                    alt={version.displayName}
-                    className="h-full w-full object-contain"
-                  />
-                ) : (
-                  <span className="font-bold text-blue-100/20">
-                    ?
-                  </span>
-                )}
-              </div>
-
-              {/* UMA INFO */}
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <div className="hidden truncate text-sm font-bold text-white/90 md:block">
-                    {version.displayName}
-                  </div>
-
-                  {participant.won && (
-                    <svg
-                      viewBox="0 0 32 24"
-                      className="h-3.5 w-4.5 shrink-0 text-yellow-300 drop-shadow-[0_0_4px_rgba(250,204,21,0.55)]"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M4 19h24l2-12-7 5-7-9-7 9-7-5 2 12Zm2 2h20v2H6v-2Z" />
-                    </svg>
-                  )}
-                </div>
-
-                <div
-                  className={`mt-0.5 text-xs font-medium ${
-                    participant.won
-                      ? "text-amber-200/65"
-                      : "text-blue-100/35"
-                  }`}
-                >
-                  {participant.won ? "Winner" : "Finalist"}
-                </div>
-              </div>
-            </div>
-          )
-        })}
+        {finalParticipants.map((participant) => (
+          <CMLogParticipantCell key={participant.cmUmaId} configuration={participant.configuration}
+            version={versions.find((version) => version.id === participant.configuration.umaVersionId)}
+            resultText={participant.won ? "Winner" : "Finalist"} winner={participant.won} final />
+        ))}
       </div>
     </div>
   )}

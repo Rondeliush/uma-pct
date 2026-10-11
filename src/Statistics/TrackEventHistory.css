@@ -1,0 +1,48 @@
+.track-event-history { margin-top: 16px; }
+.track-event-type-filter button { min-height: 36px; }
+.track-event-columns { display: none; }
+.track-event-row { position: relative; display: grid; gap: 4px; min-width: 0; padding: 12px 20px 12px 0; border-top: 1px solid var(--uma-border); border-radius: 6px; }
+.track-event-row:first-child { border-top: 0; }
+.track-event-row:last-child { padding-bottom: 0; }
+.track-event-row h3 { display: flex; align-items: center; gap: 4px; min-width: 0; margin: 0; font-size: 12px; font-weight: 800; line-height: 1.4; overflow-wrap: anywhere; }
+.track-event-row dl { min-width: 0; margin: 0; }
+.track-event-row dd { margin: 0; overflow-wrap: anywhere; }
+.track-event-row .track-event-course dd, .track-event-row .track-event-conditions dd { text-align: left; font-weight: 400; }
+.track-event-course, .track-event-conditions { display: flex; flex-wrap: wrap; gap: 4px; color: var(--uma-muted); font-size: 10px; line-height: 1.4; }
+.track-event-course > div, .track-event-conditions > div { display: flex; }
+.track-event-course > div + div::before, .track-event-conditions > div + div::before { content: "·"; margin-right: 4px; }
+.track-event-results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding-top: 2px; font-variant-numeric: tabular-nums; }
+.track-event-results dt { color: var(--uma-muted); font-size: 10px; }
+.track-event-row .track-event-results dd { font-size: 12px; font-weight: 700; text-align: left; }
+.track-event-history .uma-detail-cm-open:focus-visible { outline-offset: -2px; }
+.track-event-rate-short { display: none; }
+
+@media (max-width: 1023px) {
+  .track-event-rate-full { display: none; }
+  .track-event-rate-short { display: inline; }
+}
+@media (min-width: 360px) and (max-width: 1023px) {
+  .track-event-row { grid-template-columns: minmax(0, 1fr) 140px; column-gap: 10px; }
+  .track-event-row h3 { grid-column: 1 / -1; }
+  .track-event-course { grid-column: 1; grid-row: 2; }
+  .track-event-conditions { grid-column: 1; grid-row: 3; }
+  .track-event-results { grid-column: 2; grid-row: 2 / 4; align-self: center; gap: 4px; padding-top: 0; grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(50px, 1.2fr); }
+}
+
+@media (hover: hover) {
+  .track-event-history .uma-detail-cm-open:hover { background: rgba(255, 255, 255, 0.03); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.03); }
+}
+@media (min-width: 1024px) {
+  .track-event-columns, .track-event-row { display: grid; grid-template-columns: minmax(180px, 2.4fr) repeat(5, minmax(64px, 1fr)) repeat(2, minmax(44px, 0.6fr)) minmax(70px, 0.9fr) 16px; align-items: center; gap: 10px; }
+  .track-event-columns { padding-bottom: 10px; color: var(--uma-muted); font-size: 10px; font-weight: 600; }
+  .track-event-columns span:nth-child(n + 7) { text-align: right; }
+  .track-event-row { padding-right: 0; }
+  .track-event-row:last-child { padding-bottom: 12px; }
+  .track-event-row h3 { font-size: 13px; }
+  .track-event-row dl { display: contents; }
+  .track-event-row :is(.track-event-course, .track-event-conditions) > div { display: block; }
+  .track-event-row dd { font-size: 12px; }
+  .track-event-course > div + div::before, .track-event-conditions > div + div::before { display: none; }
+  .track-event-results dt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .track-event-row .track-event-results dd { text-align: right; font-weight: 400; }
+}

@@ -1,6 +1,6 @@
 import {
   deleteStoredValue,
-  getStoredValue,
+  migrateStoredValue,
   setStoredValue,
 } from "../storage/indexedDB"
 
@@ -21,8 +21,10 @@ import {
 } from "../storage/appStore"
 
 import { umaVersions } from "../data/umaData"
+import { migrateProfileData, PROFILE_DATA_VERSION } from "./profileDataMigration"
 
 export type ProfileData = {
+  dataVersion?: number
   cms: CM[]
   lohs: LoH[]
 
@@ -39,6 +41,7 @@ export type ProfileData = {
   seenOfficialVersionIds: string[]
   onboardingCompleted?: boolean
   cmLineupGuideCompleted?: boolean
+  umaComparisonSlots?: (string | null)[]
 }
 
 function getProfileDataKey(
@@ -51,6 +54,7 @@ export function createEmptyProfileData(
   currentOfficialVersionIds: string[]
 ): ProfileData {
   return {
+    dataVersion: PROFILE_DATA_VERSION,
     cms: [],
     lohs: [],
 
@@ -77,8 +81,8 @@ export async function loadProfileData(
   profileId: string
 ): Promise<ProfileData | null> {
   const data =
-    await getStoredValue<ProfileData>(
-      getProfileDataKey(profileId)
+    await migrateStoredValue<ProfileData>(
+      getProfileDataKey(profileId), migrateProfileData,
     )
 
   return data ?? null
@@ -90,7 +94,7 @@ export async function saveProfileData(
 ) {
   await setStoredValue(
     getProfileDataKey(profileId),
-    data
+    migrateProfileData(data)
   )
 }
 
@@ -181,7 +185,7 @@ export async function loadLegacyProfileData(): Promise<ProfileData> {
     loadSeenOfficialVersionIdsFromStore(),
   ])
 
-  return {
+  return migrateProfileData({
     cms,
     lohs,
 
@@ -202,7 +206,7 @@ export async function loadLegacyProfileData(): Promise<ProfileData> {
       umaVersions.map(
         (version) => version.id
       ),
-  }
+  })
 }
 
 export async function deleteProfileData(

@@ -1,0 +1,5 @@
+.badge-tooltip-trigger { position: relative; z-index: 2; display: inline-flex; align-items: center; min-width: 0; max-width: 100%; padding: 0; border: 0; border-radius: 5px; background: transparent; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.badge-tooltip-trigger:focus-visible { outline: 2px solid #67e8f9; outline-offset: 2px; }
+.badge-tooltip { position: fixed; z-index: 1600; width: 260px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; padding: 8px 10px; border: 1px solid rgba(125, 211, 252, 0.25); border-radius: 6px; background: #07111f; color: #b4c3d8; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.badge-tooltip strong { display: block; color: #edf5ff; font-size: 12px; font-weight: 800; }
+.badge-tooltip p { margin: 4px 0 0; }

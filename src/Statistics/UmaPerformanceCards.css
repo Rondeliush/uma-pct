@@ -1,0 +1,78 @@
+.uma-performance-top-label { display: inline-block; margin-left: 8px; padding: 3px 5px; border: 1px solid var(--uma-border); border-radius: 4px; color: var(--uma-muted); font-size: 9px; font-weight: 700; line-height: 1; letter-spacing: 0.05em; vertical-align: middle; }
+.uma-performance-carousel { --uma-performance-gap: 12px; min-width: 0; touch-action: pan-y pinch-zoom; }
+.uma-performance-carousel:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; border-radius: 8px; }
+.uma-performance-carousel[data-scrollable],
+.uma-performance-carousel[data-scrollable] .uma-statistics-performance-card { cursor: grab; }
+.uma-performance-carousel[data-dragging] { user-select: none; }
+.uma-performance-carousel[data-dragging],
+.uma-performance-carousel[data-dragging] .uma-statistics-performance-card { cursor: grabbing; }
+.uma-performance-carousel-viewport { position: relative; overflow: clip; border-radius: 11px; }
+.uma-performance-carousel-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - var(--uma-performance-gap) * (var(--uma-performance-visible, 5) - 1)) / var(--uma-performance-visible, 5));
+  gap: var(--uma-performance-gap);
+  align-items: stretch;
+  transform: translateX(calc(var(--uma-performance-start, 0) * (100% + var(--uma-performance-gap)) / var(--uma-performance-visible, 5) * -1 + var(--uma-performance-drag, 0px)));
+  transition: transform 200ms cubic-bezier(0.22, 0.7, 0.25, 1);
+}
+.uma-performance-carousel .uma-statistics-performance-card { position: relative; height: 100%; transition: opacity 160ms ease, border-color 160ms, background-color 160ms; }
+.uma-performance-carousel .uma-statistics-performance-card[data-medal]::before { content: ""; position: absolute; z-index: 1; inset: -1px; border-radius: inherit; pointer-events: none; transition: border-color 160ms; }
+/* Reuse the Event Statistics shimmer mask/rotation, with its winner's gold palette and glow. */
+.uma-performance-carousel .uma-statistics-performance-card[data-medal="gold"] { animation: none; }
+.uma-performance-carousel .uma-statistics-performance-card[data-medal="gold"]::before { animation: winnerGlow 3s ease-in-out infinite; }
+.uma-performance-carousel .uma-statistics-performance-card[data-medal="gold"]::after {
+  z-index: 1; inset: -1px; padding: 2.5px;
+  background: conic-gradient(from var(--triple-tie-angle), rgba(250, 204, 21, 0.15) 0%, rgba(250, 204, 21, 0.4) 35%, #fffbea 50%, rgba(250, 204, 21, 0.4) 65%, rgba(250, 204, 21, 0.15) 100%);
+}
+.uma-performance-carousel[data-dragging] :is(.uma-performance-carousel-track, .uma-statistics-performance-card) { transition: none; }
+.uma-performance-carousel .uma-statistics-performance-card:focus-visible { outline-offset: -3px; }
+.uma-performance-card-rank { position: absolute; z-index: 1; top: 8px; left: 8px; }
+.uma-performance-carousel .uma-statistics-performance-card.uma-performance-empty-card { cursor: default; border-style: dashed; border-color: rgba(148, 163, 184, 0.2); background: rgba(5, 12, 23, 0.5); box-shadow: none; }
+.uma-performance-empty-portrait { display: grid; place-items: center; width: 100%; height: clamp(132px, 10.5vw, 152px); flex-shrink: 0; border-bottom: 1px solid rgba(148, 163, 184, 0.1); background: rgba(5, 12, 23, 0.4); color: #8497ad; font-size: 32px; }
+.uma-performance-carousel .uma-performance-empty-card :is(h3, dt, dd) { color: #a2b1c4; }
+.uma-performance-empty-card .uma-statistics-performance-body h3 { font-weight: 500; }
+.uma-performance-empty-card .uma-performance-card-rank { border-color: rgba(148, 163, 184, 0.2); color: #a2b1c4; }
+.uma-performance-carousel-viewport::before,
+.uma-performance-carousel-viewport::after { content: ""; position: absolute; z-index: 2; top: 0; bottom: 0; width: 8px; opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+.uma-performance-carousel-viewport::before { left: 0; background: linear-gradient(to right, rgba(7, 17, 31, 0.4), transparent); }
+.uma-performance-carousel-viewport::after { right: 0; background: linear-gradient(to left, rgba(7, 17, 31, 0.4), transparent); }
+.uma-performance-carousel[data-has-previous] .uma-performance-carousel-viewport::before,
+.uma-performance-carousel[data-has-next] .uma-performance-carousel-viewport::after { opacity: 1; }
+.uma-performance-carousel-position { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 9px; color: var(--uma-muted); font-size: 10px; line-height: 1.4; }
+.uma-performance-carousel-progress { position: relative; width: 48px; height: 3px; overflow: hidden; border-radius: 3px; background: rgba(125, 211, 252, 0.16); }
+.uma-performance-carousel-progress > span { position: absolute; top: 0; bottom: 0; border-radius: inherit; background: #67e8f9; transition: left 200ms ease, width 200ms ease; }
+
+@media (max-width: 639px) {
+  .uma-performance-carousel { --uma-performance-gap: 8px; }
+  .uma-performance-carousel-viewport,
+  .uma-performance-carousel .uma-statistics-performance-card { border-radius: 9px; }
+  .uma-performance-carousel .uma-statistics-performance-card > .uma-statistics-avatar { height: auto; aspect-ratio: 1; flex-shrink: 0; }
+  .uma-performance-empty-portrait { height: auto; aspect-ratio: 1; }
+  .uma-performance-carousel .uma-statistics-performance-body { display: flex; flex: 1; flex-direction: column; padding: 8px 6px; }
+  .uma-performance-carousel .uma-statistics-performance-body h3 { display: block; height: auto; min-height: 32px; flex: 1; margin: 0 0 8px; overflow: visible; -webkit-line-clamp: unset; font-size: 12px; line-height: 16px; text-wrap: wrap; }
+  .uma-performance-carousel .uma-statistics-card-values { font-size: 11px; }
+  .uma-performance-carousel .uma-statistics-card-values > div { gap: 3px; padding: 3px 0; }
+  .uma-performance-carousel .uma-statistics-card-values dd { font-size: 12px; }
+  .uma-performance-card-rank { top: 5px; left: 5px; padding: 3px 6px; font-size: 11px; }
+}
+
+@media (max-width: 767px) {
+  .uma-statistics-performance .uma-performance-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; width: 100%; }
+  .uma-statistics-performance .uma-performance-controls .uma-statistics-sort { position: relative; min-width: 0; width: auto; gap: 0; }
+  .uma-statistics-performance .uma-statistics-sort > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .uma-statistics-performance .uma-performance-controls .uma-statistics-sort select { width: 100%; max-width: none; min-height: 48px; }
+  .uma-statistics-performance .uma-performance-view-switch { margin: 0; padding: 2px; }
+  .uma-statistics-performance .uma-performance-view-switch button { gap: 4px; min-height: 42px; padding: 0 8px; }
+  .uma-statistics-performance .uma-performance-view-switch svg { width: 13px; height: 13px; flex-shrink: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uma-performance-carousel .uma-statistics-performance-card[data-medal="gold"],
+  .uma-performance-carousel .uma-statistics-performance-card[data-medal="gold"]::before,
+  .uma-performance-carousel .uma-statistics-performance-card[data-medal="gold"]::after { animation: none; }
+  .uma-performance-carousel :is(.uma-performance-carousel-track, .uma-statistics-performance-card, .uma-performance-carousel-progress > span),
+  .uma-performance-carousel .uma-statistics-performance-card[data-medal]::before,
+  .uma-performance-carousel-viewport::before,
+  .uma-performance-carousel-viewport::after { transition: none; }
+}

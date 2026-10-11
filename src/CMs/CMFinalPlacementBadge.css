@@ -1,0 +1,15 @@
+.cm-final-placement-badge { position: absolute; z-index: 40; pointer-events: none; white-space: nowrap; }
+.cm-final-placement-badge--lineup { top: -2px; left: 50%; transform: translateX(-50%); padding: 3px 6px; font-size: 11px; }
+.cm-final-placement-badge--hero { top: 12px; left: 50%; transform: translateX(-50%); }
+.cm-final-placement-badge--card { top: 4px; left: 4px; }
+.cm-final-placement-badge--compact-card { top: 1px; left: 1px; padding: 1px 3px; font-size: 9px; }
+.cm-final-result-portraits { container-type: inline-size; }
+
+@media (max-width: 639px) {
+  .cm-final-placement-badge--card,
+  .cm-final-placement-badge--hero { padding: 3px 6px; font-size: 11px; }
+  .cm-final-placement-badge--hero { top: 15px; }
+  /* Keep side badges visible without moving the existing 165px portrait slots. */
+  .cm-final-result-portraits > :first-child:nth-last-child(3) > .cm-final-placement-badge--hero { transform: translateX(calc(-50% + max(0px, 189px - 50cqw))); }
+  .cm-final-result-portraits > :last-child:nth-child(3) > .cm-final-placement-badge--hero { transform: translateX(calc(-50% - max(0px, 189px - 50cqw))); }
+}
