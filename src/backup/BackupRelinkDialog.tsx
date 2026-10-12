@@ -28,7 +28,7 @@ export default function BackupRelinkDialog({ onCancel, onConfirm }: {
         <h2 id={titleId} className="mt-2 text-xl font-black">Link this backup file?</h2>
       </div>
       <div id={messageId} className="px-6 py-5 text-sm leading-6 text-blue-100/75">
-        <p>This backup was created by the profile this profile was imported from. Linking it will allow Automatic Backup on this device to update this file from now on.</p>
+        <p>This backup comes from a profile previously imported or restored into this profile. Linking it will allow Automatic Backup on this device to update this file from now on.</p>
         <p>This does not import or replace your current profile data.</p>
       </div>
       <div className="flex flex-wrap justify-end gap-2 border-t border-white/[0.07] px-6 py-4">

@@ -4,6 +4,7 @@ import { importTS } from "./helpers/importTS.mjs"
 
 const { LocalBackupController } = await importTS(new URL("../src/backup/LocalBackupController.ts", import.meta.url))
 const { writeProfileBackupFile } = await importTS(new URL("../src/backup/backupFile.ts", import.meta.url))
+const { getTrustedBackupSourceIds } = await importTS(new URL("../src/profiles/profileStore.ts", import.meta.url))
 const { PROFILE_DATA_VERSION } = await importTS(new URL("../src/profiles/profileDataMigration.ts", import.meta.url))
 const profile = (fields = {}) => ({ id: "local-copy", name: "Imported trainer", createdAt: "2026-10-11T00:00:00Z", sourceProfileId: "copy-owner", importedFromSourceProfileId: "desktop-owner", ...fields })
 const backup = (owner, name = "Trainer") => ({ format: "uma-tracker-profile", version: 1, profile: { sourceProfileId: owner, name }, data: { dataVersion: PROFILE_DATA_VERSION, cms: [], lohs: [], customUmaDatabase: { customCharacters: [], customVersions: [], archivedVersionIds: [] }, favoriteUmaId: "current-uma", cmViewMode: "detailed", seenOfficialVersionIds: [], onboardingCompleted: true } })
@@ -73,6 +74,44 @@ test("cancelling leaves the file byte-for-byte unchanged and backup disconnected
   await controller.confirmRelink(); await controller.saveNow()
   assert.equal(handle.text, original); assert.equal(handle.calls.open, 0); assert.equal(configs.size, 0)
   assert.equal(controller.getSnapshot().configured, false); assert.equal(controller.getSnapshot().phase, "off")
+})
+
+test("restored origins and new import origins allow explicit relinking without replacing current identity or data", async () => {
+  for (const source of ["desktop-owner", "other-trusted-device"]) {
+    const current = profile({ importedFromSourceProfileId: undefined, trustedBackupSourceIds: ["desktop-owner", "other-trusted-device"] })
+    const selected = backup(source); selected.data.favoriteUmaId = "older-desktop-data"
+    const handle = file(selected), original = handle.text
+    const { controller, configs, currentProfile, setCurrent } = setup(handle, current)
+    await controller.setProfile(currentProfile); await controller.selectFile("existing")
+    assert.deepEqual(controller.getSnapshot().relink, { fileName: handle.name })
+    assert.equal(handle.text, original); assert.equal(handle.calls.open, 0); assert.equal(configs.size, 0)
+    controller.cancelRelink(); await controller.confirmRelink()
+    assert.equal(handle.text, original); assert.equal(configs.size, 0)
+    await controller.selectFile("existing"); await controller.confirmRelink()
+    assert.equal(controller.getSnapshot().phase, "ready"); assert.equal(controller.getSnapshot().configured, true)
+    assert.equal(JSON.parse(handle.text).profile.sourceProfileId, "copy-owner")
+    assert.equal(JSON.parse(handle.text).data.favoriteUmaId, "current-uma")
+    assert.equal(current.sourceProfileId, "copy-owner"); assert.equal(configs.get(current.id).handle, handle)
+    const latest = backup("copy-owner"); latest.data.favoriteUmaId = "later-mobile-change"
+    setCurrent(latest); controller.changed(`profile:${current.id}:data`); await controller.saveNow()
+    assert.deepEqual(JSON.parse(handle.text), latest); assert.equal(controller.getSnapshot().error, "")
+  }
+})
+
+test("unrelated files remain untouched even when trusted restore origins exist", async () => {
+  const current = profile({ importedFromSourceProfileId: undefined, trustedBackupSourceIds: ["desktop-owner"] })
+  const handle = file(backup("unrelated-C")), original = handle.text
+  const { controller, configs } = setup(handle, current)
+  await controller.setProfile(current); await controller.selectFile("existing"); await controller.confirmRelink()
+  assert.equal(controller.getSnapshot().relink, null); assert.match(controller.getSnapshot().error, /belongs to profile/)
+  assert.equal(handle.text, original); assert.equal(handle.calls.open, 0); assert.equal(configs.size, 0)
+})
+
+test("trusted origin lookup accepts only exact nonempty string IDs and remains compatible with legacy imports", () => {
+  const current = profile({ trustedBackupSourceIds: ["new-origin", null, 12, "", " ", "new-origin"] })
+  assert.deepEqual(getTrustedBackupSourceIds(current), ["new-origin", "desktop-owner"])
+  assert.deepEqual(getTrustedBackupSourceIds(profile({ trustedBackupSourceIds: "unrelated-owner" })), ["desktop-owner"])
+  assert.deepEqual(getTrustedBackupSourceIds(profile({ trustedBackupSourceIds: null, importedFromSourceProfileId: undefined })), [])
 })
 
 test("unrelated profiles and older copies without recorded origin stay blocked without a relink offer", async () => {

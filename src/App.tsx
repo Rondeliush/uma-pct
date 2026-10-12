@@ -1018,8 +1018,12 @@ function TrackerApp() {
     setIsRestoring(true)
     setProfileError(null)
     try {
-      await withProfileDataUpdateQueue(profile.id, () => restoreProfileFromBackup(profile, file))
-      setProfiles((current) => [...current])
+      let restoredProfile = profile
+      await withProfileDataUpdateQueue(profile.id, async () => {
+        restoredProfile = await restoreProfileFromBackup(profile, file)
+      })
+      setProfiles((current) => current.map((item) => item.id === profile.id ? restoredProfile : item))
+      setActiveProfile((current) => current?.id === profile.id ? restoredProfile : current)
       // Reload active data and its custom Uma database without selecting a profile.
       setProfileDataRevisions((current) => ({ ...current, [profile.id]: (current[profile.id] ?? 0) + 1 }))
       setRestorePreview(null)

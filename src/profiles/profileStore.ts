@@ -10,6 +10,15 @@ export type Profile = {
   createdAt: string
   sourceProfileId?: string
   readonly importedFromSourceProfileId?: string
+  readonly trustedBackupSourceIds?: readonly string[]
+}
+
+export function getTrustedBackupSourceIds(profile: Profile): string[] {
+  // Older imported copies recorded just one origin. Keep honoring that evidence.
+  const origins = Array.isArray(profile.trustedBackupSourceIds) ? profile.trustedBackupSourceIds : []
+  return [...new Set([...origins, profile.importedFromSourceProfileId].filter(
+    (id): id is string => typeof id === "string" && id.trim() !== "",
+  ))]
 }
 
 const PROFILES_STORAGE_KEY = "profiles"

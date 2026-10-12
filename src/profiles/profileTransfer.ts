@@ -1,5 +1,5 @@
 import type { ProfileData } from "./profileDataStore"
-import { createProfileId, type Profile } from "./profileStore"
+import { createProfileId, getTrustedBackupSourceIds, type Profile } from "./profileStore"
 import { openDatabase, STORE_NAME } from "../storage/indexedDB"
 import { notifyStorageChanged } from "../storage/storageChanges"
 import { migrateProfileData, PROFILE_DATA_VERSION } from "./profileDataMigration"
@@ -133,7 +133,7 @@ export async function importProfileToDevice(file: ImportedProfileFile, asCopy = 
       id: createProfileId(),
       name: file.profile.name.trim() + (asCopy ? " (restored)" : ""),
       sourceProfileId: asCopy ? createProfileId() : file.profile.sourceProfileId,
-      ...(asCopy ? { importedFromSourceProfileId: file.profile.sourceProfileId } : {}),
+      trustedBackupSourceIds: [file.profile.sourceProfileId],
       createdAt: new Date().toISOString(),
     }
 
@@ -169,9 +169,9 @@ export async function importProfileToDevice(file: ImportedProfileFile, asCopy = 
   })
 }
 
-// Restore changes only data, never the target's identity, name or backup handle.
+// Restore commits data and trusted origin together, preserving identity and backup handle.
 // Call through the profile data update queue after the user confirms the preview.
-export async function restoreProfileFromBackup(profile: Profile, file: ImportedProfileFile): Promise<void> {
+export async function restoreProfileFromBackup(profile: Profile, file: ImportedProfileFile): Promise<Profile> {
   if (!isImportedProfileFile(file)) throw new Error("This is not a valid UmaPCT profile backup. Nothing was changed.")
   const data = { ...migrateProfileData(file.data), onboardingCompleted: true, cmLineupGuideCompleted: true }
   const database = await openDatabase()
@@ -180,6 +180,7 @@ export async function restoreProfileFromBackup(profile: Profile, file: ImportedP
     const store = transaction.objectStore(STORE_NAME)
     const profiles = store.get("profiles")
     let failure: unknown
+    let restoredProfile: Profile
     profiles.onsuccess = () => {
       try {
         const target: Profile | undefined = Array.isArray(profiles.result)
@@ -192,12 +193,18 @@ export async function restoreProfileFromBackup(profile: Profile, file: ImportedP
         }
         // A restored existing profile must not start either new-profile Guide.
         store.put(data, `profile:${profile.id}:data`)
+        restoredProfile = {
+          ...target,
+          trustedBackupSourceIds: [...new Set([...getTrustedBackupSourceIds(target), file.profile.sourceProfileId])],
+        }
+        store.put(profiles.result.map((item: Profile) => item.id === target.id ? restoredProfile : item), "profiles")
       } catch (error) { failure = error; transaction.abort() }
     }
     transaction.oncomplete = () => {
       database.close()
+      notifyStorageChanged("profiles")
       notifyStorageChanged(`profile:${profile.id}:data`)
-      resolve()
+      resolve(restoredProfile)
     }
     transaction.onabort = () => {
       database.close()

@@ -1,5 +1,5 @@
 import { isImportedProfileFile, type ImportedProfileFile } from "../profiles/profileTransfer"
-import type { Profile } from "../profiles/profileStore"
+import { getTrustedBackupSourceIds, type Profile } from "../profiles/profileStore"
 
 export type BackupFile = {
   name: string
@@ -80,8 +80,7 @@ export async function assertBackupFileOwner(handle: BackupFile, sourceProfileId:
 }
 
 export function canRelinkBackupFile(profile: Profile, backup: ImportedProfileFile): boolean {
-  return typeof profile.importedFromSourceProfileId === "string" &&
-    profile.importedFromSourceProfileId === backup.profile.sourceProfileId &&
+  return getTrustedBackupSourceIds(profile).includes(backup.profile.sourceProfileId) &&
     backup.profile.sourceProfileId !== (profile.sourceProfileId ?? profile.id)
 }
 
