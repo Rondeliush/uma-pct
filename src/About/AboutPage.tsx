@@ -30,7 +30,7 @@ function AboutPage() {
             </div>
 
             <div className="mt-1 text-sm text-blue-100/45">
-              Version 0.1.6
+              Version 0.1.6_3
             </div>
           </div>
 
