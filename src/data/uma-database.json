@@ -1,6 +1,7 @@
 {
    "latestAddedVersionIds": [
-    "zenno-rob-roy"
+    "zenno-rob-roy",
+    "narita-brian-blaze"
   ],
   "characters": [
     {
@@ -1144,6 +1145,14 @@
       "versionName": "Commander",
       "archived": false,
       "avatar": "/Umas/char_stand_100103.png"
+    },
+    {
+      "id": "narita-brian-blaze",
+      "characterId": "narita-brian",
+      "displayName": "Narita Brian (BLAZE)",
+      "versionName": "Blaze",
+      "archived": false,
+      "avatar": "/Umas/char_stand_101602.png"
     } 
   ] 
 }
