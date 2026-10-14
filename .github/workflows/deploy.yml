@@ -33,11 +33,44 @@ jobs:
           node-version: lts/*
           cache: npm
 
+      - name: Disk usage before install
+        run: |
+          echo "=== BEFORE NPM CI ==="
+          df -h
+          echo ""
+          echo "=== WORKSPACE SIZE ==="
+          du -sh . || true
+
       - name: Install dependencies
         run: npm ci
 
+      - name: Disk usage after install
+        run: |
+          echo "=== AFTER NPM CI ==="
+          df -h
+          echo ""
+          echo "=== NODE_MODULES ==="
+          du -sh node_modules || true
+          echo ""
+          echo "=== WORKSPACE SIZE ==="
+          du -sh . || true
+
       - name: Build
         run: npm run build
+
+      - name: Disk usage after build
+        run: |
+          echo "=== AFTER BUILD ==="
+          df -h
+          echo ""
+          echo "=== NODE_MODULES ==="
+          du -sh node_modules || true
+          echo ""
+          echo "=== DIST ==="
+          du -sh dist || true
+          echo ""
+          echo "=== WORKSPACE SIZE ==="
+          du -sh . || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
