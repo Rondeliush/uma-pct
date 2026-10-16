@@ -140,9 +140,7 @@ function CMCardMobile({
                 <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/10 pt-2">
                 {/* UMAS */}
                 <div className="flex items-center gap-1.5">
-                    {displayedLineup
-                    .slice(0, 3)
-                    .map((cmUmaId) => {
+                    {Array.from({ length: 3 }, (_, index) => displayedLineup[index]).map((cmUmaId, index) => {
                         const cmUma = (
                         cm.participants ?? []
                         ).find(
@@ -152,7 +150,7 @@ function CMCardMobile({
                         )
 
                         if (!cmUma) {
-                        return null
+                        return <div key={`empty-${index}`} aria-label="Empty lineup slot" className="flex h-10 w-10 items-center justify-center rounded-lg border border-dashed border-cyan-300/15 bg-cyan-300/[0.015] text-cyan-100/15">?</div>
                         }
 
                         const umaVersion =
@@ -425,7 +423,7 @@ function CMCardMobile({
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-                {displayedLineup.map((cmUmaId) => {
+                {Array.from({ length: 3 }, (_, index) => displayedLineup[index]).map((cmUmaId, index) => {
                 const cmUma = (
                     cm.participants ?? []
                 ).find(
@@ -434,7 +432,7 @@ function CMCardMobile({
                 )
 
                 if (!cmUma) {
-                    return null
+                    return <div key={`empty-${index}`} aria-label="Empty lineup slot" className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-cyan-300/15 bg-cyan-300/[0.015] text-2xl font-black text-cyan-100/15">?</div>
                 }
 
                 const umaVersion = versions.find(

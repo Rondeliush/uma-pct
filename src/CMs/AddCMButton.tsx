@@ -60,9 +60,9 @@ function AddCMButton({
     createEmptyUma(),
   ])
 
-  const allUmasSelected =
-    umas.length === 3 &&
-    umas.every((uma) => uma.id !== "")
+  const canCreateCM =
+    cmNumber !== "" && !cmNumberExists && track !== "" &&
+    Number.isFinite(Number(distance)) && Number(distance) > 0
 
   const resetForm = () => {
     setCmNumber("")
@@ -94,11 +94,11 @@ function AddCMButton({
       return
     }
 
-    if (!allUmasSelected) {
+    if (!canCreateCM) {
       return
     }
 
-    const newParticipants: CMUma[] = umas.map(
+    const newParticipants: CMUma[] = umas.filter((uma) => uma.id !== "").map(
     (uma, index) => ({
       cmUmaId: `cm${cmNumber}-uma-${index + 1}`,
       umaId: uma.id,
@@ -1054,7 +1054,7 @@ function AddCMButton({
                           </div>
 
                           <div className="mt-1 text-xs font-medium text-violet-200/45">
-                            Select your three runners for this Champions Meeting.
+                            Optional — you can add your Umas later.
                           </div>
                         </div>
                       </div>
@@ -1133,11 +1133,7 @@ function AddCMButton({
                   <button
                     type="button"
                     onClick={handleCreateCM}
-                    disabled={
-                      cmNumber === "" ||
-                      cmNumberExists ||
-                      !allUmasSelected
-                    }
+                    disabled={!canCreateCM}
                     className="
                       flex h-11 w-full
                       md:h-10 md:w-auto md:min-w-[124px]

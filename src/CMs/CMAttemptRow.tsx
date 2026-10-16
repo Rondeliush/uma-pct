@@ -6,7 +6,7 @@ import type {
 } from "react"
 
 import type { CM } from "../types/types"
-import { getResultConfiguration, snapshotAttemptResults, snapshotParticipantConfiguration } from "./cmParticipantConfiguration"
+import { getResultConfiguration, hasCompleteCMLineup, snapshotAttemptResults, snapshotParticipantConfiguration } from "./cmParticipantConfiguration"
 import ParticipantConfigurationBadges from "./ParticipantConfigurationBadges"
 import CMParticipantName from "./CMParticipantName"
 import { getRunningStyleVisual } from "./runningStyleVisuals"
@@ -41,6 +41,7 @@ function CMAttemptRow({
   const [isEditing, setIsEditing] = useState(
   !existingAttempt && !attemptsLocked
   )
+  const needsCompleteLineup = !existingAttempt && !hasCompleteCMLineup(cm)
 
   const [isRetired, setIsRetired] = useState(
   existingAttempt?.retired ?? false
@@ -133,6 +134,7 @@ const validTotal =
 
 const canSave =
   !attemptsLocked &&
+  !needsCompleteLineup &&
   allFieldsFilled &&
   validRacesPlayed &&
   validValues &&
@@ -181,6 +183,7 @@ const canSave =
       )
 
       const isNewAttempt = !previousAttempt
+      if (isNewAttempt && !hasCompleteCMLineup(item)) return item
       const newAttempt = snapshotAttemptResults(item, draftAttempt)
 
       const updatedAttempts = [
@@ -400,6 +403,8 @@ const isRound2 = day === 3 || day === 4
       )}
     </div>
 
+    {needsCompleteLineup && <p className="mb-3 text-xs text-blue-100/65">Complete your lineup before recording attempts.</p>}
+
     {/* UMA RESULTS */}
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_72px] gap-x-3 gap-y-2">
       {participantIds.map((cmUmaId, index) => {
@@ -427,7 +432,7 @@ const isRound2 = day === 3 || day === 4
               min="0"
               max={racesPlayed}
               value={winInputs[index] ?? ""}
-              disabled={!isEditing || attemptsLocked}
+              disabled={!isEditing || attemptsLocked || needsCompleteLineup}
               onChange={(e) => {
                 const value = e.target.value
 
@@ -455,7 +460,7 @@ const isRound2 = day === 3 || day === 4
         <input
           type="checkbox"
           checked={isRetired}
-          disabled={!isEditing || attemptsLocked}
+          disabled={!isEditing || attemptsLocked || needsCompleteLineup}
           onChange={(event) => {
             const checked = event.target.checked
 
@@ -479,7 +484,7 @@ const isRound2 = day === 3 || day === 4
 
           <select
             value={racesPlayedInput}
-            disabled={!isEditing || attemptsLocked}
+            disabled={!isEditing || attemptsLocked || needsCompleteLineup}
             onChange={(event) => {
               const value = event.target.value
 

@@ -24,7 +24,8 @@ type UmaFormData = {
 function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
   const { characters, versions } = useUmaDatabase()
     const [umas, setUmas] = useState<UmaFormData[]>(
-  (cm.currentLineup ?? []).map((cmUmaId) => {
+  Array.from({ length: 3 }, (_, index) => {
+    const cmUmaId = cm.currentLineup?.[index]
     const cmUma = (cm.participants ?? []).find(
       (participant) =>
         participant.cmUmaId === cmUmaId
@@ -42,7 +43,7 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
     return {
       id: cmUma?.umaId ?? "",
       name: umaCharacter?.name ?? "",
-      style: getRunningStyleLabel(cmUma?.runningStyle),
+      style: cmUma ? getRunningStyleLabel(cmUma.runningStyle) : "Runaway",
       ace: cmUma?.ace ?? false,
       debuffer: cmUma?.debuffer ?? false,
       autoRun: cmUma?.autoRun ?? false,
@@ -114,7 +115,7 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
           0
         ) + 1
 
-      const newCurrentLineup = umas.map(
+      const newCurrentLineup = umas.filter((uma) => uma.id !== "").map(
         (selectedUma) => {
           // Czy ta Uma brała już udział w tym CM?
           const existingParticipant =
@@ -186,7 +187,7 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
       umaId !== undefined
   )
 
-const newLineupUmaIds = umas.map(
+const newLineupUmaIds = umas.filter((uma) => uma.id !== "").map(
   (uma) => uma.id
 )
 

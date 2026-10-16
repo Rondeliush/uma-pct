@@ -8,6 +8,14 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
     {
+    version: "0.1.7",
+    date: "2026-10-16",
+
+    new: [
+      "Champions Meetings can now be created without selecting Umas, allowing the lineup to be completed later.",
+    ],
+  },
+    {
     version: "0.1.6",
     date: "2026-10-11",
 

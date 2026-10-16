@@ -35,6 +35,15 @@ export function getParticipantRunningStyle(participant: CMUma | undefined): Runn
   return normalizeRunningStyle(Object.hasOwn(legacy, "runningStyle") ? legacy.runningStyle : legacy.style)
 }
 
+export function hasCompleteCMLineup(cm: CM): boolean {
+  const ids = cm.currentLineup ?? []
+  return ids.length === 3 && new Set(ids).size === 3 && ids.every((id) =>
+    id.trim() !== "" && (cm.participants ?? []).some((participant) =>
+      participant.cmUmaId === id && typeof participant.umaId === "string" && participant.umaId.trim() !== "",
+    ),
+  )
+}
+
 export function snapshotParticipantConfiguration(
   participant: CMUma | undefined,
   configurationSource: CMParticipantConfiguration["configurationSource"] = "recorded",

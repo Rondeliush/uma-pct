@@ -319,13 +319,13 @@ if (compact) {
 
             {/* COMPACT UMAS */}
       <div className="flex w-36 shrink-0 items-center gap-2">
-        {displayedLineup.map((cmUmaId) => {
+        {Array.from({ length: 3 }, (_, index) => displayedLineup[index]).map((cmUmaId, index) => {
           const cmUma = (cm.participants ?? []).find(
             (participant) => participant.cmUmaId === cmUmaId
           )
 
           if (!cmUma) {
-            return null
+            return <div key={`empty-${index}`} aria-label="Empty lineup slot" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-cyan-300/15 bg-cyan-300/[0.015] text-cyan-100/15">?</div>
           }
 
           const umaVersion = versions.find(
@@ -713,14 +713,14 @@ return (
 
   {/* UMA CARDS */}
   <div className="flex items-center gap-3">
-    {displayedLineup.map((cmUmaId) => {
+    {Array.from({ length: 3 }, (_, index) => displayedLineup[index]).map((cmUmaId, index) => {
       const cmUma = (cm.participants ?? []).find(
         (participant) =>
           participant.cmUmaId === cmUmaId
       )
 
       if (!cmUma) {
-        return null
+        return <div key={`empty-${index}`} aria-label="Empty lineup slot" className="flex h-[150px] w-[150px] shrink-0 items-center justify-center rounded-xl border border-dashed border-cyan-300/15 bg-cyan-300/[0.015] text-2xl font-black text-cyan-100/15">?</div>
       }
 
       const umaVersion = versions.find(
