@@ -1,7 +1,9 @@
 {
    "latestAddedVersionIds": [
     "zenno-rob-roy",
-    "narita-brian-blaze"
+    "narita-brian-blaze",
+    "kitasan-black-new-year",
+    "satono-diamond-new-year"
   ],
   "characters": [
     {
@@ -1153,6 +1155,22 @@
       "versionName": "Blaze",
       "archived": false,
       "avatar": "/Umas/char_stand_101602.png"
-    } 
+    },
+    {
+      "id": "kitasan-black-new-year",
+      "characterId": "kitasan-black",
+      "displayName": "Kitasan Black (New Year)",
+      "versionName": "New Year",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1068_106802.png"
+    },
+    {
+      "id": "satono-diamond-new-year",
+      "characterId": "satono-diamond",
+      "displayName": "Satono Diamond (New Year)",
+      "versionName": "New Year",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1067_106702.png"
+    }
   ] 
 }
