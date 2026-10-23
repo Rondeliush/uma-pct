@@ -1,9 +1,9 @@
 {
    "latestAddedVersionIds": [
-    "zenno-rob-roy",
     "narita-brian-blaze",
     "kitasan-black-new-year",
-    "satono-diamond-new-year"
+    "satono-diamond-new-year",
+    "hokko-tarumae-original"
   ],
   "characters": [
     {
@@ -281,6 +281,10 @@
     {
       "id": "zenno-rob-roy",
       "name": "Zenno Rob Roy"
+    },
+    {
+      "id": "hokko-tarumae",
+      "name": "Hokko Tarumae"
     }
   ],
   "versions": [
@@ -1133,7 +1137,7 @@
       "avatar": "/Umas/chara_stand_1008_100802.png"
     } ,
     {
-      "id": "zenno-rob-roy",
+      "id": "zenno-rob-roy-original",
       "characterId": "zenno-rob-roy",
       "displayName": "Zenno Rob Roy",
       "versionName": "Original",
@@ -1171,6 +1175,14 @@
       "versionName": "New Year",
       "archived": false,
       "avatar": "/Umas/chara_stand_1067_106702.png"
+    },
+    {
+      "id": "hokko-tarumae-original",
+      "characterId": "hokko-tarumae",
+      "displayName": "Hokko Tarumae",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1099_109901.png"
     }
   ] 
 }
