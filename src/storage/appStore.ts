@@ -6,7 +6,6 @@ import {
 
 import type {
   CM,
-  LoH,
   UmaCharacter,
   UmaVersion,
 } from "../types/types"
@@ -14,7 +13,7 @@ import { migrateCMConfiguration } from "../profiles/profileDataMigration"
 
 const APP_STORE_PREFIX = "app:"
 
-function getAppStoreKey(key: string) {
+export function getAppStoreKey(key: string) {
   return `${APP_STORE_PREFIX}${key}`
 }
 
@@ -29,29 +28,12 @@ export async function loadCmsFromStore(): Promise<CM[]> {
   )
 }
 
-export async function loadLohsFromStore(): Promise<LoH[]> {
-  return (
-    (await getStoredValue<LoH[]>(
-      getAppStoreKey("lohs")
-    )) ?? []
-  )
-}
-
 export async function saveCmsToStore(
   cms: CM[]
 ) {
   await setStoredValue(
     getAppStoreKey("cms"),
     cms.map(migrateCMConfiguration)
-  )
-}
-
-export async function saveLohsToStore(
-  lohs: LoH[]
-) {
-  await setStoredValue(
-    getAppStoreKey("lohs"),
-    lohs
   )
 }
 

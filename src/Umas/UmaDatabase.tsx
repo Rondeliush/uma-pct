@@ -15,9 +15,10 @@ import UmaDatabaseIcon from "./UmaDatabaseIcon"
 type UmaDatabaseProps = {
   cms: CM[]
   hasUpdateNotification: boolean
+  initialVersionId?: string | null
 }
 
-function UmaDatabase({ cms, hasUpdateNotification }: UmaDatabaseProps) {
+function UmaDatabase({ cms, hasUpdateNotification, initialVersionId = null }: UmaDatabaseProps) {
   const {
     characters,
     versions,
@@ -34,16 +35,16 @@ function UmaDatabase({ cms, hasUpdateNotification }: UmaDatabaseProps) {
 
   const [searchText, setSearchText] = useState("")
   const [isAddUmaOpen, setIsAddUmaOpen] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(versions.find(version => version.id === initialVersionId)?.archived ? "all" : "active")
   const [showOfficial, setShowOfficial] = useState(true)
   const [showCustom, setShowCustom] = useState(true)
   const [mobileViewMode, setMobileViewMode] = useState<ViewMode>("grid")
   const viewMode = isMobile ? mobileViewMode : "grid"
   const [sortOrder, setSortOrder] = useState<SortOrder>("name-az")
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
-    null
+    versions.find(version => version.id === initialVersionId)?.characterId ?? null
   )
-  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false)
+  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(initialVersionId !== null)
   const [deleteTarget, setDeleteTarget] = useState<UmaVersion | null>(null)
   const pageRef = useRef<HTMLDivElement>(null)
   const listScrollPosition = useRef(0)
@@ -216,6 +217,7 @@ function UmaDatabase({ cms, hasUpdateNotification }: UmaDatabaseProps) {
         {selectedEntry ? (
           <UmaVersionPanel
             key={selectedEntry.character.id}
+            initialVersionId={initialVersionId}
             entry={selectedEntry}
             hasOfficialMatch={hasOfficialCharacterMatch(
               selectedEntry.character.id

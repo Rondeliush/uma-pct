@@ -37,10 +37,11 @@ function withBrowser(run, initialHash = "", state = { unrelated: "retained" }, p
   try { run(browser) } finally { globalThis.window = originalWindow }
 }
 
-test("all six Statistics locations have canonical hash URLs and round-trip route parameters", () => {
+test("Statistics locations have canonical hash URLs and round-trip route parameters", () => {
   const routes = [
     ["landing", null, "#/statistics"], ["events", null, "#/statistics/events"],
     ["uma", null, "#/statistics/uma"], ["uma", "exact-version-id", "#/statistics/uma/exact-version-id"],
+    ["compare", null, "#/statistics/compare"],
     ["tracks", null, "#/statistics/tracks"], ["tracks", "hanshin", "#/statistics/tracks/hanshin"],
   ]
   for (const [section, id, href] of routes) {
@@ -67,8 +68,13 @@ test("existing Track URL builders and parsers share the generalized Statistics i
 })
 
 test("overview trailing slashes are safe and unrelated pages never become Statistics routes", () => {
-  for (const section of ["landing", "events", "uma", "tracks"]) assert.equal(parseStatisticsRoute(getStatisticsHref(section) + "/").section, section)
-  for (const hash of ["", "#/cms", "#/settings", "#/profiles", "#/statistics-extra", "#/statistics/unknown", "#/statistics/events/extra", "#/statistics/uma-extra"]) assert.equal(parseStatisticsRoute(hash), null)
+  for (const section of ["landing", "events", "uma", "compare", "tracks"]) assert.equal(parseStatisticsRoute(getStatisticsHref(section) + "/").section, section)
+  for (const hash of ["", "#/cms", "#/settings", "#/profiles", "#/statistics-extra", "#/statistics/unknown", "#/statistics/events/extra", "#/statistics/compare/extra", "#/statistics/uma-extra"]) assert.equal(parseStatisticsRoute(hash), null)
+})
+
+test("comparison is a separate page and does not reserve an opaque Uma version ID", () => {
+  assert.deepEqual(parseStatisticsRoute("#/statistics/compare"), { section: "compare", umaVersionId: null, trackId: null })
+  assert.deepEqual(parseStatisticsRoute(getStatisticsHref("uma", "compare")), { section: "uma", umaVersionId: "compare", trackId: null })
 })
 
 test("invalid and malformed detail parameters stay intact for not-found views without selecting a default", () => {
@@ -80,11 +86,11 @@ test("invalid and malformed detail parameters stay intact for not-found views wi
 
 test("unknown hashes and paths are unavailable, preserving all existing application and Statistics URLs", () => {
   for (const pathname of ["/uma-pct", "/uma-pct/", "/uma-pct/index.html"]) {
-    for (const hash of ["", "#/statistics", "#/statistics/events", "#/statistics/uma", "#/statistics/uma/version-id", "#/statistics/tracks", "#/statistics/tracks/hanshin"]) {
+    for (const hash of ["", "#/loh", "#/loh/1", "#/statistics", "#/statistics/events", "#/statistics/uma", "#/statistics/uma/version-id", "#/statistics/compare", "#/statistics/tracks", "#/statistics/tracks/hanshin"]) {
       assert.equal(isUnavailableRoute(hash, pathname, "/uma-pct/"), false, pathname + hash)
     }
   }
-  for (const hash of ["#/unknown", "#/loh", "#/statistics/blocked", "#/statistics/events/extra", "#internal-route"]) {
+  for (const hash of ["#/unknown", "#/loh-extra", "#/statistics/blocked", "#/statistics/events/extra", "#internal-route"]) {
     assert.equal(isUnavailableRoute(hash, "/uma-pct/", "/uma-pct/"), true)
   }
   for (const pathname of ["/uma-pct/missing", "/uma-pct/statistics/tracks/missing", "/elsewhere/"]) {
@@ -170,6 +176,31 @@ test("direct details visits have a safe explicit overview destination without le
   }, getStatisticsHref(section, "saved-id"))
 })
 
+test("comparison shares overview history, supports Back/Forward and returns without duplicate entries", () => withBrowser(browser => {
+  navigateStatisticsRoute("compare")
+  assert.equal(browser.location.hash, "#/statistics/compare")
+  assert.equal(browser.location.search, "?existing=1")
+  assert.equal(browser.history.length, 2)
+  browser.history.back()
+  assert.equal(browser.location.hash, "#/statistics/uma")
+  browser.history.forward()
+  assert.equal(browser.location.hash, "#/statistics/compare")
+  navigateStatisticsRoute("uma")
+  assert.equal(browser.location.hash, "#/statistics/uma")
+  assert.equal(browser.history.length, 2)
+  browser.history.forward()
+  assert.equal(browser.location.hash, "#/statistics/compare")
+  assert.equal(browser.history.state.unrelated, "retained")
+}, "#/statistics/uma"))
+
+test("a direct comparison visit has a safe explicit Uma overview destination", () => withBrowser(browser => {
+  navigateStatisticsRoute("uma")
+  assert.equal(browser.location.hash, "#/statistics/uma")
+  assert.equal(browser.history.backCalls, 0)
+  browser.history.back()
+  assert.equal(browser.location.hash, "#/statistics/compare")
+}, "#/statistics/compare"))
+
 test("matching current routes do not add duplicate entries and stale parent markers do not trigger Back", () => withBrowser((browser) => {
   navigateStatisticsRoute("uma")
   assert.equal(browser.history.length, 1)
@@ -179,7 +210,7 @@ test("matching current routes do not add duplicate entries and stale parent mark
 }, "#/statistics/uma", { umaPctStatisticsHref: "#/statistics/tracks", umaPctStatisticsParent: "#/statistics" }))
 
 test("leaving Statistics clears only its hash, preserving the base path, query and unrelated history state", () => {
-  for (const section of ["landing", "events", "uma", "tracks"]) withBrowser((browser) => {
+  for (const section of ["landing", "events", "uma", "compare", "tracks"]) withBrowser((browser) => {
     clearStatisticsRoute()
     assert.equal(browser.location.href, "https://example.test/uma-pct/?existing=1")
     assert.equal(browser.history.length, 1)

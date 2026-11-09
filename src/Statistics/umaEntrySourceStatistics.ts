@@ -2,12 +2,13 @@ import { calculateAttemptRaces } from "../CMs/CMCalculations"
 import { getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 import type { CM } from "../types/types"
 import type { RaceStatistics } from "./umaStatistics"
+import { getRecordedUmaFinals } from "./umaFinalStatistics"
 
 const sourceLabels = { manual: "Manual", autorun: "AutoRun" } as const
 type EntrySource = keyof typeof sourceLabels
 export type UmaEntrySourceRow = RaceStatistics & { source: EntrySource; label: string; usage: number | null }
 
-/** Attribute version-level round batches only to their saved entry sources. */
+/** Attribute version-level rounds and raced finals to their saved entry sources. */
 export function calculateUmaEntrySourceStatistics(cms: CM[], versionId: string) {
   const totals = new Map<EntrySource, { races: number; wins: number }>()
   let totalRaces = 0
@@ -34,6 +35,22 @@ export function calculateUmaEntrySourceStatistics(cms: CM[], versionId: string) 
       row.wins += wins
       totals.set(source, row)
     }
+    const finalResults = getRecordedUmaFinals(cm).get(versionId)
+    if (!finalResults) continue
+    totalRaces += 1
+    const wins = Number(finalResults.some((result) => result.placement === "first"))
+    // Legacy final flags establish participation, but cannot replace a saved source snapshot.
+    const sources = new Set(finalResults.map((result) => cm.finalResults ? result.configuration.entrySource : null))
+    const source = sources.values().next().value
+    if (sources.size !== 1 || (source !== "manual" && source !== "autorun")) {
+      unknownSourceRaces += 1
+      unknownSourceWins += wins
+      continue
+    }
+    const row = totals.get(source) ?? { races: 0, wins: 0 }
+    row.races += 1
+    row.wins += wins
+    totals.set(source, row)
   }
   const attributedRaces = totalRaces - unknownSourceRaces
   const rows: UmaEntrySourceRow[] = (["manual", "autorun"] as const).map((source) => {

@@ -1,3 +1,5 @@
+import { formatTrackLength } from "../formatting"
+import { TRACK_SURFACES } from "../types/types"
 import { useState } from "react"
 
 import type { CM } from "../types/types"
@@ -998,7 +1000,7 @@ const recentProgress =
             </div>
 
             <div className="rounded-md border border-white/[0.09] bg-black/30 px-2.5 py-1 text-[10px] font-bold text-white/80 backdrop-blur-sm">
-              {bestEvent.cm.length}
+              {formatTrackLength(bestEvent.cm.length)}
             </div>
 
           </div>
@@ -1157,7 +1159,7 @@ const recentProgress =
   </div>
 
   {/* SURFACES */}
-  {(["Turf", "Dirt"] as const).map((surface, surfaceIndex) => {
+  {TRACK_SURFACES.map((surface, surfaceIndex) => {
     const categories =
       surface === "Turf"
         ? distanceCategories

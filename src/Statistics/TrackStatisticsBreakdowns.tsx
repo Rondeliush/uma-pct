@@ -24,7 +24,7 @@ export default function TrackStatisticsBreakdowns({ cms, trackId }: { cms: CM[];
       </section>
       <section className="uma-statistics-panel" aria-labelledby="track-detail-condition-title">
         <div className="uma-statistics-section-heading"><h2 id="track-detail-condition-title">Ground Condition Performance</h2></div>
-        <UmaDetailPerformanceTable label="Condition" rows={conditions.map((row) => ({ ...row, label: row.condition }))} />
+        <UmaDetailPerformanceTable label="Condition" rows={conditions.filter(row => row.condition !== "Yielding").map((row) => ({ ...row, label: row.condition }))} />
         {!conditions.some((row) => row.races > 0) && unknownConditionRaces === 0 && <p className="uma-statistics-summary-note">No recorded round races at this track yet.</p>}
         {unknownConditionRaces > 0 && <p className="uma-statistics-summary-note">{unknownConditionRaces.toLocaleString("en")} races have no valid recorded ground condition and are excluded here.</p>}
       </section>

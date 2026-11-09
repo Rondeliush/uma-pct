@@ -1,4 +1,4 @@
-export type StatisticsSection = "landing" | "events" | "uma" | "tracks"
+export type StatisticsSection = "landing" | "events" | "uma" | "compare" | "tracks"
 export type StatisticsRoute = {
   section: StatisticsSection
   umaVersionId: string | null
@@ -11,6 +11,7 @@ const NAVIGATION_EVENT = "uma-pct-statistics-navigation"
 const APP_ROUTES = {
   home: "#/",
   cms: "#/cm",
+  loh: "#/loh",
   statistics: STATISTICS_ROUTE,
   autoRunTimer: "#/autorun",
   umaDatabase: "#/uma-database",
@@ -24,11 +25,12 @@ export type AppPage = keyof typeof APP_ROUTES
 export type AppRoute = {
   page: AppPage
   cmId: string | null
+  lohId?: string
   statistics: StatisticsRoute | null
 }
 
-export function getAppHref(page: AppPage, cmId: string | null = null) {
-  return page === "cms" && cmId !== null ? `${APP_ROUTES.cms}/${encodeURIComponent(cmId)}` : APP_ROUTES[page]
+export function getAppHref(page: AppPage, eventId: string | null = null) {
+  return (page === "cms" || page === "loh") && eventId !== null ? `${APP_ROUTES[page]}/${encodeURIComponent(eventId)}` : APP_ROUTES[page]
 }
 
 export function parseAppRoute(hash: string): AppRoute | null {
@@ -45,6 +47,11 @@ export function parseAppRoute(hash: string): AppRoute | null {
     try { cmId = decodeURIComponent(cmId) } catch { /* Unresolved IDs use the shared unavailable page. */ }
     return { page: "cms", cmId, statistics: null }
   }
+  if (hash.startsWith(`${APP_ROUTES.loh}/`)) {
+    let lohId = hash.slice(APP_ROUTES.loh.length + 1)
+    try { lohId = decodeURIComponent(lohId) } catch { /* Unresolved IDs use the shared unavailable page. */ }
+    return { page: "loh", cmId: null, lohId, statistics: null }
+  }
   return null
 }
 
@@ -55,10 +62,10 @@ export function getStatisticsHref(section: StatisticsSection = "landing", detail
 
 export function parseStatisticsRoute(hash: string): StatisticsRoute | null {
   if (hash === STATISTICS_ROUTE || hash === `${STATISTICS_ROUTE}/`) return { section: "landing", umaVersionId: null, trackId: null }
-  for (const section of ["events", "uma", "tracks"] as const) {
+  for (const section of ["events", "uma", "compare", "tracks"] as const) {
     const base = getStatisticsHref(section)
     if (hash === base || hash === `${base}/`) return { section, umaVersionId: null, trackId: null }
-    if (section === "events" || !hash.startsWith(`${base}/`)) continue
+    if (section === "events" || section === "compare" || !hash.startsWith(`${base}/`)) continue
     const segment = hash.slice(base.length + 1)
     let id = segment
     try { id = decodeURIComponent(segment) } catch { /* Keep malformed IDs for the existing not-found view. */ }
@@ -104,8 +111,8 @@ function navigateHref(href: string, basePath?: string, backToParent = false, ret
   window.dispatchEvent(new Event(NAVIGATION_EVENT))
 }
 
-export function navigateAppRoute(page: AppPage, cmId: string | null = null, basePath?: string, backToParent = false) {
-  navigateHref(getAppHref(page, cmId), basePath, backToParent)
+export function navigateAppRoute(page: AppPage, eventId: string | null = null, basePath?: string, backToParent = false) {
+  navigateHref(getAppHref(page, eventId), basePath, backToParent)
 }
 
 export function navigateStatisticsRoute(section: StatisticsSection, detailId: string | null = null, returnPage?: string, basePath?: string) {

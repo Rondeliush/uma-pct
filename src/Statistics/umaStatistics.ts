@@ -1,6 +1,7 @@
 import { calculateAttemptRaces, calculateAttemptWins } from "../CMs/CMCalculations"
-import { getCMFinalResults, getResultConfiguration } from "../CMs/cmParticipantConfiguration"
+import { getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 import type { CM, UmaCharacter, UmaVersion } from "../types/types"
+import { getRecordedUmaFinals } from "./umaFinalStatistics"
 
 export const MIN_RACES_FOR_WIN_RATE = 10
 
@@ -78,7 +79,7 @@ export function formatUmaWinRate(winRate: number | null) {
   return winRate === null ? "—" : `${winRate.toFixed(1)}%`
 }
 
-/** Read-only, version-level view of the existing CM round records. */
+/** Read-only, version-level view of the existing CM rounds and raced finals. */
 export function calculateUmaStatistics(
   cms: CM[],
   characters: UmaCharacter[],
@@ -173,21 +174,16 @@ export function calculateUmaStatistics(
       })
     })
 
-    // A chosen final lineup alone does not establish that the final was raced.
-    if (!["1st", "2nd", "3rd"].includes(cm.finalPlace)) return
-    const finalVersions = new Set<string>()
-    const winningVersions = new Set<string>()
-    getCMFinalResults(cm).forEach((result) => {
-      if (result.configuration.umaVersionId === null) return
-      const performance = getPerformance(result.configuration.umaVersionId)
+    getRecordedUmaFinals(cm).forEach((results, versionId) => {
+      const performance = getPerformance(versionId)
+      const wins = Number(results.some((result) => result.placement === "first"))
       countEvent(performance)
-      finalVersions.add(performance.versionId)
-      if (cm.finalPlace === "1st" && result.won) {
-        winningVersions.add(performance.versionId)
-      }
+      performance.races += 1
+      performance.wins += wins
+      performance.finalAppearances += 1
+      performance.finalWins += wins
+      addDistance(performance.distances, cm.distance, 1, wins)
     })
-    finalVersions.forEach((id) => { performanceByVersion.get(id)!.finalAppearances += 1 })
-    winningVersions.forEach((id) => { performanceByVersion.get(id)!.finalWins += 1 })
   })
 
   const umas: UmaPerformance[] = Array.from(performanceByVersion.values())

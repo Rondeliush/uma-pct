@@ -1,3 +1,4 @@
+import { formatTrackLength } from "../formatting"
 import {
   useEffect,
   useState,
@@ -15,9 +16,13 @@ import {
 } from "./CMCalculations"
 import ModalPortal from "../components/ModalPortal"
 import UmaAvatarImage from "../components/UmaAvatarImage"
-import { getTrackImage } from "../data/trackData"
 import CMCardMobile from "./CMCardMobile"
 import CMFinalPlacementBadge from "./CMFinalPlacementBadge"
+import EventCardLayout from "../components/event-card/EventCardLayout"
+import EventCardBadge from "../components/event-card/EventCardBadge"
+import EventCardInfo from "../components/event-card/EventCardInfo"
+import EventCardLineup from "../components/event-card/EventCardLineup"
+import EventUmaTile from "../components/event-card/EventUmaTile"
 
 
 type CMCardProps = {
@@ -38,7 +43,6 @@ function CMCard({
   onCompactHoverStart,
 }: CMCardProps) {
   const {versions} = useUmaDatabase()
-  const trackImage = getTrackImage(cm.track)
   const overallWinRate =
     calculateOverallWinRateFromAttempts(cm)
   const finalQualification =
@@ -282,7 +286,7 @@ if (compact) {
 
       {/* LENGTH */}
       <div className="w-24 shrink-0 text-gray-300">
-        {cm.length}
+        {formatTrackLength(cm.length)}
       </div>
 
       {/* WIN RATE */}
@@ -501,219 +505,10 @@ if (compact) {
 return (
   <div className="group mb-3">
     <>
-      <div
-        data-guide="cm-card"
-        className="cm-card-sweep relative cursor-pointer overflow-hidden rounded-xl border border-sky-400/50 bg-gray-950/90 shadow-[0_0_14px_rgba(56,189,248,0.18),0_0_30px_rgba(37,99,235,0.10)] transition-[transform,background-color,box-shadow,border-color] duration-200 ease-out group-hover:-translate-y-1 group-hover:scale-[1.01] group-hover:border-sky-300/70 group-hover:bg-gray-900/95 group-hover:shadow-[0_0_20px_rgba(56,189,248,0.28),0_0_42px_rgba(37,99,235,0.18)]"
-        onClick={openCm}
-      >
-        <div className="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_0_12px_rgba(56,189,248,0.08)]" />
-        
-        <div className="grid min-h-[150px] grid-cols-[140px_480px_minmax(0,1fr)_120px_52px]">
-
-          {/* CM NUMBER */}
-          <div className="relative flex items-center justify-center overflow-hidden">
-
-            {/* BACKGROUND */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-950/80 via-indigo-950/70 to-violet-950/80" />
-
-            {/* SUBTLE GLOW */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10 blur-2xl" />
-
-            <div className="relative z-10 flex flex-col items-center">
-
-              {/* LEAGUE */}
-              <div
-                className={`mb-1 text-[9px] font-black uppercase tracking-[0.18em] ${
-                  cm.league === "Open League"
-                    ? "text-emerald-400"
-                    : cm.league === "Graded League"
-                      ? "text-red-400"
-                      : "text-gray-500"
-                }`}
-              >
-                {cm.league === "Open League"
-                  ? "OPEN"
-                  : cm.league === "Graded League"
-                    ? "GRADED"
-                    : "—"}
-              </div>
-
-              {/* CROWN */}
-              <svg
-                viewBox="0 0 32 24"
-                className="mb-0.5 h-5 w-7 text-sky-300 drop-shadow-[0_0_7px_rgba(125,211,252,0.7)]"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M4 19h24l2-12-7 5-7-9-7 9-7-5 2 12Zm2 2h20v2H6v-2Z" />
-              </svg>
-
-              {/* CM */}
-              <div className="text-lg font-black tracking-wide text-blue-200">
-                CM
-              </div>
-
-              {/* NUMBER + LAURELS */}
-              <div className="relative mt-[-2px] flex items-center justify-center">
-
-                {/* LEFT LAUREL */}
-                <svg
-                  viewBox="0 0 30 64"
-                  className="absolute right-full mr-1 h-14 w-6 text-blue-400 drop-shadow-[0_0_7px_rgba(96,165,250,0.65)]"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <ellipse cx="18" cy="54" rx="4" ry="9" transform="rotate(-35 18 54)" />
-                  <ellipse cx="13" cy="44" rx="4" ry="9" transform="rotate(-28 13 44)" />
-                  <ellipse cx="11" cy="33" rx="4" ry="9" transform="rotate(-18 11 33)" />
-                  <ellipse cx="12" cy="22" rx="4" ry="8" transform="rotate(-8 12 22)" />
-                  <ellipse cx="16" cy="12" rx="4" ry="8" transform="rotate(12 16 12)" />
-                </svg>
-
-                {/* NUMBER */}
-                <div
-                  className={`font-black leading-none tracking-tight text-white drop-shadow-[0_0_8px_rgba(96,165,250,0.45)] ${
-                    String(cm.number).length <= 2
-                      ? "text-5xl"
-                      : String(cm.number).length === 3
-                        ? "text-4xl"
-                        : String(cm.number).length === 4
-                          ? "text-3xl"
-                          : "text-2xl"
-                  }`}
-                >
-                  {cm.number}
-                </div>
-
-                {/* RIGHT LAUREL */}
-                <svg
-                  viewBox="0 0 30 64"
-                  className="absolute left-full ml-1 h-14 w-6 -scale-x-100 text-blue-400 drop-shadow-[0_0_7px_rgba(129,140,248,0.65)]"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <ellipse cx="18" cy="54" rx="4" ry="9" transform="rotate(-35 18 54)" />
-                  <ellipse cx="13" cy="44" rx="4" ry="9" transform="rotate(-28 13 44)" />
-                  <ellipse cx="11" cy="33" rx="4" ry="9" transform="rotate(-18 11 33)" />
-                  <ellipse cx="12" cy="22" rx="4" ry="8" transform="rotate(-8 12 22)" />
-                  <ellipse cx="16" cy="12" rx="4" ry="8" transform="rotate(12 16 12)" />
-                </svg>
-
-              </div>
-
-            </div>
-
-            {/* DIVIDER */}
-            <div className="pointer-events-none absolute right-0 top-1/2 h-[68%] w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-sky-400/80 to-transparent shadow-[0_0_6px_rgba(56,189,248,0.65)]" />
-
-          </div>
-          {/* EVENT / TRACK */}
-          <div className="relative overflow-hidden">
-            <div className="pointer-events-none absolute left-0 top-1/2 z-30 h-[68%] w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-sky-400/80 to-transparent shadow-[0_0_6px_rgba(56,189,248,0.65)]" />
-
-            {/* TRACK BACKGROUND */}
-            {trackImage ? (
-              <img
-                src={trackImage}
-                alt={cm.track}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-indigo-950 to-violet-950" />
-            )}
-
-            {/* OVERLAYS */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-gray-950 from-0% via-gray-950/80 via-45% to-gray-950/15 to-100%" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-gray-950/45" />
-
-            {/* CONTENT */}
-            <div className="relative z-10 flex h-full flex-col justify-center px-5 py-4">
-
-              {/* CM NAME */}
-              <div className="truncate text-2xl font-black tracking-tight text-white drop-shadow-lg">
-                {cm.name || "Unnamed CM"}
-              </div>
-
-              {/* MAIN TRACK INFO */}
-              <div className="mt-4 flex flex-nowrap items-center gap-2">
-
-                {/* RACECOURSE */}
-                <div className="whitespace-nowrap rounded-lg border border-blue-800/60 bg-gray-950/70 px-3 py-1.5 text-sm font-bold text-white backdrop-blur-sm">
-                  {cm.track || "—"}
-                </div>
-
-                {/* SURFACE */}
-                <div
-                  className={`rounded-lg px-3 py-1.5 text-sm font-black ${
-                    cm.surface === "Turf"
-                      ? "bg-emerald-900/90 text-emerald-200"
-                      : "bg-amber-900/90 text-amber-200"
-                  }`}
-                >
-                  {cm.surface}
-                </div>
-
-                {/* DISTANCE */}
-                <div className="rounded-lg border border-blue-800/60 bg-gray-950/70 px-3 py-1.5 text-sm font-bold text-white backdrop-blur-sm">
-                  {cm.distance}m
-                </div>
-
-                {/* LENGTH */}
-                <div className="rounded-lg border border-blue-800/60 bg-gray-950/70 px-3 py-1.5 text-sm font-bold text-white backdrop-blur-sm">
-                  {cm.length}
-                </div>
-              </div>
-
-              {/* SECONDARY INFO */}
-              <div className="mt-3 flex items-center gap-3 whitespace-nowrap text-sm font-semibold text-gray-300">
-                <span>{cm.direction}</span>
-
-                <span className="text-blue-800">|</span>
-
-                <span className="text-gray-300">
-                  {cm.weather}
-                </span>
-
-                <span className="text-blue-800">|</span>
-
-                <span className="text-gray-300">
-                  {cm.season}
-                </span>
-
-                <span className="text-blue-800">|</span>
-
-                <span className="text-gray-300">
-                  {cm.condition}
-                </span>
-
-                <span className="text-blue-800">|</span>
-
-                <span className="font-bold text-indigo-300">
-                  {displayedFinalQualification}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* TEAM LINEUP */}
-<div className="relative flex min-w-0 flex-col justify-center px-4 py-3">
-
-  {/* GLOW DIVIDER */}
-  <div className="pointer-events-none absolute left-0 top-1/2 h-[68%] w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-sky-400/80 to-transparent shadow-[0_0_6px_rgba(56,189,248,0.65)]" />
-
-  {/* HEADER */}
-    <div className="mx-auto flex items-center justify-center gap-3">
-
-  {/* VERTICAL TEAM LINEUP LABEL */}
-  <div className="flex h-[150px] shrink-0 items-center justify-center">
-    <div className="rotate-180 [writing-mode:vertical-rl] text-sm font-black uppercase tracking-[0.22em] text-gray-300 drop-shadow-[0_0_5px_rgba(125,211,252,0.25)]">
-      Team Lineup
-    </div>
-  </div>
-
-  {/* UMA CARDS */}
-  <div className="flex items-center gap-3">
-    {Array.from({ length: 3 }, (_, index) => displayedLineup[index]).map((cmUmaId, index) => {
+      <EventCardLayout onOpen={openCm}>
+  <EventCardBadge number={cm.number} leagueLabel={cm.league === "Open League" ? "OPEN" : cm.league === "Graded League" ? "GRADED" : "?"} leagueClassName={cm.league === "Open League" ? "text-emerald-400" : cm.league === "Graded League" ? "text-red-400" : "text-gray-500"} />
+  <EventCardInfo name={cm.name || "Unnamed CM"} racecourse={cm.track} surface={cm.surface} distance={cm.distance} length={cm.length} direction={cm.direction} weather={cm.weather} season={cm.season} condition={cm.condition} status={<span className="font-bold text-indigo-300">{displayedFinalQualification}</span>} />
+  <EventCardLineup>{Array.from({ length: 3 }, (_, index) => displayedLineup[index]).map((cmUmaId, index) => {
       const cmUma = (cm.participants ?? []).find(
         (participant) =>
           participant.cmUmaId === cmUmaId
@@ -732,80 +527,10 @@ return (
       }
 
       return (
-        <div
-          key={cmUma.cmUmaId}
-          className={`relative flex h-[150px] w-[150px] shrink-0 flex-col overflow-hidden rounded-xl border shadow-md ${umaStyleClasses[getRunningStyleLabel(cmUma.runningStyle)]} ${
-            cmUma.won
-              ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-gray-950"
-              : ""
-          }`}
-        >
-          {/* PORTRAIT */}
-          <div className="relative min-h-0 flex-1 overflow-hidden">
-
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-red-900/20 via-transparent to-black/20" />
-
-              {/* AVATAR CLIPPING AREA */}
-              <div className="absolute inset-0 overflow-hidden">
-                {umaVersion.avatar ? (
-                  <UmaAvatarImage
-                    avatar={umaVersion.avatar}
-                    alt={umaVersion.displayName}
-                    className="absolute inset-0 h-full w-full origin-top scale-[1.65] object-contain object-top"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-2xl font-black text-gray-600">
-                    ?
-                  </div>
-                )}
-              </div>
-          <CMFinalPlacementBadge placement={showFinalLineup ? cm.finalResults?.find((result) => result.cmUmaId === cmUma.cmUmaId)?.placement : null} location="card" />
-          {/* STATUS ICONS */}
-          {(cmUma.debuffer || cmUma.autoRun) && (
-            <div className="absolute right-1 top-1 z-30 flex flex-col gap-0.5">
-              {cmUma.debuffer && (
-                <span
-                  className="flex h-4 w-4 items-center justify-center rounded bg-black/65 text-[9px]"
-                  title="Debuffer"
-                >
-                  🟥
-                </span>
-              )}
-
-              {cmUma.autoRun && (
-                <span
-                  className="flex h-4 w-4 items-center justify-center rounded bg-black/65 text-[9px]"
-                  title="AutoRun"
-                >
-                  🤖
-                </span>
-              )}
-            </div>
-          )}
-          </div>
-
-          {/* NAME */}
-          <div className="relative z-20 flex min-h-[38px] items-center justify-center border-t border-white/10 bg-black/25 px-2 py-1 text-center">
-            <div
-              className="line-clamp-2 break-words text-[11px] font-black leading-[1.05] text-white"
-              title={umaVersion.displayName}
-            >
-              {cmUma.ace && (
-                <span className="mr-1 text-yellow-300">★</span>
-              )}
-              {umaVersion.displayName}
-            </div>
-          </div>
-
-        </div>
+        <EventUmaTile key={cmUma.cmUmaId} participant={cmUma} version={umaVersion} highlightWinner={cmUma.won} decoration={<CMFinalPlacementBadge placement={showFinalLineup ? cm.finalResults?.find((result) => result.cmUmaId === cmUma.cmUmaId)?.placement : null} location="card" />} />
       )
-    })}
-  </div>
-  </div>
-</div>
-
-          {/* RESULT */}
-            <div className="relative flex flex-col items-center justify-center px-3 text-center">
+    })}</EventCardLineup>
+  <div className="relative flex flex-col items-center justify-center px-3 text-center">
             <div className="pointer-events-none absolute left-0 top-1/2 h-[68%] w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-sky-400/80 to-transparent shadow-[0_0_8px_rgba(56,189,248,0.65)]" />
 
             {/* WIN RATE */}
@@ -869,9 +594,7 @@ return (
               </div>
             )}
           </div>
-
-          {/* ACTIONS */}
-            <div className="relative flex flex-col items-center justify-center gap-2">
+  <div className="relative flex flex-col items-center justify-center gap-2">
             <div className="pointer-events-none absolute left-0 top-1/2 h-[68%] w-px -translate-y-1/2 bg-gradient-to-b from-transparent via-sky-400/80 to-transparent shadow-[0_0_8px_rgba(56,189,248,0.65)]" />
 
             <button
@@ -914,9 +637,7 @@ return (
               🗑️
             </button>
           </div>
-
-        </div>
-      </div>
+</EventCardLayout>
 
       {/* EDIT MODAL */}
       {isEditModalOpen && (

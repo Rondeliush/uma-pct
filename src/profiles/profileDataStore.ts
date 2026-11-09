@@ -1,19 +1,15 @@
+import { loadLohsFromStore } from "../LoH/storage"
 import {
   deleteStoredValue,
   migrateStoredValue,
   setStoredValue,
 } from "../storage/indexedDB"
 
-import type {
-  CM,
-  LoH,
-  UmaCharacter,
-  UmaVersion,
-} from "../types/types"
+import type { CM, UmaCharacter, UmaVersion } from "../types/types"
+import type { LoH } from "../LoH/types"
 
 import {
   loadCmsFromStore,
-  loadLohsFromStore,
   loadFavoriteUmaIdFromStore,
   loadCmViewModeFromStore,
   loadCustomUmaDatabaseFromStore,
@@ -72,7 +68,7 @@ export function createEmptyProfileData(
       ...currentOfficialVersionIds,
     ],
 
-    onboardingCompleted: false,
+    onboardingCompleted: true,
     cmLineupGuideCompleted: false,
   }
 }

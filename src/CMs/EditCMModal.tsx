@@ -1,5 +1,8 @@
+import { formatTrackLength } from "../formatting"
+import TrackConditionOptions from "../components/TrackConditionOptions"
+import type { UmaFormData } from "../components/event-form/eventFormData"
 import { useEffect, useState } from "react"
-import type { CM, CMUma, UmaStyle } from "../types/types"
+import type { CM, CMUma } from "../types/types"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaForm from "./UmaForm"
 import ModalPortal from "../components/ModalPortal"
@@ -10,18 +13,10 @@ type EditCMModalProps = {
   cm: CM
   setCms: React.Dispatch<React.SetStateAction<CM[]>>
   onClose: () => void
+  onSaved?: () => void
 }
 
-type UmaFormData = {
-  id: string
-  name: string
-  style: UmaStyle | ""
-  ace: boolean
-  debuffer: boolean
-  autoRun: boolean
-}
-
-function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
+function EditCMModal({ cm, setCms, onClose, onSaved }: EditCMModalProps) {
   const { characters, versions } = useUmaDatabase()
     const [umas, setUmas] = useState<UmaFormData[]>(
   Array.from({ length: 3 }, (_, index) => {
@@ -61,7 +56,7 @@ function EditCMModal({ cm, setCms, onClose }: EditCMModalProps) {
     const [weather, setWeather] = useState(cm.weather)
     const [season, setSeason] = useState(cm.season)
     const [condition, setCondition] = useState(cm.condition)
-    const isLineupLocked = cm.phase !== "attempts"
+    const isLineupLocked = cm.phase !== "attempts" && cm.phase !== "finalLineup"
     const [isSaved, setIsSaved] = useState(false)
 
     useEffect(() => {
@@ -272,7 +267,7 @@ const trackLogDetails = [
     : []),
 
   ...(item.length !== length
-    ? [`Length: ${item.length} → ${length}`]
+    ? [`Length: ${formatTrackLength(item.length)} → ${formatTrackLength(length)}`]
     : []),
 
   ...(item.direction !== direction
@@ -425,6 +420,7 @@ umas.forEach((selectedUma) => {
   )
 
   setIsSaved(true)
+  onSaved?.()
 }
 
 const trackImage = getTrackImage(track)
@@ -434,7 +430,6 @@ const trackImage = getTrackImage(track)
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm">
 
       <div className="relative flex max-h-[94vh] w-full max-w-[1480px] flex-col overflow-hidden rounded-[24px] border border-violet-500/55 bg-[#06101f] shadow-[0_0_30px_rgba(139,92,246,0.18),0_30px_90px_rgba(0,0,0,0.65)]">
-
 
         {/* ======================================= */}
         {/* MODAL BACKGROUND */}
@@ -1042,7 +1037,7 @@ const trackImage = getTrackImage(track)
                         }
                         className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
-                        <option value="Short">Short</option>
+                        <option value="Short">Sprint</option>
                         <option value="Mile">Mile</option>
                         <option value="Medium">Medium</option>
                         <option value="Long">Long</option>
@@ -1203,11 +1198,7 @@ const trackImage = getTrackImage(track)
                         }
                         className="col-span-2 w-full rounded-lg border border-blue-600/70 bg-[#081426]/85 px-3 py-2 text-sm font-semibold text-white outline-none hover:border-blue-400/80 focus:border-cyan-400 md:col-span-1"
                       >
-                        <option value="Firm">Firm</option>
-                        <option value="Good">Good</option>
-                        <option value="Yielding">Yielding</option>
-                        <option value="Soft">Soft</option>
-                        <option value="Heavy">Heavy</option>
+                        <TrackConditionOptions value={condition} />
                       </select>
 
                     </div>
@@ -1343,14 +1334,13 @@ const trackImage = getTrackImage(track)
                     <div className="mt-1.5 text-sm font-semibold text-white/80">
                       {cm.phase === "eliminated"
                         ? "Team Lineup cannot be changed after elimination."
-                        : "Team Lineup cannot be changed after proceeding to the Final."}
+                        : "Team Lineup cannot be changed after saving the Final Lineup."}
                     </div>
                   </div>
                 </div>
               )}
 
               </div>
-
             </section>
 
           </div>

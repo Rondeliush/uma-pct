@@ -29,7 +29,7 @@ function withBrowser(run, hash = "#/", pathname = "/uma-pct/") {
 }
 
 test("main pages have stable hash URLs and refresh can resolve each page from the URL alone", () => {
-  for (const [page, href] of Object.entries({ home: "#/", cms: "#/cm", autoRunTimer: "#/autorun", umaDatabase: "#/uma-database", settings: "#/settings", profiles: "#/profiles", about: "#/about", changelog: "#/changelog" })) {
+  for (const [page, href] of Object.entries({ home: "#/", cms: "#/cm", loh: "#/loh", autoRunTimer: "#/autorun", umaDatabase: "#/uma-database", settings: "#/settings", profiles: "#/profiles", about: "#/about", changelog: "#/changelog" })) {
     assert.equal(getAppHref(page), href)
     assert.deepEqual(parseAppRoute(href), { page, cmId: null, statistics: null })
     assert.equal(isUnavailableRoute(href, "/uma-pct/", "/uma-pct/"), false)
@@ -48,16 +48,30 @@ test("CM identity is the saved event number, independent of names or display ord
   }
 })
 
+test("LoH detail URLs use saved event numbers and decode identity independently of CM", () => {
+  for (const number of [1, 32, 5435]) {
+    assert.equal(getAppHref("loh", String(number)), `#/loh/${number}`)
+    assert.deepEqual(parseAppRoute(`#/loh/${number}`), { page: "loh", cmId: null, lohId: String(number), statistics: null })
+    assert.equal(isUnavailableRoute(`#/loh/${number}`, "/uma-pct/", "/uma-pct/"), false)
+  }
+  const id = "missing/event?#%"
+  assert.equal(parseAppRoute(getAppHref("loh", id)).lohId, id)
+  for (const id of ["secret", "%", "%E0%A4", "invalid/extra"]) {
+    assert.equal(parseAppRoute(`#/loh/${id}`).lohId, id, "unresolved event identities are checked against profile data by the app")
+  }
+  assert.equal(isUnavailableRoute("#/loh/1", "/uma-pct/missing", "/uma-pct/"), true)
+})
+
 test("existing Statistics routes and opaque entity IDs are delegated unchanged", () => {
-  for (const [section, id] of [["landing", null], ["events", null], ["uma", null], ["uma", "custom/version?#%"], ["tracks", null], ["tracks", "hanshin"]]) {
+  for (const [section, id] of [["landing", null], ["events", null], ["uma", null], ["uma", "custom/version?#%"], ["compare", null], ["tracks", null], ["tracks", "hanshin"]]) {
     const route = parseAppRoute(getStatisticsHref(section, id))
     assert.equal(route.page, "statistics")
     assert.deepEqual(route.statistics, { section, umaVersionId: section === "uma" ? id : null, trackId: section === "tracks" ? id : null })
   }
 })
 
-test("unknown, inaccessible LoH and nested non-detail routes remain unavailable", () => {
-  for (const hash of ["#/unknown", "#/loh", "#/cms", "#/settings/secret", "#/profiles/secret", "#/autorun/extra", "#/cm-extra", "#/statistics/events/extra"]) {
+test("unknown and nested non-detail routes remain unavailable", () => {
+  for (const hash of ["#/unknown", "#/loh-extra", "#/cms", "#/settings/secret", "#/profiles/secret", "#/autorun/extra", "#/cm-extra", "#/statistics/events/extra", "#/statistics/compare/extra"]) {
     assert.equal(parseAppRoute(hash), null)
     assert.equal(isUnavailableRoute(hash, "/uma-pct/", "/uma-pct/"), true)
   }
@@ -78,6 +92,46 @@ test("main pages, CM details and Statistics follow one native Back/Forward histo
   }
   assert.equal(browser.history.state.unrelated, "retained")
 }))
+
+test("LoH participates in native history alongside CM and Statistics", () => withBrowser(browser => {
+  navigateAppRoute("cms")
+  navigateAppRoute("loh")
+  navigateStatisticsRoute("tracks")
+  browser.history.back(); assert.equal(browser.location.hash, "#/loh")
+  browser.history.back(); assert.equal(browser.location.hash, "#/cm")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/loh")
+}))
+
+test("LoH details share native Back/Forward history with CM details and Statistics", () => withBrowser(browser => {
+  navigateAppRoute("cms", "32")
+  navigateAppRoute("loh")
+  navigateAppRoute("loh", "1")
+  navigateStatisticsRoute("uma")
+  browser.history.back(); assert.equal(browser.location.hash, "#/loh/1")
+  browser.history.back(); assert.equal(browser.location.hash, "#/loh")
+  browser.history.back(); assert.equal(browser.location.hash, "#/cm/32")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/loh")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/loh/1")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/statistics/uma")
+}))
+
+test("closing a LoH detail returns to its existing list entry without creating duplicate history", () => withBrowser(browser => {
+  navigateAppRoute("loh")
+  navigateAppRoute("loh", "1")
+  navigateAppRoute("loh", null, "/uma-pct/", true)
+  assert.equal(browser.location.hash, "#/loh")
+  assert.equal(browser.history.length, 3)
+  browser.history.back(); assert.equal(browser.location.hash, "#/")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/loh")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/loh/1")
+}))
+
+test("a direct or refreshed LoH detail can close to the LoH list safely", () => withBrowser(browser => {
+  navigateAppRoute("loh", null, "/uma-pct/", true)
+  assert.equal(browser.location.hash, "#/loh")
+  browser.history.back(); assert.equal(browser.location.hash, "#/loh/1")
+  browser.history.forward(); assert.equal(browser.location.hash, "#/loh")
+}, "#/loh/1"))
 
 test("CM close returns to the existing list entry; a direct detail URL closes safely to CM", () => {
   withBrowser(browser => {

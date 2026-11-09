@@ -12,6 +12,7 @@ type Props = {
   cmHistory: UmaCMHistoryEntry[]
   unresolved: boolean
   onOpenCm: (cmNumber: CM["number"]) => void
+  compact?: boolean
 }
 
 const formatCount = (value: number) => value.toLocaleString("en")
@@ -25,21 +26,22 @@ const ROLE_EXPLANATIONS = {
 }
 
 /** CM-only history. Open the original saved record by its profile-local number. */
-export default function UmaChampionsMeetingHistory({ cmHistory, unresolved, onOpenCm }: Props) {
+export default function UmaChampionsMeetingHistory({ cmHistory, unresolved, onOpenCm, compact = false }: Props) {
   return (
-    <BadgeTooltipGroup><section className="uma-statistics-panel uma-detail-history-panel" aria-labelledby="uma-detail-cm-history-title">
-      <UmaEventPanelHeader
+    <BadgeTooltipGroup><section className="uma-statistics-panel uma-detail-history-panel" data-compact={compact || undefined} aria-label={compact ? "Champions Meeting history" : undefined} aria-labelledby={compact ? undefined : "uma-detail-cm-history-title"}>
+      {!compact && <UmaEventPanelHeader
         title="Champions Meeting History"
         titleId="uma-detail-cm-history-title"
         subtitle="Competitive history of this Uma in Champions Meeting."
         note="Newest first"
-      />
+      />}
       {cmHistory.length > 0 ? (
+        <>{compact && <div className="uma-detail-history-columns" aria-hidden="true">{["Event", "Role", "Running Style", "Races", "Wins", "Win Rate", "Team Final", "Uma Finish"].map(label => <span key={label}>{label}</span>)}</div>}
         <ol className="uma-detail-events">
           {cmHistory.map((cm) => {
             const name = cm.name?.trim() || `Champions Meeting ${cm.number}`
-            const venue = [cm.track, cm.surface, Number.isFinite(cm.distance) && cm.distance > 0 ? `${cm.distance} m` : null].filter(Boolean).join(" · ")
-            const compactVenue = [cm.track, Number.isFinite(cm.distance) && cm.distance > 0 ? `${cm.distance}m` : null].filter(Boolean).join(" · ")
+            const venue = [`CM${cm.number}`, cm.track, cm.surface, Number.isFinite(cm.distance) && cm.distance > 0 ? `${cm.distance} m` : null].filter(Boolean).join(" · ")
+            const compactVenue = [`CM${cm.number}`, cm.track, Number.isFinite(cm.distance) && cm.distance > 0 ? `${cm.distance}m` : null].filter(Boolean).join(" · ")
             const teamResult = cm.teamFinal ? `${cm.teamFinal.group ?? "Final"} · ${cm.teamFinal.teamPlace}` : "No Final"
             const finishExplanation = cm.umaFinish === "not_in_final"
               ? { title: "Not in Final", description: "This Uma participated in the Champions Meeting but was not selected for the Final Lineup." }
@@ -52,7 +54,7 @@ export default function UmaChampionsMeetingHistory({ cmHistory, unresolved, onOp
                   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 5 7 7-7 7" /></svg>
                 </button>
                 <div className="uma-detail-event-heading">
-                  <h3 title={name}>{name}</h3>
+                  <div className="uma-detail-event-name"><h3 title={name}>{name}</h3><small className="uma-detail-result-badge uma-detail-history-league" data-league={cm.league} title={cm.league ?? "League not recorded"}>{cm.league === "Graded League" ? "Graded" : cm.league === "Open League" ? "Open" : "Unknown"}</small></div>
                   <p title={venue} aria-label={venue}><span className="uma-detail-history-desktop">{venue}</span><span className="uma-detail-history-mobile">{compactVenue}</span></p>
                 </div>
                 <dl className="uma-detail-event-configuration">
@@ -93,7 +95,7 @@ export default function UmaChampionsMeetingHistory({ cmHistory, unresolved, onOp
               </li>
             )
           })}
-        </ol>
+        </ol></>
       ) : <p className="uma-detail-note">No recorded Champions Meeting history for {unresolved ? "this entry" : "this version"} yet.</p>}
     </section></BadgeTooltipGroup>
   )

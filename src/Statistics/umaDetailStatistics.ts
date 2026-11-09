@@ -1,3 +1,4 @@
+import { TRACK_SURFACES } from "../types/types"
 import { calculateAttemptRaces, calculateFinalQualificationFromAttempts } from "../CMs/CMCalculations"
 import { getCMFinalResults, getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 import { CM_FINAL_PLACEMENTS } from "../CMs/cmFinalPlacements"
@@ -87,7 +88,7 @@ export function getUmaDistancePerformance(events: Pick<UmaEventStatistics, "race
 
 /** Additional views of the same recorded rounds and finals, without resampling races. */
 export function getUmaDetailInsights(statistics: UmaDetailStatistics) {
-  const surfaces = (["Turf", "Dirt"] as const).flatMap((surface) => {
+  const surfaces = TRACK_SURFACES.flatMap((surface) => {
     const events = statistics.events.filter((event) => event.surface === surface && event.races > 0)
     if (events.length === 0) return []
     return [withWinRate({ surface, races: events.reduce((sum, event) => sum + event.races, 0), wins: events.reduce((sum, event) => sum + event.wins, 0) })]
@@ -128,7 +129,7 @@ export function getFinalGroup(cm: CM): FinalGroup | null {
   return qualification === "Final A" || qualification === "Final B" ? qualification : null
 }
 
-/** One stored Uma version/reference only; round totals follow the Overview convention. */
+/** One stored Uma version/reference only, including its raced final in event totals. */
 export function calculateUmaDetailStatistics(
   cms: CM[],
   versionId: string,
@@ -168,6 +169,8 @@ export function calculateUmaDetailStatistics(
     if (eventRaces === 0 && !final) return
 
     if (final) {
+      eventRaces += 1
+      eventWins += Number(final.won)
       finalAppearances += 1
       if (final.won) finalWins += 1
       const group = finals.find((record) => record.group === final.group)!

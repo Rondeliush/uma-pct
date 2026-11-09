@@ -1,314 +1,102 @@
-import { useState } from "react"
+﻿import { useState } from "react"
+import "./LoH.css"
+import type { Dispatch, SetStateAction } from "react"
+import EventPageHeader from "../components/EventPageHeader"
+import { useIsMobile } from "../responsive/useIsMobile"
+import type { LoH } from "./types"
+import LoHCard from "./LoHCard"
+import LoHCardMobile from "./LoHCardMobile"
+import LoHCompactCard from "./LoHCompactCard"
+import LoHOverviewStats from "./LoHOverviewStats"
+import LoHOverviewControls from "./LoHOverviewControls"
+import LoHFilters from "./LoHFilters"
+import { useLoHViewMode } from "./useLoHViewMode"
+import { EMPTY_LOH_FILTERS, filterLoHEvents, paginateLoHEvents, sortLoHEvents } from "./overview"
+import type { LoHOverviewFilters, LoHSortMode } from "./overview"
+import LoHEventForm from "./LoHEventForm"
+import LoHEventModal from "./LoHEventModal"
+import LoHModalFrame from "./LoHModalFrame"
+import LoHNotesModal from "./LoHNotesModal"
+import { createLoHEvent, updateLoHEvent } from "./lohData"
+import type { LoHEventDetails } from "./types"
 
-type LoHTab =
-  | "overview"
-  | "umaStatistics"
-  | "teams"
-  | "history"
+type Props = { lohs: LoH[]; setLohs: Dispatch<SetStateAction<LoH[]>>; selectedEvent: LoH | null; onOpen: (number: number) => void; onClose: () => void; profileId?: string | null; initialFocus?: { day: number | null; tab: "results" | "umas" } }
 
-function LeagueOfHeroesPage() {
-  const [activeTab, setActiveTab] =
-    useState<LoHTab>("overview")
+export default function LeagueOfHeroesPage({ lohs, setLohs, selectedEvent, onOpen, onClose, profileId = null, initialFocus }: Props) {
+  const isMobile = useIsMobile()
+  const [view, setView] = useLoHViewMode(profileId)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [filters, setFilters] = useState<LoHOverviewFilters>(EMPTY_LOH_FILTERS)
+  const [sort, setSort] = useState<LoHSortMode>("number-desc")
+  const [currentPage, setCurrentPage] = useState(1)
+  const filtered = filterLoHEvents(lohs, filters)
+  const pagination = paginateLoHEvents(sortLoHEvents(filtered, sort), currentPage)
+  const filterCount = Object.values(filters).filter(values => values.length > 0).length
+  const [showCreate, setShowCreate] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [notesId, setNotesId] = useState<string | null>(null)
+  const editingEvent = lohs.find(event => event.id === editingId)
+  const deletingEvent = lohs.find(event => event.id === deletingId)
+  const notesEvent = lohs.find(event => event.id === notesId)
 
+  function handleCreate(details: LoHEventDetails) {
+    const id = crypto.randomUUID()
+    const timestamp = new Date().toISOString()
+    setLohs(current => [...current, createLoHEvent(current, details, id, timestamp)])
+    setShowCreate(false)
+    setCurrentPage(1)
+  }
+
+  function handleEdit(details: LoHEventDetails) {
+    const timestamp = new Date().toISOString()
+    const logId = crypto.randomUUID()
+    setLohs(current => current.map(event => event.id === editingId ? updateLoHEvent(event, current, details, timestamp, logId) : event))
+  }
+
+  function handleDelete() {
+    setCurrentPage(paginateLoHEvents(sortLoHEvents(filterLoHEvents(lohs.filter(event => event.id !== deletingId), filters), sort), pagination.page).page)
+    setLohs(current => current.filter(event => event.id !== deletingId))
+    if (selectedEvent?.id === deletingId) onClose()
+    setDeletingId(null)
+  }
 
   return (
-    <div className="space-y-8">
-
-      {/* PAGE HEADER */}
-        <section className="px-5 pt-4">
-        <div className="mb-5">
-          <div className="text-xs font-black uppercase tracking-[0.25em] text-rose-400">
-            League of Heroes
-          </div>
-
-          <h1 className="mt-1 text-3xl font-black text-white">
-            Dashboard - Work in progress (waiting for upcoming LoH mode update)
-          </h1>
-        </div>
-
-        {/* TABS */}
-            <div className="w-fit rounded-full border border-rose-800/50 bg-gradient-to-r from-rose-950/95 via-pink-950/55 to-rose-950/95 px-3 shadow-[0_0_18px_rgba(190,24,93,0.15)]">
-            <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab("overview")}
-            className={`relative px-5 py-3 text-sm font-bold transition ${
-              activeTab === "overview"
-                ? "text-white"
-                : "text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            Overview
-
-            {activeTab === "overview" && (
-              <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-rose-500" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              setActiveTab("umaStatistics")
-            }
-            className={`relative px-5 py-3 text-sm font-bold transition ${
-              activeTab === "umaStatistics"
-                ? "text-white"
-                : "text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            Uma Statistics
-
-            {activeTab === "umaStatistics" && (
-              <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-rose-500" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("teams")}
-            className={`relative px-5 py-3 text-sm font-bold transition ${
-              activeTab === "teams"
-                ? "text-white"
-                : "text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            Teams
-
-            {activeTab === "teams" && (
-              <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-rose-500" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("history")}
-            className={`relative px-5 py-3 text-sm font-bold transition ${
-              activeTab === "history"
-                ? "text-white"
-                : "text-gray-500 hover:text-gray-300"
-            }`}
-          >
-            History
-
-            {activeTab === "history" && (
-              <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-rose-500" />
-            )}
-          </button>
-        </div>
-        </div>
-
-
-      </section>
-
-      {/* OVERVIEW */}
-      {activeTab === "overview" && (
-      <div className="loh-overview space-y-8">
-
-          {/* MAIN STATS */}
-          <section className="grid grid-cols-4 gap-5">
-
-            <div className="loh-card-sweep overflow-hidden rounded-2xl border border-rose-900/40 bg-slate-950/70">
-                <div className="border-b border-rose-500/30 bg-gradient-to-r from-rose-950/95 via-pink-900/70 to-rose-950/95 px-5 py-3">
-                    <div className="text-xs font-black uppercase tracking-[0.18em] text-rose-100">
-                    Events
-                    </div>
-                </div>
-
-                <div className="px-5 py-4">
-                    <div className="text-5xl font-black text-white">
-                    0
-                    </div>
-                </div>
-                </div>
-
-            <div className="loh-card-sweep overflow-hidden rounded-2xl border border-rose-900/40 bg-slate-950/70">
-            <div className="border-b border-rose-500/30 bg-gradient-to-r from-rose-950/95 via-pink-900/70 to-rose-950/95 px-5 py-3">
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-rose-100">
-                Total League Score
-                </div>
-            </div>
-
-            <div className="px-5 py-4">
-                <div className="text-5xl font-black text-white">
-                -
-                </div>
-            </div>
-            </div>
-
-            <div className="loh-card-sweep overflow-hidden rounded-2xl border border-rose-900/40 bg-slate-950/70">
-                <div className="border-b border-rose-500/30 bg-gradient-to-r from-rose-950/95 via-pink-900/70 to-rose-950/95 px-5 py-3">
-                    <div className="text-xs font-black uppercase tracking-[0.18em] text-rose-100">
-                    Best Event Score
-                    </div>
-                </div>
-
-                <div className="px-5 py-4">
-                    <div className="text-5xl font-black text-white">
-                    -
-                    </div>
-                </div>
-                </div>
-
-            <div className="loh-card-sweep overflow-hidden rounded-2xl border border-rose-900/40 bg-slate-950/70">
-            <div className="border-b border-rose-500/30 bg-gradient-to-r from-rose-950/95 via-pink-900/70 to-rose-950/95 px-5 py-3">
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-rose-100">
-                Best Rank
-                </div>
-            </div>
-
-            <div className="px-5 py-4">
-                <div className="text-5xl font-black text-white">
-                -
-                </div>
-            </div>
-            </div>
-
-          </section>
-
-          {/* OVERVIEW CONTENT */}
-          <section className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)] gap-5">
-
-            {/* RECENT EVENTS */}
-                <div className="loh-card-sweep overflow-hidden rounded-2xl border border-rose-900/40 bg-gray-950/70">
-
-                {/* HEADER */}
-                <div className="border-b border-rose-800/50 bg-gradient-to-r from-rose-950/95 via-pink-950/65 to-rose-950/95 px-5 py-3">
-                    <h2 className="text-xl font-black text-white">
-                    Recent Events
-                    </h2>
-                </div>
-
-                <div className="p-5">
-                    <p className="mb-4 text-sm text-gray-500">
-                    Your latest League of Heroes results.
-                    </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="p-5">
-                <div className="py-10 text-center">
-                  <div className="font-bold text-gray-300">
-                    No events yet.
-                  </div>
-
-                  <div className="mt-2 text-sm text-gray-600">
-                    Your 3 latest LoH events will appear here.
-                  </div>
-                </div>
-              </div>
-              </div>
-
-            </div>
-
-            {/* UMA RANKING */}
-                <div className="loh-card-sweep overflow-hidden rounded-2xl border border-rose-900/40 bg-gray-950/70">
-
-                {/* HEADER */}
-                <div className="flex items-center justify-between border-b border-rose-800/50 bg-gradient-to-r from-rose-950/95 via-pink-950/65 to-rose-950/95 px-5 py-3">
-                    <h2 className="text-xl font-black text-white">
-                    Uma Ranking
-                    </h2>
-
-                    <button
-                    type="button"
-                    onClick={() =>
-                        setActiveTab("umaStatistics")
-                    }
-                    className="text-sm font-bold text-rose-200 transition hover:text-white"
-                    >
-                    View All →
-                    </button>
-                </div>
-
-                {/* CONTENT */}
-                <div className="p-5">
-
-                    <p className="mb-4 text-sm text-gray-500">
-                    Best performing Umas across League of Heroes.
-                    </p>
-
-                    {/* TABLE HEADER */}
-                    <div className="grid grid-cols-[48px_minmax(0,1fr)_110px_80px_80px_80px_80px] gap-3 border-b border-gray-800 px-3 pb-3 text-xs font-black uppercase tracking-wide text-gray-500">
-                    <div>#</div>
-                    <div>Uma</div>
-                    <div className="text-center">
-                        Career Pts
-                    </div>
-                    <div className="text-center">
-                        Events
-                    </div>
-                    <div className="text-center">
-                        Races
-                    </div>
-                    <div className="text-center">
-                        Wins
-                    </div>
-                    <div className="text-center">
-                        Top 3
-                    </div>
-                    </div>
-
-                    {/* EMPTY TABLE */}
-                    <div className="py-14 text-center">
-                    <div className="font-bold text-gray-300">
-                      No Uma statistics yet.
-                    </div>
-
-                    <div className="mt-2 text-sm text-gray-600">
-                      Rankings will appear after you record LoH events.
-                    </div>
-                  </div>
-
-                </div>
-
-                </div>
-
-          </section>
-
-        </div>
-      )}
-
-      {/* UMA STATISTICS */}
-      {activeTab === "umaStatistics" && (
-        <div className="rounded-2xl border border-gray-700 bg-gray-950/70 px-6 py-16 text-center">
-          <div className="text-xl font-black text-white">
-            Uma Statistics
-          </div>
-
-          <div className="mt-2 text-sm text-gray-500">
-            Full LoH Uma statistics will be added here.
+    <main className="loh-overview relative space-y-5" aria-labelledby="loh-title">
+      <EventPageHeader title="League of Heroes" accent="loh" mobile={isMobile} titleId="loh-title" />
+      <LoHOverviewStats events={lohs} />
+      <LoHOverviewControls mobile={isMobile} onAdd={() => setShowCreate(true)} filtersOpen={filtersOpen} onToggleFilters={() => setFiltersOpen(current => !current)} filterCount={filterCount}
+        sort={sort} onSort={next => { setSort(next); setCurrentPage(1) }} page={pagination.page} totalPages={pagination.totalPages} onPage={setCurrentPage} view={view} onView={setView} />
+      {filtersOpen && <LoHFilters events={lohs} filters={filters} onChange={next => { setFilters(next); setCurrentPage(1) }} filteredCount={filtered.length} />}
+      {lohs.length === 0 ? <div className="py-8 text-center">
+      </div> : !filtered.length ? <div className="py-8 text-center">
+        <p className="text-sm font-semibold text-slate-300">No League of Heroes events match the selected filters.</p>
+        <button type="button" onClick={() => { setFilters(EMPTY_LOH_FILTERS); setCurrentPage(1) }} className="mt-3 min-h-10 text-xs font-bold text-rose-300 hover:text-rose-100">Reset filters</button>
+      </div> : <section aria-label="League of Heroes events" data-loh-view={view} className={view === "compact" && !isMobile ? "loh-scrollbar overflow-x-auto pb-1" : "space-y-3"}>
+        {view === "compact" && !isMobile && <div className="loh-compact-grid mb-2 rounded-xl border border-rose-950/70 bg-gray-950/75 px-4 py-3 text-[10px] font-black uppercase tracking-wide text-gray-500" aria-hidden="true">
+          {["LoH", "Name", "Racecourse", "Length", "League Score", "League Rank", "Overall Rank", "Umas", "Actions"].map(label => <span key={label}>{label}</span>)}
+        </div>}
+        {pagination.events.map(event => view === "compact"
+          ? <LoHCompactCard key={event.id} event={event} mobile={isMobile} onOpen={() => onOpen(event.number)} onEdit={() => setEditingId(event.id)} onNotes={() => setNotesId(event.id)} onDelete={() => setDeletingId(event.id)} />
+          : isMobile
+            ? <LoHCardMobile key={event.id} event={event} onOpen={() => onOpen(event.number)} onEdit={() => setEditingId(event.id)} onNotes={() => setNotesId(event.id)} onDelete={() => setDeletingId(event.id)} />
+            : <LoHCard key={event.id} event={event} onOpen={() => onOpen(event.number)} onEdit={() => setEditingId(event.id)} onNotes={() => setNotesId(event.id)} onDelete={() => setDeletingId(event.id)} />)}
+      </section>}
+      {showCreate && <LoHEventForm lohs={lohs} onCreate={handleCreate} onClose={() => setShowCreate(false)} />}
+      {editingEvent && <LoHEventForm key={editingEvent.id} initialEvent={editingEvent} lohs={lohs} onCreate={handleEdit} onClose={() => setEditingId(null)} />}
+      {notesEvent && <LoHNotesModal key={notesEvent.id} event={notesEvent} onClose={() => setNotesId(null)}
+        onSave={notes => setLohs(current => current.map(event => event.id === notesEvent.id ? { ...event, notes } : event))} />}
+      {deletingEvent && <LoHModalFrame title={`Delete LOH${deletingEvent.number}?`} onClose={() => setDeletingId(null)}>
+        <div className="p-6 sm:p-8">
+          <h3 className="pr-10 text-xl font-black text-white">Delete LOH{deletingEvent.number}?</h3>
+          <p className="mt-3 text-sm leading-6 text-slate-400">Delete {deletingEvent.name || `League of Heroes #${deletingEvent.number}`} and its recorded results?</p>
+          <div className="mt-6 flex justify-end gap-3">
+            <button type="button" onClick={() => setDeletingId(null)} className="min-h-11 rounded-lg border border-white/10 px-5 text-sm font-bold text-slate-300 hover:bg-white/5">Cancel</button>
+            <button type="button" onClick={handleDelete} className="min-h-11 rounded-lg border border-rose-500 bg-rose-600/25 px-5 text-sm font-black text-rose-100 hover:bg-rose-600/40">Delete</button>
           </div>
         </div>
-      )}
-
-      {/* TEAMS */}
-      {activeTab === "teams" && (
-        <div className="rounded-2xl border border-gray-700 bg-gray-950/70 px-6 py-16 text-center">
-          <div className="text-xl font-black text-white">
-            Teams
-          </div>
-
-          <div className="mt-2 text-sm text-gray-500">
-            Your League of Heroes teams will be shown here.
-          </div>
-        </div>
-      )}
-
-      {/* HISTORY */}
-      {activeTab === "history" && (
-        <div className="rounded-2xl border border-gray-700 bg-gray-950/70 px-6 py-16 text-center">
-          <div className="text-xl font-black text-white">
-            LoH History
-          </div>
-
-          <div className="mt-2 text-sm text-gray-500">
-            All recorded League of Heroes events will appear here.
-          </div>
-        </div>
-      )}
-
-    </div>
+      </LoHModalFrame>}
+      {selectedEvent && <LoHEventModal key={selectedEvent.id} event={selectedEvent} lohs={lohs} setLohs={setLohs} initialFocus={initialFocus} onClose={onClose} />}
+    </main>
   )
 }
-
-export default LeagueOfHeroesPage

@@ -83,7 +83,7 @@ export default function CMFinalResultEditor({ cm, setCms, onComplete }: Props) {
       <div className="mt-4">
         <div className="mb-2 text-xs font-bold text-violet-200/45">Individual Uma Placements</div>
         {!teamSelected && <p className="mb-2 text-xs text-blue-100/45">Select the team result first.</p>}
-        {results.length === 0 && <p className="text-xs text-blue-100/45">Save the Final Lineup in the Umas tab first.</p>}
+        {results.length === 0 && <p className="text-xs text-blue-100/45">Complete Select Final Lineup before recording the final result.</p>}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {results.map((result) => {
             const version = versions.find((item) => item.id === result.configuration.umaVersionId)

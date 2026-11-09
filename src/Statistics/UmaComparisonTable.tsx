@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import type { CM } from "../types/types"
+import type { LoH } from "../LoH/types"
 import UmaDatabaseIcon from "../Umas/UmaDatabaseIcon"
 import { UmaStatisticsAvatar } from "./UmaStatisticsSelector"
 import UmaStatisticsName from "./UmaStatisticsName"
@@ -12,6 +13,7 @@ import "./UmaComparisonTable.css"
 
 type Props = {
   cms: CM[]
+  lohs: LoH[]
   slots: (UmaStatisticsEntry | null)[]
   activeSlot: number | null
   headerPinned: boolean
@@ -21,12 +23,13 @@ type Props = {
   onSlotButton: (index: number, button: HTMLButtonElement | null) => void
 }
 
-export default function UmaComparisonTable({ cms, slots, activeSlot, headerPinned, onToggleHeaderPinned, onAdd, onRemove, onSlotButton }: Props) {
+export default function UmaComparisonTable({ cms, lohs, slots, activeSlot, headerPinned, onToggleHeaderPinned, onAdd, onRemove, onSlotButton }: Props) {
   const [cmExpanded, setCmExpanded] = useState(true)
+  const [lohExpanded, setLoHExpanded] = useState(true)
   const [pinTooltip, setPinTooltip] = useState<{ left: number; top: number } | null>(null)
   const pinTooltipId = useId()
   const pinLabel = headerPinned ? "Keep Uma avatars visible while scrolling" : "Keep Uma avatars in their original position"
-  const values = useMemo(() => slots.map((uma) => getUmaComparisonValues(cms, uma?.versionId ?? null)), [cms, slots])
+  const values = useMemo(() => slots.map((uma) => getUmaComparisonValues(cms, uma?.versionId ?? null, lohs)), [cms, lohs, slots])
   const { containerRef, sentinelRef, headerRowRef } = useUmaComparisonStickyHeader(slots, headerPinned)
   useEffect(() => {
     if (!pinTooltip) return
@@ -57,11 +60,11 @@ export default function UmaComparisonTable({ cms, slots, activeSlot, headerPinne
 
   return (
     <>
-      <p id="uma-comparison-legend" className="uma-comparison-legend"><span aria-hidden="true" />Cyan marks the highest valid values, including ties. Gold marks the most final wins. — means unavailable.</p>
+      <p id="uma-comparison-legend" className="uma-comparison-legend"><span aria-hidden="true" />Cyan marks the best valid values, including ties. Lower average placements are better. Gold marks the most final wins. — means unavailable.</p>
       <div ref={containerRef} className="uma-comparison-scroll" role="region" aria-label="Uma comparison table" aria-describedby="uma-comparison-note uma-comparison-legend">
         <span ref={sentinelRef} className="uma-comparison-sticky-sentinel" aria-hidden="true" />
         <table id="uma-comparison-table" className="uma-comparison-table">
-          <caption className="sr-only">Compare individual Uma versions across General and Champions Meeting statistics. Final Appearance Rate = Final Appearances / CM Events. Podium Rate = top-three finishes / finals with known individual placement. Final Win Rate = 1st Finishes / finals with known individual placement.</caption>
+          <caption className="sr-only">Compare individual Uma versions across General, Champions Meeting and League of Heroes statistics. Final Appearance Rate = Final Appearances / CM Events. Podium Rate = top-three finishes / finals with known individual placement. Final Win Rate = 1st Finishes / finals with known individual placement. LoH totals include Main Stage and recorded Extra Stage races. Raw Points and Avg. Raw PT / Race use Main Stage only. Grouped placements and incomplete legacy history may make exact averages and placement rates unavailable.</caption>
           <colgroup><col className="uma-comparison-stat-column" />{slots.map((uma, index) => <col key={index} className={uma ? "uma-comparison-selected-column" : "uma-comparison-empty-column"} />)}</colgroup>
           <thead>
             <tr ref={headerRowRef}>
@@ -91,11 +94,12 @@ export default function UmaComparisonTable({ cms, slots, activeSlot, headerPinne
             <tbody key={section.id}>
               <tr className="uma-comparison-group" data-section={section.id} data-tone={section.tone}>
                 <th scope="rowgroup" colSpan={slots.length + 1}>
-                  <span className="uma-comparison-section-label">{section.label}{section.status === "soon" && <span className="uma-comparison-soon">SOON</span>}</span>
+                  <span className="uma-comparison-section-label">{section.label}</span>
                   {section.id === "cm" && <button type="button" className="uma-comparison-section-toggle" aria-label={`${cmExpanded ? "Collapse" : "Expand"} Champions Meeting statistics`} aria-expanded={cmExpanded} onClick={() => setCmExpanded((expanded) => !expanded)}><span aria-hidden="true">{cmExpanded ? "−" : "+"}</span></button>}
+                  {section.id === "loh" && <button type="button" className="uma-comparison-section-toggle" aria-label={`${lohExpanded ? "Collapse" : "Expand"} League of Heroes statistics`} aria-expanded={lohExpanded} onClick={() => setLoHExpanded((expanded) => !expanded)}><span aria-hidden="true">{lohExpanded ? "−" : "+"}</span></button>}
                 </th>
               </tr>
-              {(section.id !== "cm" || cmExpanded) && section.rows.map((row) => {
+              {(section.id === "general" || (section.id === "cm" ? cmExpanded : lohExpanded)) && section.rows.map((row) => {
                 const cells = values.map((column) => row.getValue(column))
                 const winners = getUmaComparisonWinners(cells, row.format, row.ranking)
                 return (
@@ -104,7 +108,7 @@ export default function UmaComparisonTable({ cms, slots, activeSlot, headerPinne
                     {cells.map((value, index) => (
                       <td key={index} data-best={winners[index] || undefined} data-unavailable={value === null || undefined}>
                         {formatUmaComparisonValue(value, row.format)}
-                        {winners[index] && <span className="sr-only"> (highest value in this row)</span>}
+                        {winners[index] && <span className="sr-only"> ({row.ranking === "lowest" ? "lowest" : "highest"} value in this row)</span>}
                       </td>
                     ))}
                   </tr>

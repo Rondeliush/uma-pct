@@ -9,6 +9,7 @@ import type { CM } from "../../types/types"
 import CMCard from "../CMCard"
 import AddCMButton from "../AddCMButton"
 import CMFilters from "../CMFilters"
+import EventPageHeader from "../../components/EventPageHeader"
 
 
 import type {
@@ -48,6 +49,8 @@ const {
   setShowScrollTop,
   isFiltersOpen,
   setIsFiltersOpen,
+  selectedLeague,
+  setSelectedLeague,
   selectedLengths,
   setSelectedLengths,
   selectedSurfaces,
@@ -124,21 +127,7 @@ const {
           {/* PAGE HEADER */}
           {/* ======================================= */}
 
-      <section className="relative px-6 py-4">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/10 blur-3xl" />
-
-        <div className="relative text-center">
-          <div className="text-xs font-black uppercase tracking-[0.35em] text-blue-400">
-            Competitive Event
-          </div>
-
-          <h1 className="mt-1 bg-gradient-to-r from-blue-200 via-white to-violet-200 bg-clip-text text-4xl font-black tracking-tight text-transparent">
-            Champions Meeting
-          </h1>
-
-          <div className="mx-auto mt-4 h-[2px] w-80 bg-gradient-to-r from-transparent via-sky-400 to-transparent" />
-        </div>
-      </section>
+      <EventPageHeader title="Champions Meeting" />
 
       {/* ======================================= */}
       {/* STATISTICS */}
@@ -514,6 +503,8 @@ const {
 
       <CMFilters
         isOpen={isFiltersOpen}
+        selectedLeague={selectedLeague}
+        setSelectedLeague={setSelectedLeague}
         selectedLengths={selectedLengths}
         setSelectedLengths={setSelectedLengths}
         selectedSurfaces={selectedSurfaces}

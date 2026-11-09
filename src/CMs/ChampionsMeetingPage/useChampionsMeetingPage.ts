@@ -7,6 +7,7 @@ import type { CM } from "../../types/types"
 import { getCMVersionIds } from "../cmParticipantConfiguration"
 
 import type {
+  CMLeagueFilter,
   CMFinalFilter,
   CMPlaceFilter,
 } from "../CMFilters"
@@ -104,6 +105,9 @@ export function useChampionsMeetingPage(
 
   const [isFiltersOpen, setIsFiltersOpen] =
     useState(false)
+
+  const [selectedLeague, setSelectedLeague] =
+    useState<CMLeagueFilter>("all")
 
   const [selectedLengths, setSelectedLengths] =
     useState<CM["length"][]>([])
@@ -266,6 +270,9 @@ const umaIdsInCms = Array.from(
 )
 
 const filteredCms = cms.filter((cm) => {
+  const matchesLeague =
+    selectedLeague === "all" || cm.league === selectedLeague
+
   const matchesLength =
     selectedLengths.length === 0 ||
     selectedLengths.includes(cm.length)
@@ -308,6 +315,7 @@ const filteredCms = cms.filter((cm) => {
     )
 
   return (
+    matchesLeague &&
     matchesLength &&
     matchesSurface &&
     matchesRacecourse &&
@@ -318,6 +326,7 @@ const filteredCms = cms.filter((cm) => {
 })
 
 const activeFilterCount = [
+  selectedLeague !== "all",
   selectedLengths.length > 0,
   selectedSurfaces.length > 0,
   selectedRacecourses.length > 0,
@@ -356,6 +365,7 @@ const totalCmPages = Math.max(
 useEffect(() => {
   setCurrentCmPage(1)
 }, [
+  selectedLeague,
   selectedLengths,
   selectedSurfaces,
   selectedRacecourses,
@@ -383,6 +393,8 @@ const paginatedCms = sortedCms.slice(
     setShowScrollTop,
     isFiltersOpen,
     setIsFiltersOpen,
+    selectedLeague,
+    setSelectedLeague,
     selectedLengths,
     setSelectedLengths,
     selectedSurfaces,

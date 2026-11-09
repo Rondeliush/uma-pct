@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import UmaDatabaseIcon from "../Umas/UmaDatabaseIcon"
 import { UmaStatisticsAvatar } from "./UmaStatisticsSelector"
 import UmaStatisticsName from "./UmaStatisticsName"
@@ -7,20 +7,25 @@ import type { UmaPerformance } from "./umaStatistics"
 type Props = {
   umas: Pick<UmaPerformance, "versionId" | "name" | "avatar">[]
   onSelect: (versionId: string, trigger: HTMLButtonElement) => void
+  onCompare?: (trigger: HTMLButtonElement) => void
 }
 
-const COLLAPSED_CHARACTER_LIMIT = 12
-
-export default function AllUmasSelector({ umas, onSelect }: Props) {
+export default function AllUmasSelector({ umas, onSelect, onCompare }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [search, setSearch] = useState("")
+  const railRef = useRef<HTMLDivElement>(null)
   const normalizedSearch = search.toLowerCase().trim()
   // The catalogue is supplied in version Name A-Z order, independently
   // of the performance-card sort. Both modes use the same grid and tile keys.
   const matchingUmas = umas.filter((uma) => uma.name.toLowerCase().includes(normalizedSearch))
-  const visibleUmas = expanded ? matchingUmas : matchingUmas.slice(0, COLLAPSED_CHARACTER_LIMIT)
+  const visibleUmas = matchingUmas
+  const scrollRail = (direction: number) => {
+    const rail = railRef.current
+    rail?.scrollBy({ left: direction * rail.clientWidth * .75, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })
+  }
 
   const toggleExpanded = () => {
+    railRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" })
     setExpanded((current) => !current)
     if (expanded) setSearch("")
   }
@@ -41,6 +46,7 @@ export default function AllUmasSelector({ umas, onSelect }: Props) {
             placeholder="Search Uma…"
           />
         </label>
+        {onCompare && <button type="button" className="uma-statistics-compare-toggle" onClick={event => onCompare(event.currentTarget)}>Compare</button>}
         <button
           type="button"
           className="uma-statistics-show-more"
@@ -54,10 +60,15 @@ export default function AllUmasSelector({ umas, onSelect }: Props) {
           </svg>
         </button>
       </div>
+      <div className="uma-statistics-selection-rail" data-expanded={expanded}>
+      {!expanded && <button type="button" className="uma-statistics-rail-arrow" aria-label="Previous Uma versions" onClick={() => scrollRail(-1)}><UmaDatabaseIcon name="back" /></button>}
       <div
+        ref={railRef}
         id="uma-statistics-all-grid"
         className="uma-statistics-all-grid"
         data-collapsed={!expanded}
+        role="region"
+        tabIndex={expanded ? 0 : undefined}
         aria-label={expanded ? "All Uma versions" : "Quick Uma selection"}
       >
         {visibleUmas.map((uma) => (
@@ -73,6 +84,8 @@ export default function AllUmasSelector({ umas, onSelect }: Props) {
             <span><UmaStatisticsName name={uma.name} /></span>
           </button>
         ))}
+      </div>
+      {!expanded && <button type="button" className="uma-statistics-rail-arrow is-next" aria-label="Next Uma versions" onClick={() => scrollRail(1)}><UmaDatabaseIcon name="back" /></button>}
       </div>
       {visibleUmas.length === 0 && (
         <p className="uma-statistics-empty-search" role="status">No Umas match this name.</p>

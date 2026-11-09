@@ -2,6 +2,7 @@ import { calculateAttemptRaces } from "../CMs/CMCalculations"
 import { getResultConfiguration } from "../CMs/cmParticipantConfiguration"
 import type { CM, CMParticipantConfiguration } from "../types/types"
 import type { RaceStatistics } from "./umaStatistics"
+import { getRecordedUmaFinals } from "./umaFinalStatistics"
 
 const roleLabels = {
   no_special_role: "No Role",
@@ -50,6 +51,18 @@ export function calculateUmaRoleStatistics(cms: CM[], versionId?: string) {
         row.wins += results.reduce((sum, result) => sum + result.wins, 0)
         totals.set(role, row)
       }
+    }
+    // Use the final snapshot for individual history, independently of the mutable lineup.
+    if (!global) {
+      const results = getRecordedUmaFinals(cm).get(versionId)
+      if (!results) continue
+      totalRaces += 1
+      const roles = new Set(results.map((result) => getRole(result.configuration)))
+      const role = roles.size === 1 ? roles.values().next().value ?? "unknown" : "unknown"
+      const row = totals.get(role) ?? { races: 0, wins: 0 }
+      row.races += 1
+      row.wins += Number(results.some((result) => result.placement === "first"))
+      totals.set(role, row)
     }
   }
   const unknownRoleRaces = totals.get("unknown")?.races ?? 0

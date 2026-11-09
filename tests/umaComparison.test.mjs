@@ -19,20 +19,20 @@ const recordedFinal = (placement, number = 1, group = "Final A", finalPlace = "1
   finalResults: [finalResult("a", "original", placement)],
 })
 
-test("Compare sections expose General and CM together with a row-free LoH placeholder", () => {
+test("Compare sections expose General, CM and the requested LoH metrics", () => {
   const rows = section => UMA_COMPARISON_SECTIONS.find(group => group.id === section).rows
   assert.deepEqual(UMA_COMPARISON_SECTIONS.map(section => section.label), ["General", "Champions Meeting", "League of Heroes"])
   assert.deepEqual(rows("general").map(row => row.label), ["Races", "Wins", "Win Rate", "Events Participated"])
-  assert.deepEqual(rows("cm").map(row => row.label), ["CM Events", "CM Races", "CM Wins", "CM Win Rate", "Final Appearances", "Final A Appearances", "Final B Appearances", "1st Finishes", "2nd Finishes", "3rd Finishes", "4th+ Finishes", "Podium Finishes", "Final Appearance Rate", "Podium Rate", "Final Win Rate"])
+  assert.deepEqual(rows("cm").map(row => row.label), ["CM Events", "CM Races", "CM Wins", "CM Win Rate", "Final Appearances", "Final A Appearances", "Final B Appearances", "1st Finishes", "2nd Finishes", "3rd Finishes", "4th+ Finishes", "Podium Finishes", "Final Appearance Rate", "Final Podium Rate", "Final Win Rate"])
   assert.ok([...rows("general"), ...rows("cm")].every(row => !row.id.toLowerCase().includes("distance") && row.ranking === "highest"))
-  assert.equal(UMA_COMPARISON_SECTIONS.find(section => section.id === "loh").status, "soon")
-  assert.deepEqual(rows("loh"), [])
+  assert.equal(UMA_COMPARISON_SECTIONS.find(section => section.id === "loh").status, "ready")
+  assert.deepEqual(rows("loh").map(row => row.label), ["LoH Events", "LoH Races", "Raw Points", "Avg. Raw PT / Race", "Average Placement", "1st Places", "2nd Places", "3rd Places", "4th Places", "5th Places", "6th+ Places", "1st Place Rate", "Top 3 Rate", "Top 6 Rate", "Extra Stage Races", "Extra Stage 1st Places", "Extra Stage Top 3 Rate", "Extra Stage Avg. Placement"])
 })
 
 test("empty slots and versions without recorded history have unavailable values in every section", () => {
   for (const id of [null, "unused"]) {
     const values = getUmaComparisonValues([], id)
-    assert.deepEqual(Object.keys(values).sort(), ["cm", "overall"])
+    assert.deepEqual(Object.keys(values).sort(), ["cm", "loh", "overall"])
     const metrics = Object.values(values).flatMap(record => Object.values(record))
     assert.ok(metrics.every(value => value === null))
   }
@@ -42,7 +42,7 @@ test("empty slots and versions without recorded history have unavailable values 
   assert.equal(formatUmaComparisonValue(1234, "number"), "1,234")
 })
 
-test("general rows use each exact version's rounds, events and final rate denominators", () => {
+test("general rows include each exact version's raced final and preserve final rate denominators", () => {
   const cms = [
     event({ participants: [participant("a", "original", { finalParticipant: true, won: true }), participant("b", "christmas", { finalParticipant: true })], attempts: [attempt(10, [["a", 6], ["b", 2]])], finalPlace: "1st" }),
     event({ number: 2, participants: [participant("a", "original")], attempts: [attempt(5, [["a", 0]])] }),
@@ -50,17 +50,17 @@ test("general rows use each exact version's rounds, events and final rate denomi
   const snapshot = structuredClone(cms)
   const original = getUmaComparisonValues(cms, "original")
   const christmas = getUmaComparisonValues(cms, "christmas")
-  assert.deepEqual(original.overall, { races: 15, wins: 6, winRate: 40, events: 2 })
-  assert.equal(original.cm.races, 15)
-  assert.equal(original.cm.wins, 6)
-  assert.equal(original.cm.winRate, 40)
+  assert.deepEqual(original.overall, { races: 16, wins: 7, winRate: 7 / 16 * 100, events: 2 })
+  assert.equal(original.cm.races, 16)
+  assert.equal(original.cm.wins, 7)
+  assert.equal(original.cm.winRate, 7 / 16 * 100)
   assert.equal(original.cm.events, 2)
   assert.equal(original.cm.finalAppearances, 1)
   assert.equal(original.cm.firstFinishes, 1)
   assert.equal(original.cm.finalAppearanceRate, 50)
   assert.equal(original.cm.finalWinRate, 100)
-  assert.deepEqual(christmas.overall, { races: 10, wins: 2, winRate: 20, events: 1 })
-  assert.equal(christmas.cm.races, 10)
+  assert.deepEqual(christmas.overall, { races: 11, wins: 2, winRate: 2 / 11 * 100, events: 1 })
+  assert.equal(christmas.cm.races, 11)
   assert.equal(christmas.cm.wins, 2)
   assert.equal(christmas.cm.firstFinishes, 0)
   assert.equal(christmas.cm.finalAppearanceRate, 100)
@@ -96,18 +96,18 @@ test("missing qualification keeps A/B unavailable, including mixed complete and 
   }
 })
 
-test("zero denominators and final-only records keep unavailable rates safe and real counts zero", () => {
+test("final-only records count one race while unknown final finish rates remain unavailable", () => {
   const { overall, cm: values } = getUmaComparisonValues([event({ participants: [participant("a", "original", { finalParticipant: true })], finalPlace: "2nd" })], "original")
-  assert.equal(values.races, 0)
+  assert.equal(values.races, 1)
   assert.equal(values.wins, 0)
-  assert.equal(values.winRate, null)
+  assert.equal(values.winRate, 0)
   assert.equal(values.finalAppearances, 1)
   assert.equal(values.finalWinRate, null)
   assert.equal(values.podiumRate, null)
   assert.deepEqual([values.firstFinishes, values.secondFinishes, values.thirdFinishes, values.fourthOrLowerFinishes, values.podiumFinishes], [0, 0, 0, 0, 0])
   assert.equal(values.finalAAppearances, null)
   assert.equal(values.finalBAppearances, null)
-  assert.deepEqual(overall, { races: 0, wins: 0, winRate: null, events: 1 })
+  assert.deepEqual(overall, { races: 1, wins: 0, winRate: 0, events: 1 })
   const { cm: noFinals } = getUmaComparisonValues([event({ participants: [participant("a", "original")], attempts: [attempt(5, [["a", 0]])] })], "original")
   assert.equal(noFinals.finalAppearances, 0)
   assert.equal(noFinals.finalAAppearances, 0)

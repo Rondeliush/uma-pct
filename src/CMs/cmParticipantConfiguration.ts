@@ -3,6 +3,8 @@ import type {
 } from "../types/types"
 import { assertCMFinalResults, isCMFinalPlacement, isCMFinalPlacementAllowed, isCMTeamPlacement, normalizeCMFinalResults } from "./cmFinalPlacements"
 
+export type ParticipantConfigurationInput = Pick<CMUma, "umaId" | "ace" | "debuffer" | "autoRun"> & Partial<Pick<CMUma, "runningStyle">>
+
 export const RUNNING_STYLE_LABELS: Record<RunningStyle, UmaStyle> = {
   runaway: "Runaway",
   front_runner: "Front Runner",
@@ -29,9 +31,9 @@ export function getRunningStyleLabel(value: RunningStyle | null | undefined): Um
   return value ? RUNNING_STYLE_LABELS[value] : ""
 }
 
-export function getParticipantRunningStyle(participant: CMUma | undefined): RunningStyle | null {
+export function getParticipantRunningStyle(participant: ParticipantConfigurationInput | undefined): RunningStyle | null {
   if (!participant) return null
-  const legacy = participant as CMUma & { style?: unknown }
+  const legacy = participant as ParticipantConfigurationInput & { style?: unknown }
   return normalizeRunningStyle(Object.hasOwn(legacy, "runningStyle") ? legacy.runningStyle : legacy.style)
 }
 
@@ -45,7 +47,7 @@ export function hasCompleteCMLineup(cm: CM): boolean {
 }
 
 export function snapshotParticipantConfiguration(
-  participant: CMUma | undefined,
+  participant: ParticipantConfigurationInput | undefined,
   configurationSource: CMParticipantConfiguration["configurationSource"] = "recorded",
 ): CMParticipantConfiguration {
   return {
@@ -95,7 +97,9 @@ export function getCMFinalResults(cm: CM): CMFinalUmaResult[] {
 
 /** Final results have their own participant snapshots, separate from round batches. */
 export function snapshotFinalResults(cm: CM, options: { lineupChanged?: boolean } = {}): CM {
-  if (!isCMTeamPlacement(cm.finalPlace)) {
+  const pendingLineup = cm.phase === "finalResult" && cm.finalResults?.length === 3
+    && cm.finalResults.every(result => result.placement === null && !result.won)
+  if (!isCMTeamPlacement(cm.finalPlace) && !(cm.finalPlace === "" && (pendingLineup || options.lineupChanged))) {
     const current = { ...cm }
     delete current.finalResults
     return synchronizeFinalWinners(current)

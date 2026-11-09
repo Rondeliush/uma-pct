@@ -73,8 +73,8 @@ test("derives Final A/B from qualification rounds and keeps team placement separ
   const original = calculateUmaDetailStatistics(cms, "oguri-original")
   assert.equal(original.finalAppearances, 1)
   assert.equal(original.finalWins, 1)
-  assert.equal(original.races, 10)
-  assert.equal(original.wins, 6)
+  assert.equal(original.races, 11)
+  assert.equal(original.wins, 7)
   assert.deepEqual(original.finals, [
     { group: "Final A", appearances: 1, placements: { first: 1, second: 0, third: 0, fourth_or_lower: 0 }, unknownPlacements: 0 },
   ])
@@ -95,7 +95,7 @@ test("derives Final A/B from qualification rounds and keeps team placement separ
   assert.equal(getUmaDetailInsights(christmas).eventPerformance.finalWinRate, 0)
 })
 
-test("final-only and incomplete records retain appearances without invented groups or round races", () => {
+test("final-only and incomplete records count raced finals without invented qualification groups", () => {
   const result = calculateUmaDetailStatistics([
     event({ participants: [participant("a", "oguri-original", { finalParticipant: true, won: true })], finalPlace: "1st" }),
     event({ number: 2, participants: [participant("a", "oguri-original", { finalParticipant: true })], attempts: [attempt(3, 5, [["a", 3]])], finalPlace: "3rd" }),
@@ -103,10 +103,10 @@ test("final-only and incomplete records retain appearances without invented grou
   ], "oguri-original")
   assert.equal(result.finalAppearances, 2)
   assert.equal(result.finalWins, 1)
-  assert.equal(result.races, 5)
+  assert.equal(result.races, 7)
   assert.equal(result.cmEvents, 2)
   assert.deepEqual(result.finals, [{ group: null, appearances: 2, placements: { first: 1, second: 0, third: 0, fourth_or_lower: 0 }, unknownPlacements: 1 }])
-  assert.equal(result.events.find(event => event.number === 1).winRate, null)
+  assert.equal(result.events.find(event => event.number === 1).winRate, 100)
 })
 
 test("null individual placements count appearances without borrowing any team placement or winner flag", () => {
@@ -287,7 +287,7 @@ test("a pending lineup and a non-final participant never gain an individual fina
   assert.deepEqual(result.finals, [])
 })
 
-test("exact distances exclude unknown distances and finals, and history is newest first", () => {
+test("exact distances include raced finals, exclude unknown distances and history is newest first", () => {
   const cms = [
     event({ number: 3, distance: 2200, participants: [participant("a", "oguri-original")], attempts: [attempt(1, 5, [["a", 2]])] }),
     event({ number: 1, distance: 2000, participants: [participant("a", "oguri-original")], attempts: [attempt(1, 10, [["a", 6]])] }),
@@ -296,7 +296,7 @@ test("exact distances exclude unknown distances and finals, and history is newes
     event({ number: 5, distance: 3200, participants: [participant("a", "oguri-original", { finalParticipant: true })], finalPlace: "2nd" }),
   ]
   const result = calculateUmaDetailStatistics(cms, "oguri-original")
-  assert.deepEqual(result.distances.map(distance => [distance.distance, distance.races, distance.wins]), [[2000, 10, 6], [2200, 5, 2]])
+  assert.deepEqual(result.distances.map(distance => [distance.distance, distance.races, distance.wins]), [[2000, 10, 6], [2200, 5, 2], [3200, 1, 0]])
   assert.deepEqual(result.events.map(event => event.number), [5, 4, 3, 1])
   assert.equal(result.cmEvents, 4)
   assert.deepEqual(calculateUmaDetailStatistics(cms, "oguri-christmas").distances.map(distance => [distance.distance, distance.races, distance.wins]), [[2000, 5, 1]])
@@ -317,7 +317,7 @@ test("legacy base-only history is inspectable without contaminating known versio
   const cms = [event({ participants: [participant("a", "oguri", { finalParticipant: true, won: true }), participant("b", "oguri-original"), participant("c", "oguri-christmas")], attempts: [attempt(1, 5, [["a", 3], ["b", 1], ["c", 0]])], finalPlace: "1st" })]
   const snapshot = structuredClone(cms)
   const legacy = calculateUmaDetailStatistics(cms, "oguri")
-  assert.equal(legacy.wins, 3)
+  assert.equal(legacy.wins, 4)
   assert.equal(legacy.finalWins, 1)
   assert.equal(legacy.events.length, 1)
   assert.equal(calculateUmaDetailStatistics(cms, "oguri-original").wins, 1)
@@ -355,8 +355,8 @@ test("Best highlights require ten races and weighted event rates resist tiny sam
   assert.equal(insights.highlights.bestDistance.distance, 2000)
   assert.equal(insights.highlights.bestCM.name, "Established best")
   assert.equal(insights.highlights.mostUsedDistance.distance, 1600)
-  assert.equal(insights.eventPerformance.weightedWinRate, 10 / 31 * 100)
-  assert.equal(insights.eventPerformance.bestEventWinRate, 50)
+  assert.equal(insights.eventPerformance.weightedWinRate, 11 / 33 * 100)
+  assert.equal(insights.eventPerformance.bestEventWinRate, 6 / 11 * 100)
   assert.equal(insights.eventPerformance.finalAppearanceRate, 2 / 3 * 100)
   assert.equal(insights.eventPerformance.finalWinRate, 100)
   const tiny = getUmaDetailInsights(calculateUmaDetailStatistics([
@@ -488,7 +488,9 @@ test("unavailable Best metrics remain null while recorded zero-win samples stay 
   const { highlights } = getUmaDetailInsights(calculateUmaDetailStatistics([recordedStyleEvent(1, "front_runner", 10, 0, { surface: "Turf" })], "oguri-original"))
   for (const key of ["bestDistance", "bestRunningStyle", "bestSurface", "bestCM"]) assert.equal(highlights[key].winRate, 0)
   const finalOnly = calculateUmaDetailStatistics([event({ participants: [participant("a", "oguri-original", { finalParticipant: true, won: true })], finalPlace: "1st" })], "oguri-original")
-  assert.ok(Object.values(getUmaDetailInsights(finalOnly).highlights).every(value => value === null))
+  const finalHighlights = getUmaDetailInsights(finalOnly).highlights
+  for (const key of ["bestDistance", "bestRunningStyle", "bestSurface", "bestCM", "mostUsedRunningStyle"]) assert.equal(finalHighlights[key], null)
+  assert.deepEqual(finalHighlights.mostUsedDistance, { distance: 2000, races: 1, wins: 1, winRate: 100 })
 })
 
 test("missing surface/category and zero totals remain unavailable without fabricated allocations", () => {
@@ -498,12 +500,12 @@ test("missing surface/category and zero totals remain unavailable without fabric
     event({ number: 3, surface: "Turf", participants: [participant("a", "oguri-original", { finalParticipant: true })], finalPlace: "3rd" }),
   ], "oguri-original")
   const distances = getUmaDistancePerformance(statistics.events)
-  assert.equal(distances.uncategorizedRaces, 5)
+  assert.equal(distances.uncategorizedRaces, 6)
   assert.deepEqual(distances.categories, [])
   assert.deepEqual(getUmaDistancePerformance(statistics.events, "Dirt").distances, [])
   const insights = getUmaDetailInsights(statistics)
   assert.equal(insights.unknownSurfaceRaces, 5)
-  assert.deepEqual(insights.surfaces.map(row => [row.surface, row.races, row.winRate]), [["Dirt", 5, 0]])
+  assert.deepEqual(insights.surfaces.map(row => [row.surface, row.races, row.winRate]), [["Turf", 1, 0], ["Dirt", 5, 0]])
   const empty = getUmaDetailInsights(calculateUmaDetailStatistics([], "oguri-original"))
   assert.deepEqual(empty.surfaces, [])
   assert.equal(empty.eventPerformance.weightedWinRate, null)

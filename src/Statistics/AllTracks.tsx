@@ -4,6 +4,7 @@ import { trackImages } from "../data/trackData"
 import type { TrackImageEntry } from "../data/trackData"
 import UmaDatabaseIcon from "../Umas/UmaDatabaseIcon"
 import TrackStatisticsLink from "./TrackStatisticsLink"
+import { TrackConditionIcon } from "../components/EventIcons"
 import "./UmaPerformanceList.css"
 import "./AllTracks.css"
 
@@ -83,7 +84,7 @@ export default function AllTracks({ onOpenTrack }: { onOpenTrack: (trackId: stri
     <section className="track-catalog" aria-labelledby="track-catalog-title">
       <div className="uma-statistics-all-header track-catalog-header">
         <h2 id="track-catalog-title" className="uma-statistics-eyebrow">
-          All Tracks <span aria-label={`${trackImages.length} racetracks`}>{trackImages.length}</span>
+          <TrackConditionIcon kind="racecourse" />All Tracks <span aria-label={`${trackImages.length} racetracks`}>{trackImages.length}</span>
         </h2>
         <div className="uma-performance-view-switch" role="group" aria-label="All Tracks presentation">
           {(["gallery", "grid", "list"] as const).map((view) => (

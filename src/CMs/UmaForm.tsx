@@ -1,16 +1,8 @@
+import type { UmaFormData } from "../components/event-form/eventFormData"
 import { useEffect, useState } from "react"
 import type { UmaStyle } from "../types/types"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaAvatarImage from "../components/UmaAvatarImage"
-
-type UmaFormData = {
-  id: string
-  name: string
-  style: UmaStyle | ""
-  ace: boolean
-  debuffer: boolean
-  autoRun: boolean
-}
 
 type UmaFormProps = {
   number: number

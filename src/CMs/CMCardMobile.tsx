@@ -1,3 +1,4 @@
+import { formatTrackLength } from "../formatting"
 import type { CM } from "../types/types"
 
 import { getTrackImage } from "../data/trackData"
@@ -133,7 +134,7 @@ function CMCardMobile({
                 <span className="text-sky-700">
                     •
                 </span>
-                <span>{cm.length}</span>
+                <span>{formatTrackLength(cm.length)}</span>
                 </div>
 
                 {/* BOTTOM */}
@@ -389,7 +390,7 @@ function CMCardMobile({
             </div>
 
             <div className="rounded-lg border border-blue-700/70 bg-gray-950/80 px-3 py-1.5 text-sm font-bold text-white backdrop-blur-sm">
-              {cm.length}
+              {formatTrackLength(cm.length)}
             </div>
           </div>
 

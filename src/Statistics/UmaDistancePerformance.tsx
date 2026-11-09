@@ -1,6 +1,6 @@
-import { useRef, useState } from "react"
-import { getUmaDistancePerformance, UMA_DISTANCE_CATEGORIES } from "./umaDetailStatistics"
-import type { UmaEventStatistics, UmaSurfaceFilter } from "./umaDetailStatistics"
+import { useRef } from "react"
+import { getUmaDistancePerformance } from "./umaDetailStatistics"
+import type { UmaSurfaceFilter } from "./umaDetailStatistics"
 import { formatUmaWinRate } from "./umaStatistics"
 import type { RaceStatistics } from "./umaStatistics"
 
@@ -48,29 +48,17 @@ export function UmaDetailPerformanceTable({ label, rows, id }: { label: string; 
   )
 }
 
-export default function UmaDistancePerformance({ events }: { events: UmaEventStatistics[] }) {
-  const [mode, setMode] = useState<"exact" | "categories">("exact")
-  const [surface, setSurface] = useState<UmaSurfaceFilter>("All")
-  const [expanded, setExpanded] = useState(false)
-  const performance = getUmaDistancePerformance(events, surface)
-  const distances = expanded ? performance.distances : performance.distances.slice(0, 5)
-  const rows = mode === "exact"
-    ? distances.map((distance) => ({ ...distance, label: `${distance.distance} m` }))
-    : UMA_DISTANCE_CATEGORIES.map((category) => ({
-      ...(performance.categories.find((row) => row.category === category) ?? { races: 0, wins: 0, winRate: null }),
-      label: category,
-    }))
+export default function UmaDistancePerformance({ events }: { events: Parameters<typeof getUmaDistancePerformance>[0] }) {
+  const performance = getUmaDistancePerformance(events)
+  const rows = performance.distances.map((distance) => ({ ...distance, label: `${distance.distance} m` }))
 
   return (
     <section className="uma-statistics-panel uma-detail-distance" aria-labelledby="uma-detail-distance-title">
-      <div className="uma-statistics-section-heading"><h2 id="uma-detail-distance-title">Distance Performance</h2></div>
-      <UmaDistancePerformanceControls idPrefix="uma-detail-distance" mode={mode} surface={surface} onModeChange={setMode} onSurfaceChange={(value) => { setSurface(value); setExpanded(false) }} />
-      <div id="uma-detail-distance-content" role="tabpanel" aria-labelledby={`uma-detail-distance-${mode}`} tabIndex={0}>
-        {rows.length > 0 ? <UmaDetailPerformanceTable id="uma-detail-distance-rows" label={mode === "exact" ? "Distance" : "Category"} rows={rows} /> : <p className="uma-detail-note">No recorded round races {mode === "exact" ? "at a known distance" : "in a known distance category"}{surface !== "All" ? ` on ${surface}` : ""}.</p>}
-        {mode === "exact" && performance.distances.length > 5 && (
-          <button type="button" className="uma-statistics-text-button uma-detail-distance-toggle" aria-expanded={expanded} aria-controls="uma-detail-distance-rows" onClick={() => setExpanded((current) => !current)}>{expanded ? "Show less" : `Show all ${performance.distances.length} distances`}</button>
-        )}
-        {mode === "categories" && performance.uncategorizedRaces > 0 && <p className="uma-detail-note">{performance.uncategorizedRaces.toLocaleString("en")} races have no saved distance category and are excluded here.</p>}
+      <div className="uma-statistics-section-heading uma-detail-distance-heading">
+        <h2 id="uma-detail-distance-title">Distance Performance</h2>
+      </div>
+      <div id="uma-detail-distance-content" className="uma-detail-distance-scroll" role="region" aria-labelledby="uma-detail-distance-title" tabIndex={rows.length > 4 ? 0 : undefined}>
+        {rows.length > 0 ? <UmaDetailPerformanceTable id="uma-detail-distance-rows" label="Distance" rows={rows} /> : <p className="uma-detail-note">No recorded races at a known distance.</p>}
       </div>
     </section>
   )

@@ -8,6 +8,7 @@ import { getRole } from "./umaRoleStatistics"
 import type { UmaRole } from "./umaRoleStatistics"
 
 export type UmaCMHistoryEntry = UmaEventStatistics & {
+  league: CM["league"]
   teamFinal: Pick<NonNullable<UmaEventStatistics["final"]>, "group" | "teamPlace"> | null
   umaFinish: CMFinalPlacement | "not_in_final" | "unrecorded" | null
   role: UmaRole | "mixed"
@@ -39,6 +40,7 @@ export function getUmaChampionsMeetingHistory(cms: CM[], versionId: string, even
     const finalStyles = new Set(finalists.map((result) => result.configuration.runningStyle))
     return {
       ...event,
+      league: cm?.league,
       teamFinal,
       umaFinish: teamFinal ? event.final ? event.final.placement ?? "unrecorded" : "not_in_final" : null,
       role,

@@ -6,6 +6,7 @@ import { migrateProfileData, PROFILE_DATA_VERSION } from "./profileDataMigration
 import { RUNNING_STYLE_LABELS } from "../CMs/cmParticipantConfiguration"
 import { getCMFinalValidationErrors, isCMFinalPlacement, normalizeCMFinalResults } from "../CMs/cmFinalPlacements"
 import type { CM } from "../types/types"
+import { isLoHData } from "../LoH/lohData"
 
 export type ImportedProfileFile = {
   format: "uma-tracker-profile"
@@ -74,20 +75,13 @@ function isCM(value: unknown, current: boolean, currentPlacements: boolean): boo
   }).length === 0
 }
 
-function isLoH(value: unknown): boolean {
-  return hasFields(value, ["name", "track", "rank"], ["number", "score", "racesPlayed", "firstPlaces", "top3Finishes"], ["completed"]) &&
-    Array.isArray(value.participants) && value.participants.every((item) =>
-      hasFields(item, ["umaId"], ["races", "wins", "top3Finishes"])
-    )
-}
-
 export function isProfileData(value: unknown): value is ProfileData {
   if (!isRecord(value) || !isRecord(value.customUmaDatabase)) return false
   const custom = value.customUmaDatabase
   return (
     (value.dataVersion === undefined || (Number.isInteger(value.dataVersion) && Number(value.dataVersion) >= 0 && Number(value.dataVersion) <= PROFILE_DATA_VERSION)) &&
-    Array.isArray(value.cms) && value.cms.every((cm) => isCM(cm, Number(value.dataVersion) >= 1, value.dataVersion === PROFILE_DATA_VERSION)) &&
-    Array.isArray(value.lohs) && value.lohs.every(isLoH) &&
+    Array.isArray(value.cms) && value.cms.every((cm) => isCM(cm, Number(value.dataVersion) >= 1, Number(value.dataVersion) >= 2)) &&
+    Array.isArray(value.lohs) && value.lohs.every(isLoHData) &&
     Array.isArray(custom.customCharacters) && custom.customCharacters.every((item) => hasFields(item, ["id", "name"])) &&
     Array.isArray(custom.customVersions) && custom.customVersions.every((item) =>
       hasFields(item, ["id", "characterId", "displayName", "versionName"], [], ["archived"]) &&

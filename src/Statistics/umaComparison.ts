@@ -1,9 +1,12 @@
 ﻿import type { CM, CMFinalPlacement } from "../types/types"
 import { calculateUmaDetailStatistics } from "./umaDetailStatistics"
 import { formatUmaWinRate } from "./umaStatistics"
+import type { LoH } from "../LoH/types"
+import { getUmaLoHComparisonRecord } from "../LoH/umaComparison"
+import type { UmaLoHComparisonRecord } from "../LoH/umaComparison"
 
-export type UmaComparisonFormat = "number" | "percentage" | "text"
-export type UmaComparisonRanking = "highest" | "none"
+export type UmaComparisonFormat = "number" | "decimal" | "percentage" | "text"
+export type UmaComparisonRanking = "highest" | "lowest" | "none"
 export type UmaComparisonValue = number | string | null
 
 export type UmaCompetitiveRecord = {
@@ -30,13 +33,14 @@ export type UmaCmComparisonRecord = UmaCompetitiveRecord & {
 export type UmaComparisonValues = {
   overall: UmaCompetitiveRecord
   cm: UmaCmComparisonRecord
+  loh: UmaLoHComparisonRecord
 }
 
 type ComparisonSectionDefinition = {
   id: string
   label: string
-  tone: "cyan" | "violet" | "muted"
-  status: "ready" | "soon"
+  tone: "cyan" | "violet" | "rose"
+  status: "ready"
   rows: readonly {
     id: string; label: string; format: UmaComparisonFormat; ranking: UmaComparisonRanking
     getValue: (values: UmaComparisonValues) => UmaComparisonValue
@@ -70,13 +74,32 @@ export const UMA_COMPARISON_SECTIONS = [
       { id: "fourthOrLowerFinishes", label: "4th+ Finishes", format: "number", ranking: "highest", getValue: (values) => values.cm.fourthOrLowerFinishes },
       { id: "podiumFinishes", label: "Podium Finishes", format: "number", ranking: "highest", getValue: (values) => values.cm.podiumFinishes },
       { id: "finalAppearanceRate", label: "Final Appearance Rate", format: "percentage", ranking: "highest", getValue: (values) => values.cm.finalAppearanceRate },
-      { id: "podiumRate", label: "Podium Rate", format: "percentage", ranking: "highest", getValue: (values) => values.cm.podiumRate },
+      { id: "podiumRate", label: "Final Podium Rate", format: "percentage", ranking: "highest", getValue: (values) => values.cm.podiumRate },
       { id: "finalWinRate", label: "Final Win Rate", format: "percentage", ranking: "highest", getValue: (values) => values.cm.finalWinRate },
     ],
   },
   {
-    id: "loh", label: "League of Heroes", tone: "muted", status: "soon",
-    rows: [],
+    id: "loh", label: "League of Heroes", tone: "rose", status: "ready",
+    rows: [
+      { id: "lohEvents", label: "LoH Events", format: "number", ranking: "highest", getValue: (values) => values.loh.events },
+      { id: "lohRaces", label: "LoH Races", format: "number", ranking: "highest", getValue: (values) => values.loh.races },
+      { id: "lohRawPoints", label: "Raw Points", format: "number", ranking: "highest", getValue: (values) => values.loh.rawPoints },
+      { id: "lohAverageRawPointsPerRace", label: "Avg. Raw PT / Race", format: "decimal", ranking: "highest", getValue: (values) => values.loh.averageRawPointsPerRace },
+      { id: "lohAveragePlacement", label: "Average Placement", format: "decimal", ranking: "lowest", getValue: (values) => values.loh.averagePlacement },
+      { id: "lohFirstPlaces", label: "1st Places", format: "number", ranking: "highest", getValue: (values) => values.loh.firstPlaces },
+      { id: "lohSecondPlaces", label: "2nd Places", format: "number", ranking: "highest", getValue: (values) => values.loh.secondPlaces },
+      { id: "lohThirdPlaces", label: "3rd Places", format: "number", ranking: "highest", getValue: (values) => values.loh.thirdPlaces },
+      { id: "lohFourthPlaces", label: "4th Places", format: "number", ranking: "highest", getValue: (values) => values.loh.fourthPlaces },
+      { id: "lohFifthPlaces", label: "5th Places", format: "number", ranking: "highest", getValue: (values) => values.loh.fifthPlaces },
+      { id: "lohSixthOrLowerPlaces", label: "6th+ Places", format: "number", ranking: "highest", getValue: (values) => values.loh.sixthOrLowerPlaces },
+      { id: "lohFirstPlaceRate", label: "1st Place Rate", format: "percentage", ranking: "highest", getValue: (values) => values.loh.firstPlaceRate },
+      { id: "lohTop3Rate", label: "Top 3 Rate", format: "percentage", ranking: "highest", getValue: (values) => values.loh.top3Rate },
+      { id: "lohTop6Rate", label: "Top 6 Rate", format: "percentage", ranking: "highest", getValue: (values) => values.loh.top6Rate },
+      { id: "lohExtraStageRaces", label: "Extra Stage Races", format: "number", ranking: "highest", getValue: (values) => values.loh.extraStageRaces },
+      { id: "lohExtraStageFirstPlaces", label: "Extra Stage 1st Places", format: "number", ranking: "highest", getValue: (values) => values.loh.extraStageFirstPlaces },
+      { id: "lohExtraStageTop3Rate", label: "Extra Stage Top 3 Rate", format: "percentage", ranking: "highest", getValue: (values) => values.loh.extraStageTop3Rate },
+      { id: "lohExtraStageAveragePlacement", label: "Extra Stage Avg. Placement", format: "decimal", ranking: "lowest", getValue: (values) => values.loh.extraStageAveragePlacement },
+    ],
   },
 ] as const satisfies readonly ComparisonSectionDefinition[]
 
@@ -131,21 +154,20 @@ function getUmaCmComparisonRecord(cms: CM[], versionId: string | null): UmaCmCom
   }
 }
 
-export function getUmaComparisonValues(cms: CM[], versionId: string | null): UmaComparisonValues {
-  // Add real saved-data providers here when supported; Overall includes every registered mode.
-  const supportedModes = { cm: getUmaCmComparisonRecord(cms, versionId) }
+export function getUmaComparisonValues(cms: CM[], versionId: string | null, lohs: LoH[] = []): UmaComparisonValues {
+  const supportedModes = { cm: getUmaCmComparisonRecord(cms, versionId), loh: getUmaLoHComparisonRecord(lohs, versionId) }
   return { overall: aggregateUmaCompetitiveRecords(Object.values(supportedModes)), ...supportedModes }
 }
 
 export function getUmaComparisonWinners(values: UmaComparisonValue[], format: UmaComparisonFormat, ranking: UmaComparisonRanking = "highest"): boolean[] {
   if (format === "text" || ranking === "none") return values.map(() => false)
   const numeric = values.filter((value): value is number => typeof value === "number" && Number.isFinite(value))
-  const best = numeric.length > 0 ? Math.max(...numeric) : null
+  const best = numeric.length > 0 ? (ranking === "lowest" ? Math.min(...numeric) : Math.max(...numeric)) : null
   return values.map((value) => best !== null && value === best)
 }
 
 export function formatUmaComparisonValue(value: UmaComparisonValue, format: UmaComparisonFormat): string {
   if (value === null || (typeof value === "number" && !Number.isFinite(value))) return "—"
   if (typeof value === "string") return value.trim() || "—"
-  return format === "percentage" ? formatUmaWinRate(value) : value.toLocaleString("en")
+  return format === "percentage" ? formatUmaWinRate(value) : value.toLocaleString("en", format === "decimal" ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : undefined)
 }

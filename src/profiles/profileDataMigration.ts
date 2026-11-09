@@ -1,8 +1,10 @@
 import { getCMFinalResults, getParticipantRunningStyle, snapshotParticipantConfiguration, synchronizeFinalWinners } from "../CMs/cmParticipantConfiguration"
 import { assertCMFinalResults } from "../CMs/cmFinalPlacements"
 import type { CM, CMUma } from "../types/types"
+import type { LoH } from "../LoH/types"
+import { normalizeLoH } from "../LoH/lohData"
 
-export const PROFILE_DATA_VERSION = 2
+export const PROFILE_DATA_VERSION = 3
 
 /** Pure, idempotent migration. Never expands batches or changes competitive counts. */
 export function migrateCMConfiguration(cm: CM): CM {
@@ -46,11 +48,13 @@ export function migrateCMConfiguration(cm: CM): CM {
   return current
 }
 
-export function migrateProfileData<T extends { cms: CM[]; dataVersion?: number }>(data: T): T {
+export function migrateProfileData<T extends { cms: CM[]; lohs?: LoH[]; dataVersion?: number }>(data: T): T {
   if (data.dataVersion !== undefined && (!Number.isInteger(data.dataVersion) || data.dataVersion < 0 || data.dataVersion > PROFILE_DATA_VERSION)) {
     throw new Error("This profile uses an unsupported data version. Nothing was overwritten.")
   }
   const cms = data.cms.map(migrateCMConfiguration)
-  return data.dataVersion === PROFILE_DATA_VERSION && cms.every((cm, index) => cm === data.cms[index])
-    ? data : { ...data, dataVersion: PROFILE_DATA_VERSION, cms }
+  const lohs = data.lohs?.map(normalizeLoH)
+  return data.dataVersion === PROFILE_DATA_VERSION && cms.every((cm, index) => cm === data.cms[index]) &&
+    (lohs === undefined || lohs.every((event, index) => event === data.lohs?.[index]))
+    ? data : { ...data, dataVersion: PROFILE_DATA_VERSION, cms, ...(lohs ? { lohs } : {}) }
 }

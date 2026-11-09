@@ -83,11 +83,12 @@ test("team changes clear only now-invalid placements and never silently promote 
   assert.deepEqual(placements(event), ["first", "second", "fourth_or_lower"])
 })
 
-test("valid third survives a team change, and clearing the team clears the final records and winner", () => {
+test("valid third survives a team change; clearing the result preserves the selected team snapshots and clears placements/winner", () => {
   const event = place(place(setup(), "a", "first"), "b", "third")
   assert.deepEqual(placements(changeCMTeamResult(event, "3rd")), [null, "third", null])
   const cleared = changeCMTeamResult(event, "")
-  assert.equal(cleared.finalResults, undefined)
+  assert.deepEqual(cleared.finalResults.map(result => result.placement), [null, null, null])
+  assert.deepEqual(cleared.finalResults.map(result => result.configuration), event.finalResults.map(result => result.configuration))
   assert.ok(cleared.participants.every((p) => !p.won))
 })
 
@@ -141,7 +142,7 @@ test("v0 and v1 known old winners migrate to first, other places stay null, and 
     assert.deepEqual(placements(migrated.cms[0]), [null, "first", null])
     assert.equal(migrated.cms[0].finalPlace, "1st")
     assert.ok(migrated.cms[0].finalResults.every((r) => r.placementSource === "legacy_inferred"))
-    assert.equal(migrated.dataVersion, 2)
+    assert.equal(migrated.dataVersion, PROFILE_DATA_VERSION)
     assert.deepEqual(original, before)
     assert.strictEqual(migrateProfileData(migrated), migrated)
     assert.ok(isImportedProfileFile(file(migrated)))

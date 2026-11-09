@@ -2,13 +2,15 @@ import type { CM } from "../types/types"
 import { calculateUmaEntrySourceStatistics } from "./umaEntrySourceStatistics"
 import { formatUmaWinRate } from "./umaStatistics"
 
-export default function UmaEntrySourcePerformance({ cms, versionId }: { cms: CM[]; versionId: string }) {
-  const performance = calculateUmaEntrySourceStatistics(cms, versionId)
+export default function UmaEntrySourcePerformance({ cms, versionId, performance: supplied, scopeLabel = "CM" }: {
+  cms: CM[]; versionId: string; performance?: ReturnType<typeof calculateUmaEntrySourceStatistics>; scopeLabel?: string
+}) {
+  const performance = supplied ?? calculateUmaEntrySourceStatistics(cms, versionId)
   return (
     <section className="uma-statistics-panel uma-detail-entry-source" aria-labelledby="uma-detail-entry-source-title">
       <div className="uma-statistics-section-heading"><h2 id="uma-detail-entry-source-title">Entry Source Performance</h2></div>
       <table className="uma-statistics-distance-table uma-detail-style-table">
-        <caption className="sr-only">Recorded CM entry sources. Usage is a share of round races with an attributable saved entry source.</caption>
+        <caption className="sr-only">Recorded {scopeLabel} entry sources. Usage is a share of races with an attributable saved entry source.</caption>
         <colgroup><col className="uma-detail-style-label-column" /><col /><col /><col /><col /></colgroup>
         <thead><tr><th scope="col">Source</th><th scope="col">Races</th><th scope="col">Wins</th><th scope="col">Win Rate</th><th scope="col">Usage</th></tr></thead>
         <tbody>{performance.rows.map((row) => (
@@ -19,7 +21,6 @@ export default function UmaEntrySourcePerformance({ cms, versionId }: { cms: CM[
           </tr>
         ))}</tbody>
       </table>
-      {performance.totalRaces === 0 && <p className="uma-detail-note">No recorded round races for this version.</p>}
       {performance.unknownSourceRaces > 0 && <p className="uma-detail-note">{performance.unknownSourceRaces.toLocaleString("en")} of {performance.totalRaces.toLocaleString("en")} races have missing or conflicting saved entry sources and are excluded from these rows and Usage.</p>}
     </section>
   )

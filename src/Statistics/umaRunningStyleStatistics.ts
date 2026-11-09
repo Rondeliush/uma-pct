@@ -2,6 +2,7 @@ import { calculateAttemptRaces } from "../CMs/CMCalculations"
 import { getResultConfiguration, RUNNING_STYLE_LABELS } from "../CMs/cmParticipantConfiguration"
 import type { CM, RunningStyle } from "../types/types"
 import type { RaceStatistics } from "./umaStatistics"
+import { getRecordedUmaFinals } from "./umaFinalStatistics"
 
 const standardStyles = ["front_runner", "pace_chaser", "late_surger", "end_closer"] as const
 export type UmaRunningStyleRow = RaceStatistics & { style: RunningStyle; label: string; usage: number | null }
@@ -38,6 +39,19 @@ export function calculateUmaRunningStyleStatistics(cms: CM[], versionId?: string
         row.wins += results.reduce((sum, result) => sum + result.wins, 0)
         totals.set(style, row)
       }
+    }
+    // Individual records include the raced final; the global rounds overview keeps its scope.
+    if (!global) {
+      const results = getRecordedUmaFinals(cm).get(versionId)
+      if (!results) continue
+      totalRaces += 1
+      const styles = new Set(results.map((result) => result.configuration.runningStyle))
+      const style = styles.values().next().value
+      if (styles.size !== 1 || !style || !Object.hasOwn(RUNNING_STYLE_LABELS, style)) { unknownStyleRaces += 1; continue }
+      const row = totals.get(style) ?? { races: 0, wins: 0 }
+      row.races += 1
+      row.wins += Number(results.some((result) => result.placement === "first"))
+      totals.set(style, row)
     }
   }
   const styles: RunningStyle[] = global ? Object.keys(RUNNING_STYLE_LABELS) as RunningStyle[]

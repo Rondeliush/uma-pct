@@ -1,9 +1,10 @@
+import { EventChevronIcon } from "../components/EventIcons"
 import { useState } from "react"
 import type { CM } from "../types/types"
 import type { Dispatch, SetStateAction } from "react"
 import CMDayResults from "./CMDayResults"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
-import UmaAvatarImage from "../components/UmaAvatarImage"
+import UmaResultPortrait from "../components/UmaResultPortrait"
 import { completeCMFinal } from "./cmParticipantConfiguration"
 import { getCMFinalValidationErrors } from "./cmFinalPlacements"
 import CMFinalResultEditor from "./CMFinalResultEditor"
@@ -251,20 +252,6 @@ function CMResults({ cm, setCms }: CMResultsProps) {
       })
     )
   }
-const avatarFadeMask = {
-  WebkitMaskImage:
-    "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 3%, black 8%, black 80%, rgba(0,0,0,0.95) 86%, rgba(0,0,0,0.65) 92%, rgba(0,0,0,0.2) 97%, transparent 100%)",
-  maskImage:
-    "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 3%, black 8%, black 80%, rgba(0,0,0,0.95) 86%, rgba(0,0,0,0.65) 92%, rgba(0,0,0,0.2) 97%, transparent 100%)",
-}
-
-const avatarSideFadeMask = {
-  WebkitMaskImage:
-    "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.45) 4%, black 10%, black 90%, rgba(0,0,0,0.45) 96%, transparent 100%)",
-  maskImage:
-    "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.45) 4%, black 10%, black 90%, rgba(0,0,0,0.45) 96%, transparent 100%)",
-}
-
   return (
     <div>
       {/* ======================================= */}
@@ -390,41 +377,13 @@ const avatarSideFadeMask = {
                       </div>
                     )}
 
-                      {version?.avatar ? (
-                        <div
-                        className={`absolute bottom-0 left-1/2 z-10 overflow-hidden -translate-x-1/2 ${
-                        isWinner
-                          ? "h-[205px] w-[200px]"
-                          : "h-[180px] w-[180px]"
-                      }`}
-                        style={avatarFadeMask}
-                      >
-                        <div
-                          className="absolute inset-0"
-                          style={avatarSideFadeMask}
-                        >
-
-                        <UmaAvatarImage
-                          avatar={version.avatar}
-                          alt={version.displayName}
-                          className={`absolute left-1/2 top-0 max-w-none -translate-x-1/2 object-contain object-top ${
-                            isWinner
-                              ? "h-[300px]"
-                              : "h-[260px]"
-                          }`}
-                          style={{
-                            filter: isWinner
-                              ? "drop-shadow(0 0 1px #fde047) drop-shadow(0 0 3px rgba(250,204,21,0.85)) drop-shadow(0 0 7px rgba(250,204,21,0.45))"
-                              : undefined,
-                          }}
-                        />
-                      </div>
-                      </div>
-                      ) : (
-                        <div className="absolute bottom-8 text-6xl text-white/15">
-                          ♞
-                        </div>
-                      )}
+                      <UmaResultPortrait
+                        avatar={version?.avatar}
+                        name={version?.displayName ?? ""}
+                        viewportClassName={`absolute bottom-0 left-1/2 z-10 overflow-hidden -translate-x-1/2 ${isWinner ? "h-[205px] w-[200px]" : "h-[180px] w-[180px]"}`}
+                        imageClassName={isWinner ? "h-[300px]" : "h-[260px]"}
+                        imageStyle={{ filter: isWinner ? "drop-shadow(0 0 1px #fde047) drop-shadow(0 0 3px rgba(250,204,21,0.85)) drop-shadow(0 0 7px rgba(250,204,21,0.45))" : undefined }}
+                      />
 
                     </div>
                   )
@@ -489,28 +448,11 @@ const avatarSideFadeMask = {
                       key={participant.cmUmaId}
                       className="relative flex h-full w-[165px] shrink-0 items-end justify-center"
                     >
-                      {version?.avatar ? (
-                        <div
-                          className="absolute bottom-0 left-1/2 h-[180px] w-[180px] -translate-x-1/2 overflow-hidden"
-                          style={avatarFadeMask}
-                        >
-                          <div
-                          className="absolute inset-0"
-                          style={avatarSideFadeMask}
-                        >
-                          
-                          <UmaAvatarImage
-                            avatar={version.avatar}
-                            alt={version.displayName}
-                            className="absolute left-1/2 top-0 h-[260px] max-w-none -translate-x-1/2 object-contain object-top"
-                          />
-                        </div>
-                        </div>
-                      ) : (
-                        <div className="absolute bottom-8 text-6xl text-white/15">
-                          ♞
-                        </div>
-                      )}
+                      <UmaResultPortrait
+                        avatar={version?.avatar}
+                        name={version?.displayName ?? ""}
+                        viewportClassName="absolute bottom-0 left-1/2 h-[180px] w-[180px] -translate-x-1/2 overflow-hidden"
+                      />
                     </div>
                   )
                 })}
@@ -611,20 +553,9 @@ const avatarSideFadeMask = {
                       isDay1Expanded ? "Hide attempts" : "Show attempts"
                     }
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`h-4 w-4 transition-transform duration-200 ${
+                    <EventChevronIcon className={`h-4 w-4 transition-transform duration-200 ${
                         isDay1Expanded ? "rotate-90" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m9 5 7 7-7 7" />
-                    </svg>
+                      }`} />
                   </button>
                 </div>
               </div>
@@ -690,20 +621,9 @@ const avatarSideFadeMask = {
                       isDay2Expanded ? "Hide attempts" : "Show attempts"
                     }
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`h-4 w-4 transition-transform duration-200 ${
+                    <EventChevronIcon className={`h-4 w-4 transition-transform duration-200 ${
                         isDay2Expanded ? "rotate-90" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m9 5 7 7-7 7" />
-                    </svg>
+                      }`} />
                   </button>
                 </div>
               </div>
@@ -811,20 +731,9 @@ const avatarSideFadeMask = {
                       isDay3Expanded ? "Hide attempts" : "Show attempts"
                     }
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`h-4 w-4 transition-transform duration-200 ${
+                    <EventChevronIcon className={`h-4 w-4 transition-transform duration-200 ${
                         isDay3Expanded ? "rotate-90" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m9 5 7 7-7 7" />
-                    </svg>
+                      }`} />
                   </button>
                 </div>
               </div>
@@ -891,20 +800,9 @@ const avatarSideFadeMask = {
                       isDay4Expanded ? "Hide attempts" : "Show attempts"
                     }
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`h-4 w-4 transition-transform duration-200 ${
+                    <EventChevronIcon className={`h-4 w-4 transition-transform duration-200 ${
                         isDay4Expanded ? "rotate-90" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m9 5 7 7-7 7" />
-                    </svg>
+                      }`} />
                   </button>
                 </div>
               </div>

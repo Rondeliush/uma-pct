@@ -25,8 +25,12 @@ export function getCMFinalValidationErrors(cm: CM, options: { requireWinner?: bo
   const results = cm.finalResults ?? []
   const errors: string[] = []
   if (!isCMTeamPlacement(cm.finalPlace)) {
-    if (results.length > 0 || options.requireWinner) errors.push("Select the team result first.")
-    return errors
+    if (options.requireWinner) errors.push("Select the team result first.")
+    // Registration saves the team/configurations before any placement is recorded.
+    if (cm.finalPlace !== "" || cm.phase !== "finalResult" || results.length !== 3) {
+      if (results.length > 0 && !options.requireWinner) errors.push("Select the team result first.")
+      return errors
+    }
   }
   const participantIds = new Set<string>()
   const podium = new Set<CMFinalPlacement>()

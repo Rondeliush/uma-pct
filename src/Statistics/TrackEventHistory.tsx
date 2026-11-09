@@ -1,65 +1,60 @@
 import { useMemo, useState } from "react"
 import type { CM } from "../types/types"
+import type { LoH } from "../LoH/types"
 import EventTypeBadge from "../components/EventTypeBadge"
-import { getTrackEventHistory } from "./trackEventHistoryStatistics"
+import { getIndividualTrackHistory } from "./trackIndividualStatistics"
+import type { IndividualTrackHistoryRow } from "./trackIndividualStatistics"
 import { formatUmaWinRate } from "./umaStatistics"
+import HomeIcon from "../Home/HomeIcon"
 import "./TrackEventHistory.css"
 
-export default function TrackEventHistory({ cms, trackId, onOpenCm }: {
+export default function TrackEventHistory({ cms, lohs, trackId, onOpenCm, onOpenLoH }: {
   cms: CM[]
+  lohs: LoH[]
   trackId: string
   onOpenCm: (cmNumber: CM["number"]) => void
+  onOpenLoH: (number: number) => void
 }) {
   const [eventType, setEventType] = useState<"all" | "cm" | "loh">("all")
-  const events = useMemo(() => getTrackEventHistory(cms, trackId).map((event) => ({ ...event, type: "cm" as const })), [cms, trackId])
+  const events = useMemo(() => getIndividualTrackHistory(cms, lohs, trackId), [cms, lohs, trackId])
   const visibleEvents = events.filter((event) => eventType === "all" || event.type === eventType)
   const emptyMessage = {
     all: "No recorded events for this track yet.",
     cm: "No Champions Meeting events recorded for this track.",
     loh: "No League of Heroes events recorded for this track.",
   }[eventType]
+  const open = (event: IndividualTrackHistoryRow) => event.type === "cm" ? onOpenCm(event.number) : onOpenLoH(event.number)
   return (
     <section className="uma-statistics-panel track-event-history" aria-labelledby="track-detail-history-title">
       <div className="uma-statistics-section-heading">
-        <h2 id="track-detail-history-title">Event History</h2>
-        <div className="uma-event-type-switch track-event-type-filter" role="group" aria-label="Event History event type">
+        <h2 id="track-detail-history-title"><HomeIcon name="clock" />Event History</h2>
+        <div className="track-stats-scope track-event-type-filter" role="group" aria-label="Event History event type">
           {(["all", "cm", "loh"] as const).map((type) => <button key={type} type="button" aria-pressed={eventType === type} onClick={() => setEventType(type)}>
             {{ all: "All", cm: "CM", loh: "LoH" }[type]}
           </button>)}
         </div>
       </div>
-      {visibleEvents.length > 0 ? <>
-        <div className="track-event-columns" aria-hidden="true">
-          {["Event", "Distance", "Surface", "Direction", "Condition", "Weather", "Races", "Wins", "Win Rate"].map((label) => <span key={label}>{label}</span>)}
-        </div>
-        <ol className="uma-detail-events">
+      <div className="track-detail-history-scroll" role="region" aria-label="Track event history" tabIndex={0}>
+        {visibleEvents.length > 0 ? <table className="uma-statistics-distance-table track-detail-history-table">
+          <thead><tr>{["Event", "Distance", "Surface", "Direction", "Condition", "Weather", "Races", "Wins", "Win Rate"].map(label => <th key={label} scope="col">{label}</th>)}<th scope="col"><span className="sr-only">Open event</span></th></tr></thead>
+          <tbody>
           {visibleEvents.map((event) => {
-            const name = event.name?.trim() || `Champions Meeting ${event.number}`
+            const kind = event.type === "cm" ? "CM" : "LoH"
+            const name = event.name?.trim() || `${kind} #${event.number}`
             return (
-              <li key={event.number} className="track-event-row" data-cm-number={event.number}>
-                <button type="button" className="uma-detail-cm-open" aria-label={`Open ${name} (CM ${event.number})`} onClick={() => onOpenCm(event.number)}>
+              <tr key={event.key} data-event-type={event.type} data-event-number={event.number} onClick={() => open(event)}>
+                <th scope="row"><strong>{name}</strong><span className="track-history-event-meta"><EventTypeBadge type={event.type} /><span>{kind}{event.number}</span>{event.league && <small>{event.league === "Graded League" ? "Graded" : "Open"}</small>}</span></th>
+                <td>{event.distance === null ? "\u2014" : `${event.distance}m`}</td><td>{event.surface ?? "\u2014"}</td><td>{event.direction ?? "\u2014"}</td><td>{event.condition ?? "\u2014"}</td><td>{event.weather ?? "\u2014"}</td>
+                <td>{event.races.toLocaleString("en")}</td><td className="track-statistics-wins">{event.wins.toLocaleString("en")}</td><td className="uma-statistics-rate">{formatUmaWinRate(event.winRate)}</td>
+                <td><button type="button" className="track-history-open" aria-label={`Open ${name} (${kind} ${event.number})`} onClick={change => { change.stopPropagation(); open(event) }}>
                   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m9 5 7 7-7 7" /></svg>
-                </button>
-                <h3>{name}{" "}<EventTypeBadge type={event.type} /></h3>
-                <dl className="track-event-course">
-                  <div><dt className="sr-only">Distance</dt><dd>{event.distance === null ? "—" : `${event.distance.toLocaleString("en")} m`}</dd></div>
-                  <div><dt className="sr-only">Surface</dt><dd>{event.surface ?? "—"}</dd></div>
-                  <div><dt className="sr-only">Direction</dt><dd>{event.direction ?? "—"}</dd></div>
-                </dl>
-                <dl className="track-event-conditions">
-                  <div><dt className="sr-only">Condition</dt><dd>{event.condition ?? "—"}</dd></div>
-                  <div><dt className="sr-only">Weather</dt><dd>{event.weather ?? "—"}</dd></div>
-                </dl>
-                <dl className="track-event-results">
-                  <div><dt>Races</dt><dd>{event.races.toLocaleString("en")}</dd></div>
-                  <div><dt>Wins</dt><dd>{event.wins.toLocaleString("en")}</dd></div>
-                  <div><dt><span className="track-event-rate-full">Win Rate</span><span className="track-event-rate-short">WR</span></dt><dd className="uma-statistics-rate">{formatUmaWinRate(event.winRate)}</dd></div>
-                </dl>
-              </li>
+                </button></td>
+              </tr>
             )
           })}
-        </ol>
-      </> : <p className="uma-statistics-summary-note" role="status">{emptyMessage}</p>}
+          </tbody>
+        </table> : <p className="uma-statistics-summary-note" role="status">{emptyMessage}</p>}
+      </div>
     </section>
   )
 }

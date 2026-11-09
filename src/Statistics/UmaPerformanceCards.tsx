@@ -1,4 +1,5 @@
 import { useId } from "react"
+import { formatOrdinal as ordinal } from "../formatting"
 import RankingBadge from "../components/RankingBadge"
 import { UmaStatisticsAvatar } from "./UmaStatisticsSelector"
 import { formatUmaWinRate } from "./umaStatistics"
@@ -20,13 +21,6 @@ const podiumFrameClasses = {
   gold: "triple-tie-shimmer border-[#facc15]/85! before:border-[2.5px] before:border-[#facc15]/85 shadow-[0_0_20px_rgba(250,204,21,0.18)]! hover:shadow-[0_0_32px_rgba(250,204,21,0.38)]!",
   silver: "border-gray-400/70! before:border-2 before:border-gray-400/70 hover:border-gray-300! hover:before:border-gray-300 shadow-lg! hover:shadow-2xl!",
   bronze: "border-orange-500/70! before:border-2 before:border-orange-500/70 hover:border-orange-300! hover:before:border-orange-300 shadow-lg! hover:shadow-2xl!",
-}
-
-function ordinal(position: number) {
-  const lastTwoDigits = position % 100
-  const suffix = lastTwoDigits >= 11 && lastTwoDigits <= 13 ? "th"
-    : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[position % 10] ?? "th"
-  return `${position}${suffix}`
 }
 
 export default function UmaPerformanceCards({ umas, sort, selectedVersionId, onSelect }: Props) {

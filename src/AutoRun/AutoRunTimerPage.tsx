@@ -189,7 +189,7 @@ const enoughEnergyText =
             AutoRun Timer
           </h1>
 
-          <p className="mt-2 text-gray-400">
+          <p className="mt-2 text-gray-900">
             Keep track of your Auto Run training.
           </p>
         </div>

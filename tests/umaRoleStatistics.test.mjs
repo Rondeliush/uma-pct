@@ -119,17 +119,20 @@ test("legacy role metadata uses explicit flags and never defaults missing flags 
   assert.equal(row(stats, "unknown").usage, 80)
 })
 
-test("zero races, unrecorded lineups and final-only participation do not invent roles or rates", () => {
+test("zero-race batches and other versions are excluded while a final-only snapshot counts once", () => {
   const cms = [event([
     attempt(0, [result(configuration(null, null))]),
     attempt(5, [result(configuration(true, true, { umaVersionId: "other" }), 2)]),
   ], { finalPlace: "1st", participants: [participant({ finalParticipant: true, won: true })], finalResults: [{ cmUmaId: "a", won: true, configuration: configuration(true, false) }] })]
   const stats = calculateUmaRoleStatistics(cms, "original")
-  assert.equal(stats.totalRaces, 0)
+  assert.equal(stats.totalRaces, 1)
   assert.equal(stats.unknownRoleRaces, 0)
   assert.equal(stats.rows.length, 4)
-  assert.ok(stats.rows.every(row => row.races === 0 && row.wins === 0 && row.winRate === null && row.usage === null))
-  assert.deepEqual(stats, calculateUmaRoleStatistics([], "unused"))
+  assert.equal(row(stats, "ace").races, 1)
+  assert.equal(row(stats, "ace").wins, 1)
+  assert.equal(row(stats, "ace").winRate, 100)
+  assert.equal(row(stats, "ace").usage, 100)
+  assert.ok(stats.rows.filter(row => row.role !== "ace").every(row => row.races === 0 && row.wins === 0 && row.winRate === null && row.usage === 0))
 })
 
 test("retired batches retain only their recorded races and invalid race counts add no Unknown row", () => {

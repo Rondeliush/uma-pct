@@ -6,7 +6,7 @@ function AboutPage() {
           About
         </h1>
 
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-gray-500">
           Umamusume Personal Competitive Tracker
         </p>
          <div>
@@ -30,7 +30,7 @@ function AboutPage() {
             </div>
 
             <div className="mt-1 text-sm text-blue-100/45">
-              Version 0.1.7
+              Version 0.2.0
             </div>
           </div>
 

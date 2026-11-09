@@ -64,7 +64,7 @@ test("team and exact-distance totals count each round race once", () => {
   assert.equal(result.umas.reduce((sum, uma) => sum + uma.races, 0), 25)
 })
 
-test("final wins belong only to the recorded winning version and stay separate from rounds", () => {
+test("raced finals count once for each version with individual wins and separate final achievements", () => {
   const result = calculateUmaStatistics([
     cm({ finalPlace: "1st", participants: [
       participant("a", "oguri-base", { finalParticipant: true, won: true }),
@@ -83,8 +83,13 @@ test("final wins belong only to the recorded winning version and stay separate f
   assert.equal(christmas.finalWins, 0)
   assert.equal(teio.finalAppearances, 2)
   assert.equal(teio.finalWins, 0)
-  assert.equal(oguri.races, 0)
-  assert.equal(oguri.winRate, null)
+  assert.equal(oguri.races, 1)
+  assert.equal(oguri.wins, 1)
+  assert.equal(oguri.winRate, 100)
+  assert.equal(christmas.races, 1)
+  assert.equal(christmas.wins, 0)
+  assert.equal(teio.races, 2)
+  assert.equal(teio.wins, 0)
   assert.equal(result.overall.races, 0)
   assert.deepEqual(result.distances, [])
 })

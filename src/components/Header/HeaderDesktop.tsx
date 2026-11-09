@@ -5,8 +5,9 @@ import {
 } from "react"
 import UpdateNotification from "../UpdateNotification"
 
-import type { HeaderProps } from "./Header"
+import type { ThemedHeaderProps } from "./Header"
 import PwaInstallDesktop from "../../pwa/PwaInstallDesktop"
+import HeaderBrand from "./HeaderBrand"
 
 
 function HeaderDesktop({
@@ -17,7 +18,11 @@ function HeaderDesktop({
   activeProfileName,
   onProfilesClick,
   hasNewChangelog,
-}: HeaderProps) {
+  navTheme,
+  isScrolled,
+  isHomeNight,
+  onToggleHomeNight,
+}: ThemedHeaderProps) {
   const navButtonClass = (
     page:
       | "home"
@@ -30,24 +35,12 @@ function HeaderDesktop({
       | "about"
       | "changelog"
   ) =>
-    `relative flex h-11 items-center justify-center rounded-lg border-b-2 px-4 text-sm font-bold transition ${
-      activePage === page
-        ? "border-sky-400 bg-sky-400/[0.07] text-white"
-        : "border-transparent text-blue-100/50 hover:bg-white/[0.035] hover:text-white"
-    }`
+    `app-nav-tab relative flex items-center justify-center text-sm font-bold transition ${activePage === page ? "app-nav-tab-active" : ""}`
   const [isMoreOpen, setIsMoreOpen] =
     useState(false)
 
   const moreMenuRef =
   useRef<HTMLDivElement | null>(null)
-
-  const updateNotificationRef =
-  useRef<HTMLDivElement | null>(null)
-
-const [
-  updateNotificationHeight,
-  setUpdateNotificationHeight,
-] = useState(0)
 
 useEffect(() => {
   if (!isMoreOpen) {
@@ -80,76 +73,26 @@ useEffect(() => {
   }
 }, [isMoreOpen])
 
-useEffect(() => {
-  const element =
-    updateNotificationRef.current
-
-  if (!element) {
-    return
-  }
-
-  const updateHeight = () => {
-    setUpdateNotificationHeight(
-      element.getBoundingClientRect()
-        .height
-    )
-  }
-
-  updateHeight()
-
-  const observer = new ResizeObserver(
-    updateHeight
-  )
-
-  observer.observe(element)
-
-  return () => {
-    observer.disconnect()
-  }
-}, [newOfficialUmaNames.length])
-
   return (
   <>
-    {/* APP BRAND */}
-    <header className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#040914]">
-
-        {/* SUBTLE BACKGROUND GLOW */}
-        <div className="pointer-events-none absolute left-1/2 top-0 h-24 w-[520px] -translate-x-1/2 rounded-full bg-blue-500/[0.07] blur-3xl" />
-
-        <PwaInstallDesktop />
-
-        <div className="relative mx-auto flex h-[68px] max-w-[1500px] items-center justify-center px-6">
-
-          <div className="text-center">
-
-            <div className="text-[16px] font-black uppercase tracking-[0.14em] text-sky-200">
-              Umamusume
-            </div>
-
-            <div className="mt-0.5 text-[22px] font-black tracking-tight text-white">
-              Personal Competitive Tracker
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* STICKY NAVIGATION + UPDATE */}
-        <div data-app-sticky-header className="sticky top-0 z-50 w-full">
+        <div data-app-sticky-header data-nav-theme={navTheme} data-scrolled={isScrolled} className="app-header-floating sticky top-0 z-50 w-full">
+
+        <div className="app-header-desktop-row">
+          <header className="app-header-brand">
+            <div className="app-header-brand-inner"><HeaderBrand isHomeNight={isHomeNight} onToggleHomeNight={onToggleHomeNight} /></div>
+          </header>
 
         {/* NAVIGATION */}
-        <nav className="border-b border-sky-400/[0.10] bg-[#081221]/95 shadow-[0_8px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <nav className="app-header-nav" aria-label="Main navigation">
 
-          <div className="mx-auto flex h-12 max-w-[1500px] items-center justify-center gap-1.5 px-6">
+          <div className="app-nav-items">
 
             {/* HOME */}
             <button
               type="button"
               onClick={() => onPageChange("home")}
-              className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-b-2 transition ${
-                activePage === "home"
-                  ? "border-sky-400 bg-sky-400/[0.08] text-sky-200"
-                  : "border-transparent text-blue-100/45 hover:bg-white/[0.035] hover:text-white"
-              }`}
+              className={`app-nav-tab app-nav-home relative flex shrink-0 items-center justify-center transition ${activePage === "home" ? "app-nav-tab-active" : ""}`}
               title="Home"
             >
               <svg
@@ -180,14 +123,10 @@ useEffect(() => {
             {/* LEAGUE OF HEROES */}
             <button
               type="button"
-              disabled
-              className="flex cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-blue-100/25"
+              onClick={() => onPageChange("loh")}
+              className={navButtonClass("loh")}
             >
-              <span>League of Heroes</span>
-
-              <span className="rounded-md border border-blue-100/10 bg-blue-100/[0.04] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-blue-100/25">
-                Soon
-              </span>
+              League of Heroes
             </button>
 
             {/* STATISTICS */}
@@ -227,7 +166,7 @@ useEffect(() => {
               Uma Database
 
               {newOfficialUmaNames.length > 0 && (
-                <span className="absolute -right-1 -top-1 rounded-md border border-sky-300/30 bg-sky-400 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-slate-950 shadow-[0_0_10px_rgba(56,189,248,0.30)]">
+                <span className="app-nav-new absolute -right-1 -top-1 rounded-md border px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide">
                   New
                 </span>
               )}
@@ -235,7 +174,7 @@ useEffect(() => {
             {/* MORE */}
             <div
               ref={moreMenuRef}
-              className="relative"
+              className="app-nav-more relative"
             >
   <button
     type="button"
@@ -244,16 +183,14 @@ useEffect(() => {
         (current) => !current
       )
     }
-    className={`relative flex h-11 items-center justify-center gap-1.5 rounded-lg border-b-2 px-4 text-sm font-bold transition ${
-      isMoreOpen
-        ? "border-violet-400 bg-violet-400/[0.07] text-white"
-        : "border-transparent text-blue-100/50 hover:bg-white/[0.035] hover:text-white"
-    }`}
+    aria-expanded={isMoreOpen}
+    aria-haspopup="true"
+    className={`app-nav-tab relative flex items-center justify-center gap-1.5 text-sm font-bold transition ${isMoreOpen || activePage === "settings" || activePage === "about" || activePage === "changelog" ? "app-nav-tab-active" : ""}`}
   >
     More
     
     {hasNewChangelog && (
-    <span className="absolute -right-1 -top-1 rounded-md border border-emerald-300/30 bg-emerald-400 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide text-emerald-950 shadow-[0_0_10px_rgba(52,211,153,0.30)]">
+    <span className="app-nav-new absolute -right-1 -top-1 rounded-md border px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide">
       New
     </span>
   )}
@@ -278,17 +215,12 @@ useEffect(() => {
 
   {isMoreOpen && (
     <div
-        className="absolute right-0 z-[100] w-56 overflow-hidden rounded-xl border border-violet-300/15 bg-[#07111f]/98 shadow-2xl backdrop-blur-xl"
-        style={{
-          top: `calc(100% + ${
-            updateNotificationHeight + 8
-          }px)`,
-        }}
+        className="app-nav-menu absolute right-0 z-[100] w-56 overflow-hidden rounded-xl border bg-[#07111f]/98 shadow-2xl backdrop-blur-xl"
       >
 
       {/* ACTIVE PROFILE */}
-      <div className="border-b border-white/[0.07] px-4 py-3">
-        <div className="text-[9px] font-black uppercase tracking-[0.16em] text-blue-100/25">
+      <div className="app-nav-divider border-b px-4 py-3">
+        <div className="app-nav-muted text-[9px] font-black uppercase tracking-[0.16em]">
           Active Profile
         </div>
 
@@ -304,10 +236,10 @@ useEffect(() => {
           setIsMoreOpen(false)
           onProfilesClick()
         }}
-        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-violet-400/[0.07] hover:text-white"
+        className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold transition"
       >
         <span>Profiles</span>
-        <span className="text-blue-100/25">
+        <span className="app-nav-muted">
           →
         </span>
       </button>
@@ -319,7 +251,7 @@ useEffect(() => {
           onPageChange("settings")
           setIsMoreOpen(false)
         }}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold text-blue-100/60 transition hover:bg-white/[0.04] hover:text-white"
+        className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-sm font-bold transition"
       >
         <span>Settings</span>
       </button>
@@ -330,12 +262,12 @@ useEffect(() => {
           onPageChange("changelog")
           setIsMoreOpen(false)
         }}
-        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+        className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold transition"
       >
         <span>Changelog</span>
 
       {hasNewChangelog && (
-        <span className="rounded-md bg-emerald-400 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-950">
+        <span className="app-nav-new rounded-md px-2 py-0.5 text-[9px] font-black uppercase">
           New
         </span>
       )}
@@ -347,7 +279,7 @@ useEffect(() => {
           onPageChange("about")
           setIsMoreOpen(false)
         }}
-        className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold text-blue-100/60 transition hover:bg-white/[0.04] hover:text-white"
+        className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-sm font-bold transition"
       >
         <span>About</span>
       </button>
@@ -357,10 +289,12 @@ useEffect(() => {
 
           </div>
         </nav>
+        <div className="app-header-install"><PwaInstallDesktop /></div>
+        </div>
 
         {/* UPDATE NOTIFICATION */}
 
-        <div ref={updateNotificationRef}>
+        <div className="app-header-update-slot app-header-desktop-update-slot">
         <UpdateNotification
           umaNames={newOfficialUmaNames}
           onViewUpdate={onViewUpdate}

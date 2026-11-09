@@ -55,7 +55,7 @@ function PwaInstallDesktop() {
         }
       `}
     >
-      <div className="min-w-0">
+      <div className="pwa-install-copy min-w-0">
         <div className="text-[9px] font-black uppercase tracking-[0.16em] text-sky-300/50">
           Available as an app
         </div>
@@ -65,9 +65,11 @@ function PwaInstallDesktop() {
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="pwa-install-actions flex shrink-0 items-center gap-2">
         <button
           type="button"
+          aria-label="Install UmaPCT"
+          title="Install UmaPCT on your PC"
           onClick={() => {
             void install()
           }}

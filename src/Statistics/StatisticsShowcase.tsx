@@ -1,3 +1,4 @@
+import { LOH_SHOWCASE_SLIDES as lohSlides } from "../LoH/constants"
 import { useEffect, useState } from "react"
 import { useUmaDatabase } from "../context/UmaDatabaseContext"
 import UmaAvatarImage from "../components/UmaAvatarImage"
@@ -357,29 +358,6 @@ function StatisticsShowcase({
     {
       title: "Most Final Appearances",
       values: ["4", "3", "2"],
-      umaIndexes: [0, 1, 2],
-    },
-  ]
-
-  const lohSlides = [
-    {
-      title: "Most LoH Wins",
-      values: ["—", "—", "—"],
-      umaIndexes: [0, 1, 2],
-    },
-    {
-      title: "Most LoH Races",
-      values: ["—", "—", "—"],
-      umaIndexes: [0, 1, 2],
-    },
-    {
-      title: "Most LoH Appearances",
-      values: ["—", "—", "—"],
-      umaIndexes: [0, 1, 2],
-    },
-    {
-      title: "Most Top 3 Finishes",
-      values: ["—", "—", "—"],
       umaIndexes: [0, 1, 2],
     },
   ]

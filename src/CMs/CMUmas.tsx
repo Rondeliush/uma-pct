@@ -1,15 +1,19 @@
 import { useState } from "react"
-import { useUmaDatabase } from "../context/UmaDatabaseContext"
-import type { CM, CMUma } from "../types/types"
 import type { Dispatch, SetStateAction } from "react"
+import { useUmaDatabase } from "../context/UmaDatabaseContext"
+import type { CM, CMParticipantConfiguration, CMUma } from "../types/types"
+
 import { calculateFinalQualificationFromAttempts } from "./CMCalculations"
 import UmaAvatarImage from "../components/UmaAvatarImage"
-import { snapshotParticipantConfiguration, snapshotFinalResults } from "./cmParticipantConfiguration"
-import { getHistoricalParticipantEntries } from "./cmParticipantPresentation"
+import { snapshotParticipantConfiguration } from "./cmParticipantConfiguration"
+import { getCMUmaOverallStats, getHistoricalParticipantEntries, getParticipantConfigurationKey } from "./cmParticipantPresentation"
 import type { HistoricalParticipantEntry } from "./cmParticipantPresentation"
+import { getFinalLineupCandidates, isFinalLineupCandidateLocked, saveFinalLineupCandidates, toggleFinalLineupCandidate } from "./cmFinalLineupCandidates"
+import type { FinalLineupCandidate } from "./cmFinalLineupCandidates"
 import { getRunningStyleVisual } from "./runningStyleVisuals"
-import ParticipantConfigurationBadges from "./ParticipantConfigurationBadges"
+import EventUmaCard from "../components/EventUmaCard"
 import CMFinalPlacementBadge from "./CMFinalPlacementBadge"
+import EditCMModal from "./EditCMModal"
 import "./ParticipantConfiguration.css"
 
 type CMUmasProps = {
@@ -18,23 +22,26 @@ type CMUmasProps = {
 }
 
 function CMUmas({ cm, setCms }: CMUmasProps) {
-  
+
   const { versions } = useUmaDatabase()
   const historicalParticipants = getHistoricalParticipantEntries(cm)
+  const overallStatsByVersion = getCMUmaOverallStats(cm)
+  const isFinalRegistration = cm.phase === "finalLineup"
+  const [isEditCMOpen, setIsEditCMOpen] = useState(false)
 
   const finalQualification =
-  calculateFinalQualificationFromAttempts(cm.attempts)
-  
+    calculateFinalQualificationFromAttempts(cm.attempts)
+
   const qualifiedForFinal =
     finalQualification === "Final A" ||
     finalQualification === "Final B"
 
   const isEliminatedFinal =
-  cm.phase === "eliminated"
+    cm.phase === "eliminated"
 
   const isPendingFinal =
-  !isEliminatedFinal &&
-  finalQualification === "Not qualified yet"
+    !isEliminatedFinal &&
+    finalQualification === "Not qualified yet"
 
   const showFinalOverlay =
     !qualifiedForFinal &&
@@ -43,11 +50,10 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
   const [isEditingFinalLineup, setIsEditingFinalLineup] =
     useState(false)
 
-  const [draftFinalParticipantIds, setDraftFinalParticipantIds] =
-    useState<string[]>([])
-  
- const [previewPosition, setPreviewPosition] =
-  useState<{
+  const [draftFinalCandidates, setDraftFinalCandidates] = useState<FinalLineupCandidate[]>([])
+  const finalLineupCandidates = getFinalLineupCandidates(cm, versions, draftFinalCandidates)
+
+  const [previewPosition, setPreviewPosition] = useState<{
     tileKey: string
     left: number
     top: number
@@ -55,207 +61,72 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
     placement: "above" | "below"
   } | null>(null)
 
-  const getSavedFinalParticipantIds = () =>
-    cm.participants
-      .filter((participant) => participant.finalParticipant)
-      .map((participant) => participant.cmUmaId)
+  const getSavedFinalParticipantIds = () => cm.finalResults?.map(result => result.cmUmaId)
+    ?? cm.participants.filter(participant => participant.finalParticipant).map(participant => participant.cmUmaId)
 
   const handleStartEdit = () => {
-    setDraftFinalParticipantIds(
-      getSavedFinalParticipantIds()
-    )
-
+    if (!isFinalRegistration) return
+    const saved = cm.finalResults?.map(result => result.configuration)
+      ?? cm.participants.filter(participant => participant.finalParticipant).map(participant => snapshotParticipantConfiguration(participant))
+    setDraftFinalCandidates(finalLineupCandidates.filter(candidate => saved.some(configuration => getParticipantConfigurationKey(configuration) === candidate.key)))
     setIsEditingFinalLineup(true)
   }
 
   const handleCancelEdit = () => {
-    setDraftFinalParticipantIds(
-      getSavedFinalParticipantIds()
-    )
-
+    setDraftFinalCandidates([])
     setIsEditingFinalLineup(false)
   }
 
-  const handleToggleFinalParticipant = (
-    cmUmaId: string
-  ) => {
-    setDraftFinalParticipantIds((current) => {
-      const isSelected = current.includes(cmUmaId)
-
-      if (isSelected) {
-        return current.filter(
-          (id) => id !== cmUmaId
-        )
-      }
-
-      if (current.length >= 3) {
-        return current
-      }
-
-      return [...current, cmUmaId]
-    })
+  const handleToggleFinalParticipant = (candidate: FinalLineupCandidate) => {
+    if (!isFinalRegistration || !isEditingFinalLineup) return
+    setDraftFinalCandidates(current => toggleFinalLineupCandidate(current, candidate))
   }
 
   const handleSaveFinalLineup = () => {
-  if (draftFinalParticipantIds.length !== 3) {
-    return
+    if (!isFinalRegistration || draftFinalCandidates.length !== 3) return
+    const timestamp = new Date().toISOString()
+    const logId = 'cm' + cm.number + '-final-lineup-' + Date.now()
+    setCms(current => current.map(item => item.number === cm.number && item.phase === "finalLineup"
+      ? saveFinalLineupCandidates(item, draftFinalCandidates, versions, { timestamp, logId }) : item))
+    setIsEditingFinalLineup(false)
   }
 
-  setCms((current) =>
-    current.map((item) => {
-      if (item.number !== cm.number) {
-        return item
-      }
-
-      const finalLineupNames =
-        draftFinalParticipantIds.map(
-          (cmUmaId) => {
-            const participant =
-              item.participants.find(
-                (participant) =>
-                  participant.cmUmaId === cmUmaId
-              )
-
-            const version = versions.find(
-              (version) =>
-                version.id === participant?.umaId
-            )
-
-            return (
-              version?.displayName ??
-              "Unknown Uma"
-            )
-          }
-        )
-
-      return {
-        ...snapshotFinalResults({
-          ...item,
-          participants: item.participants.map((participant) => ({
-            ...participant,
-            finalParticipant: draftFinalParticipantIds.includes(participant.cmUmaId),
-            won: false,
-          })),
-        }, { lineupChanged: true }),
-
-        phase: "finalResult",
-
-        log: [
-          ...(item.log ?? []),
-          {
-            id: `cm${item.number}-final-lineup-${Date.now()}`,
-            timestamp: new Date().toISOString(),
-            type: "finalLineupSet",
-            message: "Final Lineup set.",
-            details: finalLineupNames,
-          },
-        ],
-      }
-    })
-  )
-
-  setIsEditingFinalLineup(false)
-}
-
-  const getParticipantStats = (
-    participant: CMUma
-  ) => {
-    let wins = 0
-    let races = 0
-
-    cm.attempts.forEach((attempt) => {
-      const result = attempt.umaWins.find(
-        (item) =>
-          item.cmUmaId === participant.cmUmaId
-      )
-
-      if (!result) {
-        return
-      }
-
-      wins += result.wins
-      races += attempt.racesPlayed
-    })
-
-    // Final to dodatkowy wyścig dla 3 Final Participants.
-    if (
-      cm.finalPlace !== "" &&
-      participant.finalParticipant
-    ) {
-      races += 1
-
-      if (
-        cm.finalPlace === "1st" &&
-        participant.won
-      ) {
-        wins += 1
-      }
-    }
-
-    const winRate =
-      races > 0
-        ? (wins / races) * 100
-        : null
-
-    return {
-      wins,
-      races,
-      winRate,
-    }
+  const getFinalConfigurationStats = (configuration: CMParticipantConfiguration) => {
+    const key = getParticipantConfigurationKey(configuration)
+    const entry = historicalParticipants.find(participant => participant.key === key)
+    return { wins: entry?.wins ?? 0, races: entry?.races ?? 0, winRate: entry?.winRate ?? 0 }
   }
 
-  const visibleFinalParticipantIds =
-    isEditingFinalLineup
-      ? draftFinalParticipantIds
-      : getSavedFinalParticipantIds()
-
-  const finalParticipants =
-    visibleFinalParticipantIds
-      .map((cmUmaId) =>
-        cm.participants.find(
-          (participant) =>
-            participant.cmUmaId === cmUmaId
-        )
-      )
-      .filter(
-        (participant): participant is CMUma =>
-          participant !== undefined
-      )
-
-   const canSaveFinalLineup =
-    draftFinalParticipantIds.length === 3
+  const finalParticipants = getSavedFinalParticipantIds().flatMap(id => {
+    const participant = cm.participants.find(uma => uma.cmUmaId === id)
+    return participant ? [participant] : []
+  })
+  const canSaveFinalLineup = draftFinalCandidates.length === 3
 
   const renderUmaTile = (
     cmUma: CMUma | undefined,
     location: "final" | "selection" | "historical",
-    entry?: HistoricalParticipantEntry
+    entry?: HistoricalParticipantEntry,
+    candidate?: FinalLineupCandidate
   ) => {
-    const savedFinal = location === "final" ? cm.finalResults?.find((result) => result.cmUmaId === cmUma?.cmUmaId) : undefined
+    const savedFinal = location === "final" && !isFinalRegistration ? cm.finalResults?.find((result) => result.cmUmaId === cmUma?.cmUmaId) : undefined
     const configuration = entry?.configuration ?? savedFinal?.configuration ?? snapshotParticipantConfiguration(cmUma)
     const styleVisual = getRunningStyleVisual(configuration.runningStyle)
     const umaVersion = versions.find(
       (item) => item.id === configuration.umaVersionId
     )
 
-    if (!umaVersion && !entry) {
+    if (!umaVersion && !entry && !isFinalRegistration) {
       return null
     }
 
     const name = umaVersion?.displayName ?? "Unavailable Uma"
-    const stats = entry ?? (cmUma ? getParticipantStats(cmUma) : null)
+    const stats = entry ?? (cmUma ? getFinalConfigurationStats(configuration) : null)
     if (!stats) return null
     const tileKey = `${location}-${entry?.key ?? cmUma?.cmUmaId}`
-    const isSelectable = isEditingFinalLineup && location !== "historical" && cmUma !== undefined
-
-    const isSelected =
-      draftFinalParticipantIds.includes(
-        cmUma?.cmUmaId ?? ""
-      )
-
-    const selectionLocked =
-      isSelectable &&
-      !isSelected &&
-      draftFinalParticipantIds.length >= 3
+    const isSelectable = isFinalRegistration && isEditingFinalLineup && candidate !== undefined
+    const isSelected = candidate !== undefined && draftFinalCandidates.some(selected => selected.key === candidate.key)
+    const selectionLocked = isSelectable && isFinalLineupCandidateLocked(candidate, draftFinalCandidates)
 
     const isWinner = entry ? entry.finalWins > 0 : savedFinal?.won ?? cmUma?.won ?? false
     const provenance = entry?.hasInferredConfiguration ? entry.hasRecordedConfiguration
@@ -267,12 +138,17 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
       stats.winRate === null
         ? "— WR"
         : `${stats.winRate.toFixed(2)}% WR`
+    const overallStats = configuration.umaVersionId === null ? undefined : overallStatsByVersion.get(configuration.umaVersionId)
+    const overallHeading = location !== "selection" && configuration.umaVersionId !== null
+      ? `Overall Stats in CM${cm.number}:`
+      : undefined
 
     return (
       <div
         key={tileKey}
         style={styleVisual.style}
         data-participant-configuration={entry?.key}
+        data-final-candidate-key={candidate?.key}
         data-running-style={configuration.runningStyle ?? "unknown"}
         data-version-id={configuration.umaVersionId ?? ""}
         data-participant-races={stats.races}
@@ -287,13 +163,13 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
         }`}
         role={isSelectable ? "button" : undefined}
         tabIndex={isSelectable ? 0 : undefined}
-        aria-label={isSelectable ? `Select ${name} for the final` : name}
+        aria-label={isSelectable ? `Select ${name} [${styleVisual.abbreviation || styleVisual.label}] for the final` : name}
         aria-pressed={isSelectable ? isSelected : undefined}
         aria-disabled={isSelectable ? selectionLocked : undefined}
         onKeyDown={(event) => {
-          if (isSelectable && cmUma && !selectionLocked && (event.key === "Enter" || event.key === " ")) {
+          if (isSelectable && candidate && !selectionLocked && (event.key === "Enter" || event.key === " ")) {
             event.preventDefault()
-            handleToggleFinalParticipant(cmUma.cmUmaId)
+            handleToggleFinalParticipant(candidate)
           }
         }}
         onMouseEnter={(event) => {
@@ -358,16 +234,17 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
         onMouseLeave={() => {
           setPreviewPosition(null)
         }}
+
         onClick={() => {
           if (
-            !isSelectable || !cmUma ||
+            !isSelectable || !candidate ||
             selectionLocked
           ) {
             return
           }
 
           handleToggleFinalParticipant(
-            cmUma.cmUmaId
+            candidate
           )
         }}
       >
@@ -391,60 +268,35 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
             )}
 
         {/* COMPACT UMA */}
-        <div className="flex w-28 max-w-full flex-col items-center">
-          <div
-            style={styleVisual.style}
-            className={`cm-participant-portrait participant-style-surface relative flex h-22 w-22 max-w-full items-center justify-center overflow-hidden rounded-[10px] border ${styleVisual.surfaceClassName} transition ${
-              isWinner
-                ? "ring-1 ring-yellow-300/80 shadow-[0_0_12px_rgba(250,204,21,0.16)]"
-                : isEditingFinalLineup && isSelected
-                  ? "ring-1 ring-cyan-300/80 shadow-[0_0_12px_rgba(34,211,238,0.14)]"
-                  : ""
-            }`}
-          >
-           {umaVersion?.avatar ? (
-              <UmaAvatarImage
-                avatar={umaVersion.avatar}
-                alt={name}
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gray-900/70 text-3xl text-gray-500">
-                ?
-              </div>
-            )}
-
-            {/* EDIT CHECK */}
-            {isSelectable &&
-              isSelected && (
-               <div className="absolute left-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-cyan-200/40 bg-cyan-500/90 text-[11px] font-black text-white shadow-[0_0_8px_rgba(34,211,238,0.35)]">
-                  ✓
-                </div>
-              )}
-          </div>
-
-          {(location === "historical" || location === "final") && hasRoleBadges && (
-            <div className="mt-1 flex min-h-4 max-w-full flex-wrap items-center justify-center gap-1">
-              <ParticipantConfigurationBadges configuration={configuration} compact showRunningStyle={false} autoRunLabel="Auto" />
-            </div>
-          )}
-
-          <div className={`mt-2 max-w-full whitespace-nowrap rounded-md border border-white/[0.06] bg-white/[0.025] py-1 font-black text-blue-100/75 ${location !== "selection" ? "px-1 text-[10px] sm:px-2 sm:text-xs" : "px-2 text-xs"}`} data-participant-stat="win-rate">
-            {winRateText}
-          </div>
-          <span className="sr-only">{name}. {styleVisual.label}. Races: {stats.races}. Wins: {stats.wins}.
+        <EventUmaCard
+          configuration={configuration}
+          version={umaVersion}
+          name={name}
+          primaryStat={winRateText}
+          showRunningStyle={candidate !== undefined}
+          portraitClassName={isWinner ? "ring-1 ring-yellow-300/80 shadow-[0_0_12px_rgba(250,204,21,0.16)]" : isEditingFinalLineup && isSelected ? "ring-1 ring-cyan-300/80 shadow-[0_0_12px_rgba(34,211,238,0.14)]" : ""}
+          portraitDecoration={isSelectable && isSelected && <span className="absolute left-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-cyan-200/40 bg-cyan-500/90 text-[11px] font-black text-white shadow-[0_0_8px_rgba(34,211,238,0.35)]" aria-hidden="true">✓</span>}
+          accessibleSummary={<>{name}. {styleVisual.label}. Races: {stats.races}. Wins: {stats.wins}.
             {configuration.ace === true ? " Ace." : ""}
             {configuration.debuffer === true ? " Debuffer." : ""}
             {configuration.entrySource === "autorun" ? " AutoRun." : ""}
-            {configuration.entrySource === "manual" ? " Manual entry." : configuration.entrySource === null ? " Entry source unavailable." : ""}</span>
-        </div>
+            {configuration.entrySource === "manual" ? " Manual entry." : configuration.entrySource === null ? " Entry source unavailable." : ""}</>}
+        />
 
         {/* EXPANDED CARD */}
-        {!isEditingFinalLineup &&
-          previewPosition?.tileKey ===
+        {!isEditingFinalLineup && previewPosition?.tileKey ===
             tileKey && (
             <div
               className="cm-participant-preview fixed z-300"
+              ref={(element) => {
+                if (!element) return
+                const bounds = element.getBoundingClientRect()
+                const top = Math.max(12, Math.min(bounds.top, window.innerHeight - bounds.height - 12))
+                if (top !== bounds.top) {
+                  element.style.top = `${top}px`
+                  element.style.transform = "none"
+                }
+              }}
               style={{
               left: previewPosition.left,
               top: previewPosition.top,
@@ -521,8 +373,9 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
                 </div>
 
                 {/* TAGS */}
+                {(hasRoleBadges || overallHeading !== undefined) && <div className="mt-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
                 {hasRoleBadges && (
-                  <div className="mt-3 flex flex-wrap gap-1.5" title={provenance}>
+                  <div className="flex flex-wrap gap-1.5" title={provenance}>
                     {configuration.ace === true && (
                   <span className="rounded-md border border-sky-300/35 bg-sky-300/[0.10] px-2 py-1 text-[10px] font-bold text-sky-100" data-configuration-badge="ace">
                     ACE
@@ -542,6 +395,15 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
                 )}
                   </div>
                 )}
+                {overallHeading !== undefined && <div data-cm-uma-overall className="max-w-full text-[11px] font-medium leading-4 text-blue-100/60 [overflow-wrap:anywhere] sm:ml-auto">
+                  <p>{overallHeading}</p>
+                  <dl className="mt-1 grid grid-cols-[auto_auto] gap-x-3 tabular-nums">
+                    <dt>WR:</dt><dd className="text-right">{overallStats?.winRate == null ? "—" : `${overallStats.winRate.toFixed(2)}%`}</dd>
+                    <dt>Wins:</dt><dd className="text-right">{overallStats?.wins.toLocaleString("en") ?? "—"}</dd>
+                    <dt>Races:</dt><dd className="text-right">{overallStats?.races.toLocaleString("en") ?? "—"}</dd>
+                  </dl>
+                </div>}
+                </div>}
               </div>
             </div>
 
@@ -589,7 +451,7 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
   }
 
   return (
-  <div className="px-5 py-5">
+  <div data-cm-umas data-final-lineup-selection={isEditingFinalLineup || undefined} className="px-5 py-5">
 
           {/* FINAL LINEUP */}
           <div className="mx-auto max-w-[760px]">
@@ -606,7 +468,7 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
         {qualifiedForFinal && isEditingFinalLineup && (
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <div className="mr-1 text-[10px] font-bold text-blue-100/45 sm:text-xs">
-              {draftFinalParticipantIds.length}/3 selected
+              {draftFinalCandidates.length}/3 selected
             </div>
 
             <button
@@ -628,7 +490,7 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
           </div>
         )}
       </div>
-  
+
         {cm.phase === "finalLineup" && !isEditingFinalLineup && (
             <div className="mb-4 flex items-center justify-between gap-5 border-l-2 border-violet-400/45 bg-gradient-to-r from-violet-400/[0.05] via-blue-400/[0.018] to-transparent px-4 py-3">
               <div>
@@ -664,10 +526,11 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
         }`}
       >
           {[0, 1, 2].map((index) => {
-            const participant =
-              finalParticipants[index]
+            const draftCandidate = isEditingFinalLineup ? draftFinalCandidates[index] : undefined
+            const participant = isEditingFinalLineup
+              ? cm.participants.find(uma => uma.cmUmaId === draftCandidate?.participantId) : finalParticipants[index]
 
-            if (!participant) {
+            if (!participant && !draftCandidate) {
               return (
                 <div
                   key={index}
@@ -680,7 +543,9 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
 
             return renderUmaTile(
               participant,
-              "final"
+              "final",
+              draftCandidate,
+              draftCandidate
             )
           })}
         </div>
@@ -739,11 +604,13 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
       </div>
 
       {/* ALL PARTICIPANTS */}
-      <div className="mx-auto mt-6 max-w-4xl border-t border-white/[0.07] pt-4">
+      <div aria-label="All participants" className="mx-auto mt-6 max-w-4xl border-t border-white/[0.07] pt-4">
 
         <div className="mx-auto mb-4 max-w-[760px]">
-          <div className="text-lg font-black text-white">
-            All Participants
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-lg font-black text-white">All Participants</div>
+            {isFinalRegistration && isEditingFinalLineup && <button type="button" onClick={() => setIsEditCMOpen(true)}
+              className="h-9 rounded-lg border border-cyan-400/30 bg-cyan-400/[0.05] px-4 text-xs font-black text-cyan-200 transition hover:border-cyan-300/55 hover:bg-cyan-400/[0.1]">+ Add New</button>}
           </div>
 
           {isEditingFinalLineup && (
@@ -759,20 +626,20 @@ function CMUmas({ cm, setCms }: CMUmasProps) {
           )}
         </div>
 
-        {isEditingFinalLineup && (
-          <div className="mb-5 flex flex-wrap items-start justify-center gap-x-7 gap-y-5" aria-label="Final lineup selection">
-            {cm.participants.map((participant) => renderUmaTile(participant, "selection"))}
-          </div>
-        )}
-
-        <div className="cm-historical-participant-grid flex flex-wrap items-start justify-center gap-x-3 gap-y-5 max-sm:mx-auto max-sm:max-w-90 sm:gap-x-7">
-          {historicalParticipants.map((entry) => renderUmaTile(undefined, "historical", entry))}
+        <div aria-label={isFinalRegistration && isEditingFinalLineup ? "Final lineup selection" : undefined}
+          className="cm-historical-participant-grid flex flex-wrap items-start justify-center gap-x-3 gap-y-5 max-sm:mx-auto max-sm:max-w-90 sm:gap-x-7">
+          {isFinalRegistration && isEditingFinalLineup
+            ? finalLineupCandidates.map(candidate => renderUmaTile(cm.participants.find(uma => uma.cmUmaId === candidate.participantId), "selection", candidate, candidate))
+            : historicalParticipants.map(entry => renderUmaTile(undefined, "historical", entry))}
         </div>
-        {historicalParticipants.length === 0 && (
+        {historicalParticipants.length === 0 && !(isFinalRegistration && isEditingFinalLineup) && (
           <p className="py-3 text-sm text-blue-100/40">No recorded participant results yet.</p>
         )}
 
       </div>
+
+      {isEditCMOpen && isFinalRegistration && <EditCMModal cm={cm} setCms={setCms}
+        onClose={() => setIsEditCMOpen(false)} onSaved={() => setIsEditCMOpen(false)} />}
 
     </div>
   )

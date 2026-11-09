@@ -6,6 +6,19 @@ body,
   background: #030811;
 }
 
+.app-page-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  height: 100vh;
+  /* Avoid recropping the image as the mobile browser toolbar retracts. */
+  height: 100lvh;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .cm-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #4b5563 transparent;
@@ -205,6 +218,7 @@ body,
 
 
 /* LIGHT SWEEP ANIMATION */ 
+/* Shared sweep animation used by both CM and LoH event cards. */
 @property --loh-sweep-x {
   syntax: "<percentage>";
   inherits: true;
@@ -275,95 +289,6 @@ body,
     --loh-border-x: 110%;
     --loh-border-opacity: 0;
   }
-}
-
-.loh-overview {
-  animation: lohSharedSweep 10s linear infinite;
-}
-
-.loh-card-sweep {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.loh-card-sweep::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-
-  opacity: calc(var(--loh-border-opacity) * 0.18);
-
-  background-image: linear-gradient(
-    75deg,
-    transparent calc(var(--loh-border-x) - 4%),
-    rgba(255, 255, 255, 0.02)
-      calc(var(--loh-border-x) - 3%),
-    rgba(255, 240, 247, 0.08)
-      calc(var(--loh-border-x) - 1.6%),
-    rgba(255, 255, 255, 0.28)
-      var(--loh-border-x),
-    rgba(255, 240, 247, 0.08)
-      calc(var(--loh-border-x) + 1.6%),
-    rgba(255, 255, 255, 0.02)
-      calc(var(--loh-border-x) + 3%),
-    transparent calc(var(--loh-border-x) + 4%)
-  );
-
-  background-size: 100vw 100vh;
-  background-position: 0 0;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-
-  filter: blur(5px);
-}
-
-.loh-card-sweep::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-
-  border-radius: inherit;
-  padding: 2px;
-
-  opacity: var(--loh-border-opacity);
-
-  background-image: linear-gradient(
-    75deg,
-    transparent calc(var(--loh-border-x) - 7%),
-    rgba(190, 24, 93, 0.15)
-      calc(var(--loh-border-x) - 4%),
-    rgba(244, 63, 94, 0.65)
-      calc(var(--loh-border-x) - 1.5%),
-    rgba(255, 225, 238, 1)
-      var(--loh-border-x),
-    rgba(244, 63, 94, 0.65)
-      calc(var(--loh-border-x) + 1.5%),
-    rgba(190, 24, 93, 0.15)
-      calc(var(--loh-border-x) + 4%),
-    transparent calc(var(--loh-border-x) + 7%)
-  );
-
-  background-size: 100vw 100vh;
-  background-position: 0 0;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
-.loh-card-sweep > * {
-  position: relative;
-  z-index: 1;
 }
 
 /* CHAMPIONS MEETING - LIGHT SWEEP */

@@ -3,14 +3,16 @@ import { calculateUmaRunningStyleStatistics } from "./umaRunningStyleStatistics"
 import { formatUmaWinRate } from "./umaStatistics"
 import { getUmaRunningStyleDisplayRows } from "./umaRunningStylePresentation"
 
-export default function UmaRunningStylePerformance({ cms, versionId }: { cms: CM[]; versionId: string }) {
-  const performance = calculateUmaRunningStyleStatistics(cms, versionId)
+export default function UmaRunningStylePerformance({ cms, versionId, performance: supplied, scopeLabel = "CM" }: {
+  cms: CM[]; versionId: string; performance?: ReturnType<typeof calculateUmaRunningStyleStatistics>; scopeLabel?: string
+}) {
+  const performance = supplied ?? calculateUmaRunningStyleStatistics(cms, versionId)
   const rows = getUmaRunningStyleDisplayRows(performance)
   return (
     <section className="uma-statistics-panel uma-detail-running-style" aria-labelledby="uma-detail-running-style-title">
       <div className="uma-statistics-section-heading"><h2 id="uma-detail-running-style-title">Running Style Performance</h2></div>
       <table className="uma-statistics-distance-table uma-detail-style-table">
-        <caption className="sr-only">Recorded CM running styles. Usage is a share of all recorded round races for this version.</caption>
+        <caption className="sr-only">Recorded {scopeLabel} running styles. Usage is a share of all recorded races for this version.</caption>
         <colgroup><col className="uma-detail-style-label-column" /><col /><col /><col /><col /></colgroup>
         <thead><tr><th scope="col">Style</th><th scope="col">Races</th><th scope="col">Wins</th><th scope="col">Win Rate</th><th scope="col">Usage</th></tr></thead>
         <tbody>{rows.map((row) => (
@@ -21,7 +23,6 @@ export default function UmaRunningStylePerformance({ cms, versionId }: { cms: CM
           </tr>
         ))}</tbody>
       </table>
-      {performance.totalRaces === 0 && <p className="uma-detail-note">No recorded round races for this version.</p>}
       {performance.unknownStyleRaces > 0 && <p className="uma-detail-note">{performance.unknownStyleRaces.toLocaleString("en")} of {performance.totalRaces.toLocaleString("en")} races have missing or ambiguous saved styles and are excluded from these rows.</p>}
     </section>
   )

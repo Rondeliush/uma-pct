@@ -1,3 +1,5 @@
+import { formatTrackLength } from "../formatting"
+import { TRACK_SURFACES } from "../types/types"
 import { useEffect, useRef, useState } from "react"
 import type { Dispatch, SetStateAction } from "react"
 import type { CM } from "../types/types"
@@ -14,8 +16,12 @@ export type CMPlaceFilter =
   | "2nd"
   | "3rd"
 
+export type CMLeagueFilter = NonNullable<CM["league"]> | "all"
+
 type CMFiltersProps = {
   isOpen: boolean
+  selectedLeague: CMLeagueFilter
+  setSelectedLeague: Dispatch<SetStateAction<CMLeagueFilter>>
   selectedLengths: CM["length"][]
   setSelectedLengths: Dispatch<
     SetStateAction<CM["length"][]>
@@ -51,6 +57,8 @@ selectedFinals: CMFinalFilter[]
 
 function CMFilters({
   isOpen,
+  selectedLeague,
+  setSelectedLeague,
   selectedLengths,
   setSelectedLengths,
   selectedSurfaces,
@@ -199,6 +207,21 @@ const selectedUmaName =
           <div className="space-y-3">
             <div className="grid grid-cols-1 gap-3 md:flex md:flex-wrap md:items-start">
 
+              <select
+                aria-label="CM League filter"
+                value={selectedLeague}
+                onChange={(event) => setSelectedLeague(event.target.value as CMLeagueFilter)}
+                className={`w-full rounded-lg border px-3 py-2 text-sm font-semibold transition md:w-48 ${
+                  selectedLeague !== "all"
+                    ? "border-sky-500 bg-sky-600/20 text-sky-300"
+                    : "border-gray-700 bg-gray-900 text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
+              >
+                <option value="all">League: All Leagues</option>
+                <option value="Graded League">League: Graded</option>
+                <option value="Open League">League: Open</option>
+              </select>
+
               {/* LENGTH */}
               <div className="relative w-full md:w-48">
                 <button
@@ -221,7 +244,7 @@ const selectedUmaName =
                     {selectedLengths.length === 0
                       ? "All"
                       : selectedLengths.length <= 2
-                        ? selectedLengths.join(", ")
+                        ? selectedLengths.map(formatTrackLength).join(", ")
                         : `${selectedLengths.length} selected`}
                   </span>
 
@@ -282,7 +305,7 @@ const selectedUmaName =
                             className="accent-sky-500"
                           />
 
-                          {length}
+                          {formatTrackLength(length)}
                         </label>
                       )
                     })}
@@ -336,9 +359,7 @@ const selectedUmaName =
                     )}
                 {openFilter === "surface" && (
                   <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-lg border border-gray-700 bg-gray-900 p-2 shadow-xl">
-                    {(
-                      ["Turf", "Dirt"] as CM["surface"][]
-                    ).map((surface) => {
+                    {TRACK_SURFACES.map((surface) => {
                       const checked =
                         selectedSurfaces.includes(surface)
 
@@ -796,6 +817,7 @@ const selectedUmaName =
 
               {/* RESET FILTERS */}
               {(
+                selectedLeague !== "all" ||
                 selectedLengths.length > 0 ||
                 selectedSurfaces.length > 0 ||
                 selectedRacecourses.length > 0 ||
@@ -806,6 +828,7 @@ const selectedUmaName =
                 <button
                   type="button"
                   onClick={() => {
+                    setSelectedLeague("all")
                     setSelectedLengths([])
                     setSelectedSurfaces([])
                     setSelectedRacecourses([])

@@ -91,7 +91,7 @@ test("legacy Leader preserves exact races, wins, finals and every version/event 
   assert.equal(Object.hasOwn(migrated.cms[0].participants[0], "style"), false)
   assert.deepEqual(calculateUmaStatistics(migrated.cms, [], versions), totalsBefore)
   assert.deepEqual(calculateUmaDetailStatistics(migrated.cms, versionId), detailsBefore)
-  assert.deepEqual(styleTotals(migrated.cms[0]), [{ style: "pace_chaser", races: 80, wins: 55 }])
+  assert.deepEqual(styleTotals(migrated.cms[0]), [{ style: "pace_chaser", races: 81, wins: 56 }])
   assert.equal(migrated.cms[0].attempts[0].umaWins[0].configuration.configurationSource, "legacy_inferred")
   assert.equal(migrated.cms[0].finalResults[0].configuration.configurationSource, "legacy_inferred")
   assert.equal(migrated.cms[0].finalResults[0].won, true)

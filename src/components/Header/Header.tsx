@@ -1,5 +1,7 @@
+import { useSyncExternalStore } from "react"
 import HeaderDesktop from "./HeaderDesktop"
 import HeaderMobile from "./HeaderMobile"
+import "./Header.css"
 
 import { useIsMobile } from "../../responsive/useIsMobile"
 
@@ -16,6 +18,8 @@ export type HeaderPage =
 
 export type HeaderProps = {
   activePage: HeaderPage
+  isHomeNight: boolean
+  onToggleHomeNight: () => void
  hasNewChangelog: boolean
  
   onPageChange: (
@@ -29,19 +33,33 @@ export type HeaderProps = {
   onProfilesClick: () => void
 }
 
+export type ThemedHeaderProps = HeaderProps & {
+  navTheme: "home" | "cm" | "loh"
+  isScrolled: boolean
+}
+
+const getIsScrolled = () => window.scrollY > 96
+
+const subscribeToScroll = (onScroll: () => void) => {
+  window.addEventListener("scroll", onScroll, { passive: true })
+  return () => window.removeEventListener("scroll", onScroll)
+}
+
 function Header(
   props: HeaderProps
 ) {
   const isMobile = useIsMobile()
+  const isScrolled = useSyncExternalStore(subscribeToScroll, getIsScrolled)
+  const navTheme = props.activePage === "cms" ? "cm" : props.activePage === "loh" ? "loh" : "home"
 
   if (isMobile) {
     return (
-      <HeaderMobile {...props} />
+      <HeaderMobile {...props} navTheme={navTheme} isScrolled={isScrolled} />
     )
   }
 
   return (
-    <HeaderDesktop {...props} />
+    <HeaderDesktop {...props} navTheme={navTheme} isScrolled={isScrolled} />
   )
 }
 

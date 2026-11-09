@@ -23,9 +23,9 @@ test("team Final A first and this Uma's individual second finish stay separate",
   assert.equal(entry.umaFinish, "second")
   assert.equal(CM_FINAL_PLACEMENT_LABELS[entry.umaFinish], "2nd")
   assert.equal(entry.final.won, false)
-  assert.equal(entry.races, 10)
+  assert.equal(entry.races, 11)
   assert.equal(entry.wins, 6)
-  assert.equal(entry.winRate, 60)
+  assert.equal(entry.winRate, 6 / 11 * 100)
 })
 
 test("every recorded individual finish uses its own placement label", () => {
@@ -111,8 +111,8 @@ test("a style known only from the final is retained, including final-only events
   const [entry] = history([event({ attempts: [], finalResults: [finalist("third", configuration({ runningStyle: "late_surger", ace: false, debuffer: true }))] })])
   assert.deepEqual(entry.runningStyles, [{ style: "late_surger", usedInFinal: true }])
   assert.equal(entry.role, "debuffer")
-  assert.equal(entry.races, 0)
-  assert.equal(entry.winRate, null)
+  assert.equal(entry.races, 1)
+  assert.equal(entry.winRate, 0)
   assert.equal(entry.teamFinal.group, null)
   assert.equal(entry.umaFinish, "third")
 })
@@ -141,7 +141,7 @@ test("zero-race batches and other versions cannot add historical roles or styles
   ] })])
   assert.equal(entry.role, "ace")
   assert.deepEqual(entry.runningStyles, [{ style: "pace_chaser", usedInFinal: true }])
-  assert.equal(entry.races, 5)
+  assert.equal(entry.races, 6)
 })
 
 test("snapshots survive participant edits/removal and history preserves all event totals and identifiers", () => {
@@ -163,4 +163,13 @@ test("snapshots survive participant edits/removal and history preserves all even
   cms[1].participants[0].won = true
   assert.deepEqual(history(cms), entries)
   assert.deepEqual(history([], "unused"), [])
+})
+
+test("history exposes each saved CM league without guessing missing legacy leagues", () => {
+  const cms = [event({ number: 1, league: "Open League" }), event({ number: 2, league: "Graded League" }), event({ number: 3 })]
+  const before = structuredClone(cms)
+  assert.deepEqual(history(cms).map(({ number, league }) => ({ number, league })), [
+    { number: 3, league: undefined }, { number: 2, league: "Graded League" }, { number: 1, league: "Open League" },
+  ])
+  assert.deepEqual(cms, before)
 })

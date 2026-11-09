@@ -7,6 +7,26 @@ export type ChangelogEntry = {
 }
 
 export const changelog: ChangelogEntry[] = [
+  {
+  version: "0.2.0",
+  date: "2026-11-09",
+
+  new: [
+    "Added full League of Heroes support. ",
+    "Added League of Heroes statistics across Events, Uma Statistics, Compare, and individual Uma records.",
+    "Added expanded Event Statistics with dedicated Champions Meeting and League of Heroes summaries and history.",
+  ],
+
+  improved: [
+    "Redesigned Uma Statistics.",
+    "Improved Track Statistics.",
+    "Improved individual Uma and Track statistic pages.",
+  ],
+
+  fixed: [
+    "Fixed multiple statistics calculations and historical result inconsistencies across Champions Meeting and League of Heroes.",
+  ],
+},
     {
     version: "0.1.7",
     date: "2026-10-16",

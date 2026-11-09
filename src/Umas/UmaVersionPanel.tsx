@@ -15,6 +15,7 @@ type Props = {
   onDelete: (version: UmaVersion) => void
   onBack: () => void
   mobileDetailsOpen: boolean
+  initialVersionId?: string | null
 }
 
 type VersionActionsProps = {
@@ -150,10 +151,11 @@ export default function UmaVersionPanel({
   onDelete,
   onBack,
   mobileDetailsOpen,
+  initialVersionId = null,
 }: Props) {
   const { character, versions, custom } = entry
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
-    null
+    initialVersionId
   )
   const [actionVersionId, setActionVersionId] = useState<string | null>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)

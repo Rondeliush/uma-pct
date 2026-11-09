@@ -1,9 +1,9 @@
 {
    "latestAddedVersionIds": [
-    "narita-brian-blaze",
-    "kitasan-black-new-year",
-    "satono-diamond-new-year",
-    "hokko-tarumae-original"
+    "hokko-tarumae-original",
+    "daitaku-helios-original",
+    "ines-fujin-valentine",
+    "mejiro-ryan-valentine"
   ],
   "characters": [
     {
@@ -285,6 +285,10 @@
     {
       "id": "hokko-tarumae",
       "name": "Hokko Tarumae"
+    },
+    {
+      "id": "daitaku-helios",
+      "name": "Daitaku Helios"
     }
   ],
   "versions": [
@@ -1183,6 +1187,30 @@
       "versionName": "Original",
       "archived": false,
       "avatar": "/Umas/chara_stand_1099_109901.png"
+    },
+    {
+      "id": "daitaku-helios-original",
+      "characterId": "daitaku-helios",
+      "displayName": "Daitaku Helios",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1065_106501.png"
+    },
+    {
+      "id": "ines-fujin-valentine",
+      "characterId": "ines-fujin",
+      "displayName": "Ines Fujin (Valentine)",
+      "versionName": "Valentine",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1031_103102.png"
+    },
+    {
+      "id": "mejiro-ryan-valentine",
+      "characterId": "mejiro-ryan",
+      "displayName": "Mejiro Ryan (Valentine)",
+      "versionName": "Valentine",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1027_102702.png"
     }
   ] 
 }

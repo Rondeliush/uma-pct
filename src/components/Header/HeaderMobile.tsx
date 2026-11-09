@@ -6,8 +6,9 @@ import {
 
 import UpdateNotification from "../UpdateNotification"
 
-import type { HeaderProps } from "./Header"
+import type { HeaderProps, ThemedHeaderProps } from "./Header"
 import PwaInstallMobile from "../../pwa/PwaInstallMobile"
+import HeaderBrand from "./HeaderBrand"
 
 function HeaderMobile({
   activePage,
@@ -17,7 +18,11 @@ function HeaderMobile({
   activeProfileName,
   onProfilesClick,
   hasNewChangelog,
-}: HeaderProps) {
+  navTheme,
+  isScrolled,
+  isHomeNight,
+  onToggleHomeNight,
+}: ThemedHeaderProps) {
   const [isMoreOpen, setIsMoreOpen] =
     useState(false)
 
@@ -59,11 +64,7 @@ function HeaderMobile({
   active: boolean,
   widthClass = "flex-1"
 ) =>
-  `relative flex h-11 min-w-0 ${widthClass} items-center justify-center rounded-lg border-b-2 px-2 text-xs font-black transition ${
-    active
-      ? "border-sky-400 bg-sky-400/[0.08] text-white"
-      : "border-transparent text-blue-100/50"
-  }`
+  `app-nav-tab relative flex min-w-0 ${widthClass} items-center justify-center text-xs font-black transition ${active ? "app-nav-tab-active" : ""}`
 
   const navigate = (
     page: HeaderProps["activePage"]
@@ -82,35 +83,23 @@ function HeaderMobile({
   return (
   <>
     {/* BRAND */}
-    <header className="relative overflow-hidden border-b border-white/[0.06] bg-[#040914]">
-        <div className="pointer-events-none absolute left-1/2 top-0 h-20 w-72 -translate-x-1/2 rounded-full bg-blue-500/[0.07] blur-3xl" />
-
-        <div className="relative flex min-h-[70px] items-center justify-center px-3 py-3">
-          <div className="min-w-0 text-center">
-
-            <div className="text-[12px] font-black uppercase tracking-[0.18em] text-sky-200">
-              Umamusume
-            </div>
-
-            <div className="mt-1 text-[17px] font-black leading-tight tracking-tight text-white">
-              Personal Competitive Tracker
-            </div>
-
-          </div>
-        </div>
-      </header>
-      <PwaInstallMobile />
+    <header data-nav-theme={navTheme} className="app-header-brand">
+      <div className="app-header-brand-inner"><HeaderBrand isHomeNight={isHomeNight} onToggleHomeNight={onToggleHomeNight} /></div>
+    </header>
+    <div className="app-header-mobile-install" data-nav-theme={navTheme}><PwaInstallMobile /></div>
       {/* STICKY NAVIGATION + UPDATE */}
         <div
           ref={moreMenuRef}
           data-app-sticky-header
-          className="sticky top-0 z-50 w-full"
+          data-nav-theme={navTheme}
+          data-scrolled={isScrolled}
+          className="app-header-floating app-header-floating-mobile sticky top-0 z-50 w-full"
         >
 
         {/* MOBILE NAV */}
-        <nav className="border-b border-sky-400/[0.10] bg-[#081221]/95 shadow-[0_8px_24px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <nav className="app-header-nav" aria-label="Main navigation">
 
-          <div className="flex h-12 w-full items-center gap-1 px-2">
+          <div className="app-nav-items">
 
             {/* HOME */}
             <button
@@ -156,14 +145,11 @@ function HeaderMobile({
             {/* LEAGUE OF HEROES */}
             <button
             type="button"
-            disabled
-            className="relative flex h-11 min-w-0 flex-1 cursor-not-allowed items-center justify-center rounded-lg border-b-2 border-transparent px-1 text-xs font-black text-blue-100/25"
+            onClick={() => navigate("loh")}
+            aria-label="League of Heroes"
+            className={navClass(activePage === "loh")}
             >
             LoH
-
-            <span className="absolute right-0.5 top-0.5 rounded bg-blue-100/[0.06] px-1 text-[6px] font-black uppercase tracking-wide text-blue-100/25">
-                Soon
-            </span>
             </button>
 
             {/* STATISTICS */}
@@ -180,7 +166,7 @@ function HeaderMobile({
             </button>
 
             {/* MORE */}
-            <div className="relative flex min-w-0 flex-1">
+            <div className="app-nav-more relative flex min-w-0 flex-1">
               <button
                 type="button"
                 onClick={() =>
@@ -189,6 +175,8 @@ function HeaderMobile({
                       !current
                   )
                 }
+                aria-expanded={isMoreOpen}
+                aria-haspopup="true"
                 className={navClass(
                   isMoreOpen ||
                     isMorePage
@@ -198,11 +186,11 @@ function HeaderMobile({
 
                 {newOfficialUmaNames.length >
                   0 && (
-                  <span className="ml-1 h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_6px_rgba(56,189,248,0.8)]" />
+                  <span className="app-nav-new-dot ml-1 h-1.5 w-1.5 rounded-full" />
                 )}
 
                 {hasNewChangelog && (
-                  <span className="ml-1 h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                  <span className="app-nav-new-dot ml-1 h-1.5 w-1.5 rounded-full" />
                 )}
                 <svg
                   viewBox="0 0 24 24"
@@ -219,27 +207,14 @@ function HeaderMobile({
                 >
                   <path d="m6 9 6 6 6-6" />
                 </svg>
-              </button>      
-
-            </div>
-          </div>
-        </nav>
-
-        <UpdateNotification
-          umaNames={
-            newOfficialUmaNames
-          }
-          onViewUpdate={
-            onViewUpdate
-          }
-        />
+              </button>
         {isMoreOpen && (
-                <div className="absolute right-0 top-[calc(100%+6px)] z-[100] w-72 max-w-[calc(100vw-16px)] overflow-hidden rounded-xl border border-violet-300/15 bg-[#07111f]/98 shadow-2xl backdrop-blur-xl">
+                <div className="app-nav-menu absolute right-0 z-[100] w-72 max-w-[calc(100vw-16px)] overflow-hidden rounded-xl border bg-[#07111f]/98 shadow-2xl backdrop-blur-xl">
 
                   {/* PROFILE */}
-                  <div className="border-b border-white/[0.07] px-4 py-3">
+                  <div className="app-nav-divider border-b px-4 py-3">
 
-                    <div className="text-[9px] font-black uppercase tracking-[0.16em] text-blue-100/25">
+                    <div className="app-nav-muted text-[9px] font-black uppercase tracking-[0.16em]">
                       Active Profile
                     </div>
 
@@ -257,7 +232,7 @@ function HeaderMobile({
                         "autoRunTimer"
                       )
                     }
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold transition"
                   >
                     <span>
                       AutoRun Timer
@@ -272,7 +247,7 @@ function HeaderMobile({
                         "umaDatabase"
                       )
                     }
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold transition"
                   >
                     <span>
                       Uma Database
@@ -280,14 +255,15 @@ function HeaderMobile({
 
                     {newOfficialUmaNames.length >
                       0 && (
-                      <span className="rounded-md bg-sky-400 px-2 py-0.5 text-[9px] font-black uppercase text-slate-950">
+                      <span className="app-nav-new rounded-md px-2 py-0.5 text-[9px] font-black uppercase">
                         New
                       </span>
                     )}
+
                   </button>
 
 
-                  <div className="border-t border-white/[0.07]" />
+                  <div className="app-nav-divider border-t" />
 
                   {/* PROFILES */}
                   <button
@@ -296,10 +272,10 @@ function HeaderMobile({
                       setIsMoreOpen(false)
                       onProfilesClick()
                     }}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold transition"
                   >
                     <span>Profiles</span>
-                    <span className="text-blue-100/25">
+                    <span className="app-nav-muted">
                       →
                     </span>
                   </button>
@@ -310,7 +286,7 @@ function HeaderMobile({
                     onClick={() =>
                       navigate("settings")
                     }
-                    className="flex w-full items-center px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="app-nav-menu-item flex w-full items-center px-4 py-3 text-left text-sm font-bold transition"
                   >
                     Settings
                   </button>
@@ -321,12 +297,12 @@ function HeaderMobile({
                     onClick={() =>
                       navigate("changelog")
                     }
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="app-nav-menu-item flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold transition"
                   >
                     <span>Changelog</span>
 
                     {hasNewChangelog && (
-                      <span className="rounded-md bg-emerald-400 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-950">
+                      <span className="app-nav-new rounded-md px-2 py-0.5 text-[9px] font-black uppercase">
                         New
                       </span>
                     )}
@@ -338,13 +314,29 @@ function HeaderMobile({
                     onClick={() =>
                       navigate("about")
                     }
-                    className="flex w-full items-center px-4 py-3 text-left text-sm font-bold text-blue-100/65 transition hover:bg-white/[0.04] hover:text-white"
+                    className="app-nav-menu-item flex w-full items-center px-4 py-3 text-left text-sm font-bold transition"
                   >
                     About
                   </button>
 
                 </div>
               )}
+
+
+            </div>
+          </div>
+        </nav>
+
+        <div className="app-header-update-slot">
+        <UpdateNotification
+          umaNames={
+            newOfficialUmaNames
+          }
+          onViewUpdate={
+            onViewUpdate
+          }
+        />
+        </div>
       </div>
       </>
   )

@@ -1,4 +1,14 @@
 import type { CM, CMParticipantConfiguration } from "../types/types"
+import { calculateUmaStatistics } from "../Statistics/umaStatistics"
+
+/** Same exact version identity as Statistics, limited to one CM and including its recorded final. */
+export function getCMUmaOverallStats(cm: CM) {
+  return new Map(calculateUmaStatistics([cm], [], []).umas.map(uma => {
+    const races = uma.races
+    const wins = uma.wins
+    return [uma.versionId, { races, wins, winRate: races > 0 ? wins / races * 100 : null }]
+  }))
+}
 
 export type HistoricalParticipantEntry = {
   key: string

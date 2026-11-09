@@ -22,25 +22,25 @@ function UpdateNotification({
   }
 
   return (
-    <div className="w-full border-b border-sky-400/[0.12] bg-[#050b15]/88 shadow-[0_4px_18px_rgba(0,0,0,0.20)] backdrop-blur-xl">
-      <div className="mx-auto flex h-9 max-w-4xl items-center justify-between gap-4 px-4">
+    <div className="app-nav-update">
+      <div className="app-nav-update-inner">
 
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="app-nav-update-copy">
 
           {/* NEW BADGE */}
-          <div className="flex h-5 shrink-0 items-center rounded border border-sky-300/25 bg-sky-400/[0.10] px-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-sky-200">
+          <div className="app-nav-update-badge flex h-5 shrink-0 items-center rounded border px-1.5 text-[8px] font-black uppercase tracking-[0.12em]">
             New
           </div>
 
-          <span className="shrink-0 text-sm font-bold text-white/90">
+          <span className="app-nav-update-title shrink-0 text-sm font-bold">
             Uma Database updated
           </span>
 
-          <span className="text-blue-100/20">
+          <span className="app-nav-update-separator app-nav-muted">
             ·
           </span>
 
-          <span className="truncate text-xs font-medium text-blue-100/45">
+          <span className="app-nav-update-message app-nav-muted truncate text-xs font-medium">
             {message}
           </span>
 
@@ -49,7 +49,7 @@ function UpdateNotification({
         <button
           type="button"
           onClick={onViewUpdate}
-          className="shrink-0 rounded-md border border-sky-400/35 bg-sky-400/[0.06] px-3 py-1 text-[10px] font-bold text-sky-200 transition hover:border-sky-300/60 hover:bg-sky-400/[0.12] hover:text-white"
+          className="app-nav-update-button shrink-0 rounded-md border px-3 py-1 text-[10px] font-bold transition"
         >
           View Update
         </button>

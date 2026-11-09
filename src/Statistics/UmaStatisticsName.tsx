@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react"
 
 /** Keep the base name intact; only a version suffix may wrap to another line. */
-export default function UmaStatisticsName({ name }: { name: string }) {
+export default function UmaStatisticsName({ name, deferResize = false }: { name: string; deferResize?: boolean }) {
   const nameRef = useRef<HTMLSpanElement>(null)
   const parts = name.match(/^(.*?)\s+(\([^()]*\))$/)
   const base = parts?.[1] ?? name
@@ -11,6 +11,7 @@ export default function UmaStatisticsName({ name }: { name: string }) {
     const text = nameRef.current
     if (!text) return
     let disposed = false
+    let frame = 0
 
     const fitName = () => {
       if (disposed || !text.isConnected) return
@@ -27,16 +28,21 @@ export default function UmaStatisticsName({ name }: { name: string }) {
     }
 
     fitName()
-    const observer = new ResizeObserver(fitName)
+    const observer = new ResizeObserver(() => {
+      if (!deferResize) { fitName(); return }
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(fitName)
+    })
     observer.observe(text)
     void document.fonts.ready.then(fitName)
     document.fonts.addEventListener("loadingdone", fitName)
     return () => {
       disposed = true
+      cancelAnimationFrame(frame)
       observer.disconnect()
       document.fonts.removeEventListener("loadingdone", fitName)
     }
-  }, [name])
+  }, [name, deferResize])
 
   return <span ref={nameRef} className="uma-statistics-name"><span>{base}</span>{suffix && <> <span>{suffix}</span></>}</span>
 }

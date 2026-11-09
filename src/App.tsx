@@ -13,6 +13,8 @@ import { useUmaDatabase } from "./context/UmaDatabaseContext"
 import UmaDatabase from "./Umas/UmaDatabase"
 import HomePage from "./Home/HomePage"
 import ChampionsMeetingPage from "./CMs/ChampionsMeetingPage/ChampionsMeetingPage"
+import LeagueOfHeroesPage from "./LoH/LeagueOfHeroesPage"
+import LoHEventModal from "./LoH/LoHEventModal"
 import StatisticsPage from "./Statistics/StatisticsPage"
 import { normalizeUmaComparisonSlots } from "./Statistics/umaComparisonSelection"
 import { navigateAppRoute, subscribeStatisticsNavigation } from "./Statistics/statisticsRoute"
@@ -30,16 +32,13 @@ import ProfileSelectionPage from "./profiles/ProfileSelectionPage"
 import ProfileRestoreDialog from "./profiles/ProfileRestoreDialog"
 import CreateProfileModal from "./profiles/CreateProfileModal"
 import WelcomePage from "./profiles/WelcomePage"
-import ProfileGuide from "./onboarding/ProfileGuide"
 import CMLineupGuide from "./onboarding/CMLineupGuide"
 
 import CMModal from "./CMs/CMModal"
 import { changelog } from "./data/changelogData"
 
-import type {
-  CM,
-  LoH,
-} from "./types/types"
+import type { CM } from "./types/types"
+import type { LoH } from "./LoH/types"
 
 import type { Profile } from "./profiles/profileStore"
 
@@ -87,9 +86,14 @@ import AppMessageDialog from "./components/AppMessageDialog"
 import { chooseBackupFile, supportsAutomaticBackup, withBackupFileLock, writeProfileBackupFile, type BackupDestination } from "./backup/backupFile"
 import { readProfileBackup } from "./backup/profileBackup"
 
+// Temporary full-brightness preview; enable to restore the page background overlays.
+const SHOW_PAGE_BACKGROUND_DIMMING = false
+
 type AppContentProps = {
   profileId: string
   profileName: string
+  isHomeNight: boolean
+  onToggleHomeNight: () => void
   onProfilesClick: () => void
   navigation: ReturnType<typeof useStatisticsNavigation>
 }
@@ -97,6 +101,8 @@ type AppContentProps = {
 function AppContent({
   profileId,
   profileName,
+  isHomeNight,
+  onToggleHomeNight,
   onProfilesClick,
   navigation: statisticsNavigation,
 }: AppContentProps) {
@@ -112,11 +118,6 @@ function AppContent({
   const [
     isStoreReady,
     setIsStoreReady,
-  ] = useState(false)
-
-  const [
-    showProfileGuide,
-    setShowProfileGuide,
   ] = useState(false)
 
   const [
@@ -185,8 +186,21 @@ useEffect(() => {
   ] = useState(false)
 
   const [contextualCmNumber, setContextualCmNumber] = useState<CM["number"] | null>(null)
+  const [contextualLoHNumber, setContextualLoHNumber] = useState<number | null>(null)
+  const [homeLoHFocus, setHomeLoHFocus] = useState<{ number: number; day: number | null; tab: "results" | "umas" } | null>(null)
+  const [homeDatabaseVersion, setHomeDatabaseVersion] = useState<string | null>(null)
 
-  useEffect(() => subscribeStatisticsNavigation(() => setContextualCmNumber(null)), [])
+  const [homeFocusPage, setHomeFocusPage] = useState(activePage)
+  if (homeFocusPage !== activePage) {
+    setHomeFocusPage(activePage)
+    if (activePage !== "loh" && homeLoHFocus) setHomeLoHFocus(null)
+    if (activePage !== "umaDatabase" && homeDatabaseVersion) setHomeDatabaseVersion(null)
+  }
+
+  useEffect(() => subscribeStatisticsNavigation(() => {
+    setContextualCmNumber(null)
+    setContextualLoHNumber(null)
+  }), [])
 
   useEffect(() => {
     let cancelled = false
@@ -212,9 +226,6 @@ useEffect(() => {
       setLohs(profileData.lohs)
       setUmaComparisonSlots(normalizeUmaComparisonSlots(profileData.umaComparisonSlots))
 
-      setShowProfileGuide(
-        profileData.onboardingCompleted === false
-      )
       setCmLineupGuideCompleted(
       profileData.cmLineupGuideCompleted ??
         null
@@ -235,10 +246,6 @@ useEffect(() => {
     return
   }
 
-  if (showProfileGuide) {
-    return
-  }
-
   if (
     cmLineupGuideCompleted !== false
   ) {
@@ -254,7 +261,6 @@ useEffect(() => {
 }, [
   cms.length,
   isStoreReady,
-  showProfileGuide,
   cmLineupGuideCompleted,
   routePage,
   navigatePage,
@@ -318,18 +324,6 @@ useEffect(() => {
     })).catch((error: unknown) => console.error("Could not save Uma comparison selections:", error))
   }, [umaComparisonSlots, isStoreReady, profileId])
 
-  const handleCompleteProfileGuide = () => {
-  setShowProfileGuide(false)
-
-    void updateProfileData(
-      profileId,
-      (currentData) => ({
-        ...currentData,
-        onboardingCompleted: true,
-      })
-    )
-  }
-
   const handleCompleteCmLineupGuide = () => {
   setShowCmLineupGuide(false)
   setCmLineupGuideCompleted(true)
@@ -349,13 +343,19 @@ useEffect(() => {
         version.displayName
     )
         const hasStatisticsBackground =
-          activePage === "statistics" && (statisticsSection === "uma" || statisticsSection === "tracks")
+          activePage === "statistics" && (statisticsSection === "uma" || statisticsSection === "compare" || statisticsSection === "tracks")
         const pageBackground =
           activePage === "umaDatabase"
             ? `${import.meta.env.BASE_URL}uma-database-background.jpg`
             : activePage === "settings"
               ? `${import.meta.env.BASE_URL}settings-background.jpg`
-              : `${import.meta.env.BASE_URL}background.jpg`
+              : activePage === "cms"
+                ? `${import.meta.env.BASE_URL}${isHomeNight ? "cm-page-background.jpg" : "cm-page-background-light.png"}`
+                : activePage === "loh"
+                  ? `${import.meta.env.BASE_URL}${isHomeNight ? "loh-page-background.png" : "loh-page-background-light.png"}`
+                  : activePage === "autoRunTimer"
+                    ? `${import.meta.env.BASE_URL}${isHomeNight ? "autorun-background-night.png" : "autorun-background-light.png"}`
+                    : `${import.meta.env.BASE_URL}${isHomeNight ? "home-background-night.png" : "home-background-2.png"}`
   
   const routedCm =
     statisticsNavigation.appRoute?.page === "cms" && statisticsNavigation.appRoute.cmId !== null
@@ -367,21 +367,42 @@ useEffect(() => {
   const contextualCm = activePage === "statistics" && contextualCmNumber !== null
     ? cms.find((cm) => cm.number === contextualCmNumber) ?? null : null
   const openedCm = routedCm ?? contextualCm
+  const contextualLoH = activePage === "statistics" && contextualLoHNumber !== null
+    ? lohs.find(event => event.number === contextualLoHNumber) ?? null : null
+  const routedLoH =
+    statisticsNavigation.appRoute?.page === "loh" && statisticsNavigation.appRoute.lohId !== undefined
+      ? lohs.find(event => String(event.number) === statisticsNavigation.appRoute?.lohId) ?? null
+      : null
   const unavailable = statisticsNavigation.unavailable || (
     isStoreReady && statisticsNavigation.appRoute?.page === "cms" && statisticsNavigation.appRoute.cmId !== null && !routedCm
+  ) || (
+    isStoreReady && statisticsNavigation.appRoute?.page === "loh" && statisticsNavigation.appRoute.lohId !== undefined && !routedLoH
   )
 
   return (
-    <div data-app-shell className={`min-h-screen bg-gray-950 text-gray-100${hasStatisticsBackground ? " uma-statistics-page-layout" : ""}`}>
+    <div
+      data-app-shell
+      className={`relative z-[1] min-h-screen bg-transparent text-gray-100${hasStatisticsBackground ? " uma-statistics-page-layout" : ""}`}
+    >
+
+      {!hasStatisticsBackground && (
+        <ModalPortal>
+          <div
+            className="app-page-background"
+            aria-hidden="true"
+            style={{ backgroundImage: `${SHOW_PAGE_BACKGROUND_DIMMING ? "linear-gradient(rgba(3, 12, 20, 0.45), rgba(3, 12, 20, 0.45)), " : ""}url("${pageBackground}")` }}
+          />
+        </ModalPortal>
+      )}
 
       {hasStatisticsBackground && (
         <ModalPortal>
           <div
             className="uma-statistics-page-background"
             aria-hidden="true"
-            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}Statistic/${statisticsSection === "tracks" ? "statistic_track_overview_background.png" : "statistic_uma_overview_background.png"}")` }}
+            style={{ backgroundImage: `url("${pageBackground}")` }}
           >
-            <div className="uma-statistics-background-overlay" />
+            {SHOW_PAGE_BACKGROUND_DIMMING && <div className="uma-statistics-background-overlay" />}
           </div>
         </ModalPortal>
       )}
@@ -389,6 +410,8 @@ useEffect(() => {
       {/* HEADER */}
       <Header
         activePage={activePage}
+        isHomeNight={isHomeNight}
+        onToggleHomeNight={onToggleHomeNight}
         onPageChange={statisticsNavigation.navigatePage}
         newOfficialUmaNames={
           newOfficialUmaNames
@@ -408,6 +431,7 @@ useEffect(() => {
           onClose={routedCm ? statisticsNavigation.closeCm : () => setContextualCmNumber(null)}
         />
       )}
+      {contextualLoH && <LoHEventModal key={contextualLoH.id} event={contextualLoH} lohs={lohs} setLohs={setLohs} onClose={() => setContextualLoHNumber(null)} />}
       {activePage === "statistics" && isStoreReady && contextualCmNumber !== null && !contextualCm && (
         <AppMessageDialog
           title="Champions Meeting unavailable"
@@ -415,19 +439,10 @@ useEffect(() => {
           onClose={() => setContextualCmNumber(null)}
         />
       )}
-      
-      {showProfileGuide && (
-        <ProfileGuide
-          currentPage={activePage}
-          onNavigate={statisticsNavigation.navigatePage}
-          onComplete={
-            handleCompleteProfileGuide
-          }
-        />
+      {activePage === "statistics" && isStoreReady && contextualLoHNumber !== null && !contextualLoH && (
+        <AppMessageDialog title="League of Heroes unavailable" message="This page doesn't exist or is unavailable." onClose={() => setContextualLoHNumber(null)} />
       )}
-
-      {showCmLineupGuide &&
-      !showProfileGuide && (
+      {showCmLineupGuide && (
         <CMLineupGuide
           cmNumber={
             cms[cms.length - 1]?.number
@@ -439,15 +454,10 @@ useEffect(() => {
       )}
 
 
-      {/* FULL WIDTH PAGE BACKGROUND */}
+      {/* Page content shares the fixed background with the header. */}
       <div
         data-app-content
-        className={hasStatisticsBackground ? "relative min-h-screen" : "relative min-h-screen bg-cover bg-center bg-scroll md:bg-fixed"}
-        style={{
-          backgroundImage: hasStatisticsBackground
-            ? undefined
-            : `url("${pageBackground}")`,
-        }}
+        className="relative min-h-screen"
       >
         {isUpdateReviewOpen && (
           <UpdateReviewModal
@@ -463,9 +473,6 @@ useEffect(() => {
           />
         )}
 
-        {/* DARK OVERLAY */}
-          {!hasStatisticsBackground && <div className="absolute inset-0 bg-gray-950/70" />}
-
         {/* STATISTICS */}
         {unavailable ? <UnavailablePage /> : <>
         {activePage ===
@@ -473,8 +480,10 @@ useEffect(() => {
           <div data-statistics-content className={`relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6${statisticsSection === "landing" ? " lg:max-w-[1680px]" : ""}`}>
             <StatisticsPage
               cms={cms}
+              lohs={lohs}
               navigation={statisticsNavigation}
               onOpenCm={setContextualCmNumber}
+              onOpenLoH={setContextualLoHNumber}
               comparisonSlots={umaComparisonSlots}
               setComparisonSlots={setUmaComparisonSlots}
             />
@@ -482,16 +491,29 @@ useEffect(() => {
         )}
 
         {/* HOME */}
-        {activePage === "home" && (
+        {activePage === "home" && isStoreReady && (
           <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
             <HomePage
               cms={cms}
+              lohs={lohs}
+              setCms={setCms}
+              setLohs={setLohs}
               profileId={profileId}
               hasNewChangelog={hasNewChangelog}
               onOpenChangelog={() =>
                 statisticsNavigation.navigatePage("changelog")
               }
               onOpenCm={statisticsNavigation.navigateCm}
+              onOpenLoH={(number, focus) => {
+                setHomeLoHFocus(focus ? { number, ...focus } : null)
+                statisticsNavigation.navigateLoH(number)
+              }}
+              onOpenUmaStatistics={statisticsNavigation.navigateUma}
+              onOpenUmaDatabase={id => {
+                setHomeDatabaseVersion(id ?? null)
+                statisticsNavigation.navigatePage("umaDatabase")
+              }}
+              onOpenStatistics={statisticsNavigation.navigateSection}
             />
           </div>
         )}
@@ -500,7 +522,7 @@ useEffect(() => {
         {activePage === "cms" && (
           <div className="relative min-h-screen w-full overflow-hidden">
 
-            <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            {SHOW_PAGE_BACKGROUND_DIMMING && <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
 
               <div className="cm-side-aura absolute -bottom-10 -left-10 -top-10 w-[calc(24vw+2.5rem)] bg-gradient-to-r from-blue-950/35 via-blue-900/12 to-transparent blur-xl" />
 
@@ -514,7 +536,7 @@ useEffect(() => {
 
               <div className="cm-bottom-glow absolute -bottom-8 left-[8%] right-[8%] h-[calc(7vh+2rem)] bg-gradient-to-t from-blue-800/18 to-transparent blur-2xl" />
 
-            </div>
+            </div>}
 
             <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
               <ChampionsMeetingPage
@@ -524,6 +546,12 @@ useEffect(() => {
               />
             </div>
 
+          </div>
+        )}
+
+        {activePage === "loh" && (
+          <div className="relative z-10 mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-6 sm:py-6">
+            <LeagueOfHeroesPage key={profileId ?? "legacy"} profileId={profileId} lohs={lohs} setLohs={setLohs} selectedEvent={routedLoH} onOpen={statisticsNavigation.navigateLoH} onClose={statisticsNavigation.closeLoH} initialFocus={homeLoHFocus && homeLoHFocus.number === routedLoH?.number ? homeLoHFocus : undefined} />
           </div>
         )}
 
@@ -544,6 +572,7 @@ useEffect(() => {
             <main>
               <UmaDatabase
                 cms={cms}
+                initialVersionId={homeDatabaseVersion}
                 hasUpdateNotification={
                   newOfficialVersions.length > 0
                 }
@@ -583,6 +612,25 @@ useEffect(() => {
 function TrackerApp() {
   usePwaInstall()
   const navigation = useStatisticsNavigation()
+  const [isHomeNight, setIsHomeNight] = useState(() => {
+    try {
+      return localStorage.getItem("uma-pct-home-night") === "true"
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("uma-pct-home-night", String(isHomeNight))
+    } catch {
+      // Keep the toggle available when browser storage is disabled.
+    }
+    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (favicon) favicon.href = `${import.meta.env.BASE_URL}${isHomeNight ? "umapct-favicon.png" : "umapct-favicon-2.png"}`
+  }, [isHomeNight])
+
+  const toggleHomeNight = () => setIsHomeNight(current => !current)
   const [
     showSplash,
     setShowSplash,
@@ -836,7 +884,7 @@ function TrackerApp() {
           ]
         )
 
-        if (profileData.onboardingCompleted === false) navigation.navigatePage("home")
+        navigation.navigatePage("home")
 
         setActiveProfile(
           createdProfile
@@ -1110,6 +1158,7 @@ function TrackerApp() {
   if (showSplash) {
     return (
       <SplashScreen
+        isHomeNight={isHomeNight}
         version={
           changelog[0]?.version
         }
@@ -1373,6 +1422,8 @@ function TrackerApp() {
     <AppContent
       profileId={activeProfile.id}
       profileName={activeProfile.name}
+      isHomeNight={isHomeNight}
+      onToggleHomeNight={toggleHomeNight}
       navigation={navigation}
       onProfilesClick={() => {
         void (async () => {

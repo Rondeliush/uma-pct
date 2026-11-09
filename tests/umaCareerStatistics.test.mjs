@@ -16,10 +16,10 @@ const cmStatistics = () => calculateUmaDetailStatistics([{
   }],
 }], "original")
 
-test("Career Overall equals CM round totals and event participation with only CM supported", () => {
+test("Career Overall equals CM rounds plus raced finals and event participation", () => {
   const statistics = cmStatistics()
   const before = structuredClone(statistics)
-  assert.deepEqual(getUmaCareerOverall(statistics), { races: 10, wins: 6, winRate: 60, events: 1 })
+  assert.deepEqual(getUmaCareerOverall(statistics), { races: 11, wins: 7, winRate: 7 / 11 * 100, events: 1 })
   assert.equal(statistics.finalAppearances, 1)
   assert.equal(statistics.finalWins, 1)
   assert.deepEqual(statistics, before)
@@ -29,7 +29,7 @@ test("Overall combines compatible mode records with a weighted rate while preser
   const statistics = cmStatistics()
   const additionalModes = [{ races: 30, wins: 3, winRate: 10, events: 2 }]
   const before = structuredClone({ statistics, additionalModes })
-  assert.deepEqual(getUmaCareerOverall(statistics, additionalModes), { races: 40, wins: 9, winRate: 22.5, events: 3 })
+  assert.deepEqual(getUmaCareerOverall(statistics, additionalModes), { races: 41, wins: 10, winRate: 10 / 41 * 100, events: 3 })
   assert.deepEqual({ statistics, additionalModes }, before)
   assert.equal(statistics.cmEvents, 1)
   assert.equal(statistics.finalAppearances, 1)
@@ -38,7 +38,7 @@ test("Overall combines compatible mode records with a weighted rate while preser
 
 test("Overall never invents a win equivalent for a supported mode with unavailable wins", () => {
   assert.deepEqual(getUmaCareerOverall(cmStatistics(), [{ races: 30, wins: null, winRate: null, events: 2 }]), {
-    races: 40, wins: null, winRate: null, events: 3,
+    races: 41, wins: null, winRate: null, events: 3,
   })
 })
 

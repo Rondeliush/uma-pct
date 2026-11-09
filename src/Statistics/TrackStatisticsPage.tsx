@@ -1,83 +1,64 @@
 import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import type { CM } from "../types/types"
+import type { LoH } from "../LoH/types"
 import AllTracks from "./AllTracks"
 import TrackStatisticsDetailPage from "./TrackStatisticsDetailPage"
-import TrackStatisticsLink from "./TrackStatisticsLink"
-import TrackGlobalMetadataPerformance from "./TrackGlobalMetadataPerformance"
-import { getRecordedTrackId } from "./trackDetailsStatistics"
-import { calculateTrackStatistics, sortTrackPerformance } from "./trackStatistics"
+import TrackHighlights from "./TrackHighlights"
+import { sortTrackPerformance } from "./trackStatistics"
 import type { TrackStatisticsSort } from "./trackStatistics"
-import { formatUmaWinRate, MIN_RACES_FOR_WIN_RATE } from "./umaStatistics"
+import { getTrackOverviewStatistics } from "./trackOverviewStatistics"
+import type { TrackOverviewScope, TrackOverviewSurface, TrackOverviewLeague } from "./trackOverviewStatistics"
+import { formatUmaWinRate } from "./umaStatistics"
+import TrackOverviewPerformance from "./TrackOverviewPerformance"
 import "./UmaStatisticsPage.css"
 import "./TrackStatisticsPage.css"
 
-export default function TrackStatisticsPage({ cms, navigation, trackId, onOpenTrack, onBack, onOpenCm }: {
+export default function TrackStatisticsPage({ cms, lohs, navigation, trackId, onOpenTrack, onBack, onOpenCm, onOpenLoH }: {
   cms: CM[]
+  lohs: LoH[]
   navigation: ReactNode
   trackId: string | null
   onOpenTrack: (trackId: string) => void
   onBack: () => void
   onOpenCm: (cmNumber: CM["number"]) => void
+  onOpenLoH: (number: number) => void
 }) {
   const [sort, setSort] = useState<TrackStatisticsSort>("win-rate")
-  const statistics = useMemo(() => calculateTrackStatistics(cms), [cms])
+  const [scope, setScope] = useState<TrackOverviewScope>("overall")
+  const [surface, setSurface] = useState<TrackOverviewSurface>("all")
+  const [league, setLeague] = useState<TrackOverviewLeague>("all")
+  const statistics = useMemo(() => getTrackOverviewStatistics(cms, lohs, scope, surface, league), [cms, lohs, scope, surface, league])
   const tracks = useMemo(() => sortTrackPerformance(statistics.tracks, sort), [statistics.tracks, sort])
-  if (trackId !== null) return <TrackStatisticsDetailPage trackId={trackId} cms={cms} onBack={onBack} onOpenCm={onOpenCm} />
+  const scopeLabel = scope === "cm" ? "Champions Meeting" : scope === "loh" ? "League of Heroes" : "Overall"
+  if (trackId !== null) return <TrackStatisticsDetailPage key={trackId} trackId={trackId} cms={cms} lohs={lohs} onBack={onBack} onOpenCm={onOpenCm} onOpenLoH={onOpenLoH} />
   return (
-    <main className="uma-statistics" aria-labelledby="track-statistics-title">
+    <main className="uma-statistics track-statistics-overview" data-scope={scope} aria-labelledby="track-statistics-title">
       {navigation}
-      <header className="uma-statistics-header">
-        <div>
-          <h1 id="track-statistics-title">Track Statistics</h1>
-          <p>Explore performance across racetracks and race conditions.</p>
-        </div>
-      </header>
+      <h1 id="track-statistics-title" className="sr-only">Track Statistics</h1>
       <AllTracks onOpenTrack={onOpenTrack} />
-      <div id="track-statistics-content" className="uma-statistics-summary-grid track-statistics-grid">
-        <section className="uma-statistics-panel" aria-labelledby="track-statistics-overall-title">
-          <div className="uma-statistics-section-heading"><h2 id="track-statistics-overall-title">Overall Statistics</h2></div>
-          <dl className="uma-statistics-overall-values">
-            <div><dt>Tracks Used</dt><dd>{statistics.overall.tracksUsed.toLocaleString("en")}</dd></div>
-            <div><dt>Recorded Races</dt><dd>{statistics.overall.races.toLocaleString("en")}</dd></div>
-            <div><dt>Race Wins</dt><dd>{statistics.overall.wins.toLocaleString("en")}</dd></div>
-            <div><dt>Race Win Rate</dt><dd className="uma-statistics-rate">{formatUmaWinRate(statistics.overall.winRate)}</dd></div>
-          </dl>
-        </section>
-        <section className="uma-statistics-panel" aria-labelledby="track-statistics-performance-title">
-          <div className="uma-statistics-section-heading track-statistics-performance-heading">
-            <div>
-              <h2 id="track-statistics-performance-title">Track Performance</h2>
-              <p>{sort === "win-rate" ? `Win rate prioritizes tracks with ${MIN_RACES_FOR_WIN_RATE}+ races.` : "Recorded Champions Meeting race results."}</p>
+      <TrackHighlights tracks={statistics.tracks} turfTracks={statistics.turfTracks} dirtTracks={statistics.dirtTracks} onOpenTrack={onOpenTrack} />
+      <section className="track-stats" data-scope={scope} aria-labelledby="track-stats-title">
+        <div className="uma-statistics-section-heading"><h2 id="track-stats-title">Stats</h2></div>
+        <div className="track-stats-content">
+          <aside className="track-stats-sidebar" aria-label={scopeLabel + " track summary"}>
+            <div className="track-stats-scope" role="group" aria-label="Track statistics scope">
+              {(["overall", "cm", "loh"] as const).map(value => <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)}>{value === "overall" ? "Overall" : value === "cm" ? "CM" : "LoH"}</button>)}
             </div>
-            <label className="uma-statistics-sort">
-              <span>Sort by</span>
-              <select id="track-statistics-sort" value={sort} disabled={tracks.length === 0} onChange={(event) => setSort(event.target.value as TrackStatisticsSort)}>
-                <option value="win-rate">Win Rate</option><option value="races">Races</option><option value="wins">Wins</option><option value="events">Events</option><option value="racetrack">Racetrack</option>
-              </select>
-            </label>
-          </div>
-          {tracks.length > 0 ? (
-            <table className="uma-statistics-distance-table track-statistics-table">
-              <caption className="sr-only">Recorded Champions Meeting performance by racetrack.</caption>
-              <thead><tr>
-                <th scope="col"><span className="track-statistics-wide-label">Racetrack</span><span className="track-statistics-compact-label">Track</span></th>
-                <th scope="col">Events</th><th scope="col">Races</th><th scope="col">Wins</th>
-                <th scope="col"><span className="track-statistics-wide-label">Win Rate</span><span className="track-statistics-compact-label">WR</span></th>
-              </tr></thead>
-              <tbody>{tracks.map((track) => {
-                const id = getRecordedTrackId(track.racetrack)
-                return <tr key={track.racetrack} data-racetrack={track.racetrack} data-track-id={id ?? undefined} onClick={(event) => {
-                  if (id && !(event.target as HTMLElement).closest("a")) onOpenTrack(id)
-                }}>
-                  <th scope="row">{id ? <TrackStatisticsLink trackId={id} onOpenTrack={onOpenTrack} label={`Open ${track.racetrack} statistics`}>{track.racetrack}</TrackStatisticsLink> : track.racetrack}</th><td>{track.events.toLocaleString("en")}</td><td>{track.races.toLocaleString("en")}</td><td>{track.wins.toLocaleString("en")}</td><td className="uma-statistics-rate">{formatUmaWinRate(track.winRate)}</td>
-                </tr>
-              })}</tbody>
-            </table>
-          ) : <p className="uma-statistics-summary-note">No recorded Champions Meeting racetrack results yet.</p>}
-        </section>
-      </div>
-      <TrackGlobalMetadataPerformance cms={cms} />
+            <div className="track-stats-filters">
+              <label><span>Surface</span><select aria-label="Track statistics surface" value={surface} onChange={event => setSurface(event.target.value as TrackOverviewSurface)}><option value="all">All Surfaces</option><option value="Turf">Turf</option><option value="Dirt">Dirt</option></select></label>
+              {scope === "cm" && <label><span>League</span><select aria-label="Track statistics CM league" value={league} onChange={event => setLeague(event.target.value as TrackOverviewLeague)}><option value="all">All Leagues</option><option value="Graded League">Graded</option><option value="Open League">Open</option></select></label>}
+            </div>
+            <dl className="track-stats-totals">
+              <div><dt>Tracks Used</dt><dd>{statistics.overall.tracksUsed.toLocaleString("en")}</dd></div>
+              <div><dt>Recorded Races</dt><dd>{statistics.overall.races.toLocaleString("en")}</dd></div>
+              <div><dt>Race Wins</dt><dd className="track-statistics-wins">{statistics.overall.wins.toLocaleString("en")}</dd></div>
+              <div><dt>Race Win Rate</dt><dd className="uma-statistics-rate">{formatUmaWinRate(statistics.overall.winRate)}</dd></div>
+            </dl>
+          </aside>
+          <TrackOverviewPerformance statistics={statistics} tracks={tracks} scopeLabel={scopeLabel} sort={sort} onSort={setSort} onOpenTrack={onOpenTrack} />
+        </div>
+      </section>
     </main>
   )
 }

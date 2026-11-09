@@ -10,7 +10,7 @@ export default function useStatisticsNavigation() {
   const route = appRoute?.statistics ?? null
   const unavailable = isUnavailableRoute(hash, pathname, import.meta.env.BASE_URL)
   const pageHref = unavailable || !appRoute ? location : route
-    ? getStatisticsHref(route.section, route.umaVersionId ?? route.trackId) : getAppHref(appRoute.page, appRoute.cmId)
+    ? getStatisticsHref(route.section, route.umaVersionId ?? route.trackId) : getAppHref(appRoute.page, appRoute.cmId ?? appRoute.lohId ?? null)
 
   useLayoutEffect(() => {
     const previousRestoration = window.history.scrollRestoration
@@ -21,7 +21,7 @@ export default function useStatisticsNavigation() {
 
   const navigatePage = useCallback((page: HeaderPage) => {
     if (page === "statistics") navigateStatisticsRoute("landing", null, undefined, import.meta.env.BASE_URL)
-    else if (page !== "loh") navigateAppRoute(page, null, import.meta.env.BASE_URL)
+    else navigateAppRoute(page, null, import.meta.env.BASE_URL)
   }, [])
 
   const navigateSection = (section: StatisticsSection) => {
@@ -37,5 +37,7 @@ export default function useStatisticsNavigation() {
     navigateUma: (id: string) => openDetails("uma", id), navigateTrack: (id: string) => openDetails("tracks", id),
     navigateCm: (number: number) => navigateAppRoute("cms", String(number), import.meta.env.BASE_URL),
     closeCm: () => navigateAppRoute("cms", null, import.meta.env.BASE_URL, true),
+    navigateLoH: (number: number) => navigateAppRoute("loh", String(number), import.meta.env.BASE_URL),
+    closeLoH: () => navigateAppRoute("loh", null, import.meta.env.BASE_URL, true),
   }
 }

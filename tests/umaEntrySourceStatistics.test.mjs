@@ -119,16 +119,18 @@ test("conflicting or partially unknown simultaneous sources do not split or dupl
   assert.equal(stats.rows.reduce((sum, row) => sum + row.wins, 0) + stats.unknownSourceWins, calculateUmaDetailStatistics(cms, "original").wins)
 })
 
-test("empty, zero-race and final-only records never invent sources or usage", () => {
+test("zero-race batches and other versions are excluded while a saved final-only source counts once", () => {
   const cms = [event([
     attempt(0, [result(null)]),
     attempt(5, [result("manual", 2, "other", { umaVersionId: "other" })]),
   ], { finalPlace: "1st", participants: [participant({ finalParticipant: true, won: true, autoRun: true })], finalResults: [{ cmUmaId: "a", won: true, configuration: configuration("autorun") }] })]
   const stats = calculateUmaEntrySourceStatistics(cms, "original")
-  assert.deepEqual(stats, calculateUmaEntrySourceStatistics([], "unused"))
-  assert.equal(stats.totalRaces, 0)
+  assert.equal(stats.totalRaces, 1)
   assert.equal(stats.unknownSourceRaces, 0)
-  assert.ok(stats.rows.every(row => row.races === 0 && row.wins === 0 && row.winRate === null && row.usage === null))
+  assert.equal(stats.attributedRaces, 1)
+  assert.deepEqual(row(stats, "autorun"), { source: "autorun", label: "AutoRun", races: 1, wins: 1, winRate: 100, usage: 100 })
+  assert.deepEqual(row(stats, "manual"), { source: "manual", label: "Manual", races: 0, wins: 0, winRate: null, usage: 0 })
+  assert.ok(calculateUmaEntrySourceStatistics([], "unused").rows.every(row => row.races === 0 && row.wins === 0 && row.winRate === null && row.usage === null))
 })
 
 test("retired attempts keep their recorded races and invalid race counts are ignored", () => {
@@ -141,4 +143,76 @@ test("retired attempts keep their recorded races and invalid race counts are ign
   assert.equal(row(stats, "manual").winRate, 50)
   assert.equal(row(stats, "manual").usage, 100)
   assert.equal(stats.unknownSourceRaces, 0)
+})
+
+const final = (entrySource, placement = "first", fields = {}) => ({
+  cmUmaId: "a", placement, placementSource: "recorded", won: placement === "first",
+  configuration: configuration(entrySource), ...fields,
+})
+const tenManualRaces = () => [attempt(5, [result("manual", 5)]), attempt(5, [result("manual", 5)], { day: 3 })]
+
+test("Maruzensky's ten Manual round wins plus a Manual final win are eleven races and wins", () => {
+  const cm = event(tenManualRaces(), { finalPlace: "1st", finalResults: [final("manual")],
+    participants: [participant({ autoRun: true })] })
+  const before = structuredClone(cm)
+  const stats = calculateUmaEntrySourceStatistics([cm], "original")
+  assert.deepEqual(row(stats, "manual"), { source: "manual", label: "Manual", races: 11, wins: 11, winRate: 100, usage: 100 })
+  assert.equal(row(stats, "autorun").races, 0)
+  assert.equal(stats.totalRaces, 11)
+  assert.equal(stats.attributedRaces, 11)
+  assert.equal(stats.totalRaces, calculateUmaDetailStatistics([cm], "original").races)
+  assert.equal(stats.rows.reduce((sum, row) => sum + row.wins, 0), calculateUmaDetailStatistics([cm], "original").wins)
+  assert.deepEqual(cm, before)
+})
+
+test("an AutoRun final uses its snapshot, exact version and weighted Usage independently of Manual rounds", () => {
+  const cm = event(tenManualRaces(), { finalPlace: "1st", finalResults: [final("autorun")],
+    participants: [participant({ umaId: "alternate", autoRun: false })] })
+  const stats = calculateUmaEntrySourceStatistics([cm], "original")
+  assert.deepEqual([row(stats, "manual").races, row(stats, "manual").wins, row(stats, "manual").usage], [10, 10, 10 / 11 * 100])
+  assert.deepEqual(row(stats, "autorun"), { source: "autorun", label: "AutoRun", races: 1, wins: 1, winRate: 100, usage: 1 / 11 * 100 })
+  assert.equal(calculateUmaEntrySourceStatistics([cm], "alternate").totalRaces, 0)
+  cm.participants = []
+  assert.deepEqual(calculateUmaEntrySourceStatistics([cm], "original"), stats)
+})
+
+test("a losing individual final contributes a race without borrowing a team win or stale won flag", () => {
+  for (const finalPlace of ["1st", "2nd", "3rd"]) {
+    const cm = event(tenManualRaces(), { finalPlace, finalResults: [final("autorun", "second", { won: true })] })
+    const stats = calculateUmaEntrySourceStatistics([cm], "original")
+    assert.equal(stats.totalRaces, 11)
+    assert.deepEqual([row(stats, "autorun").races, row(stats, "autorun").wins, row(stats, "autorun").winRate], [1, 0, 0])
+    assert.equal(row(stats, "manual").wins, 10)
+  }
+})
+
+test("pending or invalid final results add no Manual or AutoRun race", () => {
+  const baseline = calculateUmaEntrySourceStatistics([event(tenManualRaces())], "original")
+  for (const finalPlace of ["", "unexpected"]) {
+    const cm = event(tenManualRaces(), { finalPlace, finalResults: [final("autorun")] })
+    assert.deepEqual(calculateUmaEntrySourceStatistics([cm], "original"), baseline)
+  }
+})
+
+test("duplicate final references count one race and at most one individual win per version", () => {
+  const cm = event(tenManualRaces(), { finalPlace: "1st", finalResults: [
+    final("manual"), final("manual", "first", { cmUmaId: "duplicate" }), final("manual", "second", { cmUmaId: "loser" }),
+  ] })
+  const stats = calculateUmaEntrySourceStatistics([cm], "original")
+  assert.deepEqual([stats.totalRaces, row(stats, "manual").races, row(stats, "manual").wins], [11, 11, 11])
+})
+
+test("missing or conflicting final sources retain participation and wins without guessing from current AutoRun", () => {
+  for (const finalResults of [[final(null)], [final("manual"), final("autorun", "second", { cmUmaId: "duplicate" })]]) {
+    const cm = event(tenManualRaces(), { finalPlace: "1st", finalResults, participants: [participant({ autoRun: true })] })
+    const stats = calculateUmaEntrySourceStatistics([cm], "original")
+    assert.deepEqual([stats.totalRaces, stats.attributedRaces, stats.unknownSourceRaces, stats.unknownSourceWins], [11, 10, 1, 1])
+    assert.equal(row(stats, "manual").races, 10)
+    assert.equal(row(stats, "manual").usage, 100)
+    assert.equal(row(stats, "autorun").races, 0)
+  }
+  const legacy = event([], { finalPlace: "1st", participants: [participant({ finalParticipant: true, won: true, autoRun: true })] })
+  const stats = calculateUmaEntrySourceStatistics([legacy], "original")
+  assert.deepEqual([stats.totalRaces, stats.unknownSourceRaces, stats.unknownSourceWins], [1, 1, 1])
+  assert.ok(stats.rows.every(row => row.races === 0 && row.usage === null))
 })

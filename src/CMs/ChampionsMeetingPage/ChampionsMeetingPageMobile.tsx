@@ -15,6 +15,7 @@ import type {
 } from "./useChampionsMeetingPage"
 
 import CMCard from "../CMCard"
+import EventPageHeader from "../../components/EventPageHeader"
 
 function ChampionsMeetingPageMobile(
   props: ChampionsMeetingPageViewProps
@@ -46,19 +47,7 @@ function ChampionsMeetingPageMobile(
   return (
     <div className="space-y-5">
       {/* HEADER */}
-      <section className="relative py-2">
-        <div className="text-center">
-          <div className="text-[10px] font-black uppercase tracking-[0.28em] text-blue-400">
-            Competitive Event
-          </div>
-
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-white">
-            Champions Meeting
-          </h1>
-
-          <div className="mx-auto mt-3 h-px w-40 bg-gradient-to-r from-transparent via-sky-400 to-transparent" />
-        </div>
-      </section>
+      <EventPageHeader title="Champions Meeting" mobile />
 
       {/* STATISTICS */}
       <section

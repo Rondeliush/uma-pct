@@ -98,15 +98,11 @@ export type CMLogEntry = {
   details?: string[]
 }
 
-export type TrackSurface = 
-  | "Turf" 
-  | "Dirt"
+export const TRACK_SURFACES = ["Turf", "Dirt"] as const
+export type TrackSurface = (typeof TRACK_SURFACES)[number]
 
-export type TrackLength = 
-  | "Short" 
-  | "Mile" 
-  | "Medium" 
-  | "Long"
+export const TRACK_LENGTHS = ["Short", "Mile", "Medium", "Long"] as const
+export type TrackLength = (typeof TRACK_LENGTHS)[number]
 
 export const TRACK_DIRECTIONS = ["Left", "Right", "Straight"] as const
 export type TrackDirection = (typeof TRACK_DIRECTIONS)[number]
@@ -119,6 +115,8 @@ export type TrackSeason = (typeof TRACK_SEASONS)[number]
 
 export const TRACK_CONDITIONS = ["Firm", "Good", "Yielding", "Soft", "Heavy"] as const
 export type TrackCondition = (typeof TRACK_CONDITIONS)[number]
+/** Available for new selections; historical conditions remain valid when loading saved results. */
+export const SELECTABLE_TRACK_CONDITIONS = TRACK_CONDITIONS.filter(condition => condition !== "Yielding")
 
 
 export type CM = {
@@ -156,37 +154,3 @@ export type CMPhase =
   export type CMLeague =
   | "Open League"
   | "Graded League"
-
-export type LoHPlacement =
-  | 1
-  | 2
-  | 3
-  | 4
-  | 5
-  | 6
-  | 7
-  | 8
-  | 9
-  | 10
-  | 11
-  | 12
-
-export type LoHUma = {
-  umaId: string
-  races: number
-  wins: number
-  top3Finishes: number
-}
-
-export type LoH = {
-  number: number
-  name: string
-  track: string
-  participants: LoHUma[]
-  score: number
-  rank: string
-  racesPlayed: number
-  firstPlaces: number
-  top3Finishes: number
-  completed: boolean
-}
