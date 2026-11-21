@@ -1,9 +1,9 @@
 {
    "latestAddedVersionIds": [
-    "hokko-tarumae-original",
     "daitaku-helios-original",
     "ines-fujin-valentine",
-    "mejiro-ryan-valentine"
+    "mejiro-ryan-valentine",
+    "shinko-windy-original"
   ],
   "characters": [
     {
@@ -289,6 +289,10 @@
     {
       "id": "daitaku-helios",
       "name": "Daitaku Helios"
+    },
+    {
+      "id": "shinko-windy",
+      "name": "Shinko Windy"
     }
   ],
   "versions": [
@@ -1211,6 +1215,14 @@
       "versionName": "Valentine",
       "archived": false,
       "avatar": "/Umas/chara_stand_1027_102702.png"
+    },
+    {
+      "id": "shinko-windy-original",
+      "characterId": "shinko-windy",
+      "displayName": "Shinko Windy",
+      "versionName": "Original",
+      "archived": false,
+      "avatar": "/Umas/chara_stand_1043_104301.png"
     }
   ] 
 }
