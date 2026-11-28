@@ -8,6 +8,20 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
   {
+  version: "0.2.1",
+  date: "2026-11-28",
+
+  improved: [
+    "Improved the full-screen layout and background scaling of the 404 page.",
+  ],
+
+  fixed: [
+    "Fixed an issue preventing access to Profiles from the More menu.",
+    "Fixed profile saving and backup operations getting stuck in a pending state.",
+    "Fixed the save status indicator not updating correctly in Settings.",
+  ],
+},
+  {
   version: "0.2.0",
   date: "2026-11-09",
 

@@ -1,5 +1,6 @@
 import { isImportedProfileFile, type ImportedProfileFile } from "../profiles/profileTransfer"
 import { getTrustedBackupSourceIds, type Profile } from "../profiles/profileStore"
+import { backupStep, markBackupStep, withBackupDeadline } from "./backupOperation"
 
 export type BackupFile = {
   name: string
@@ -42,7 +43,7 @@ export async function chooseBackupFile(suggestedName: string, destination: Backu
     })
     if (!handle) throw new DOMException("No file selected.", "AbortError")
     // The open picker restores user activation, allowing this permission request.
-    if (await handle.requestPermission({ mode: "readwrite" }) !== "granted") {
+    if (await withBackupDeadline(signal => backupStep(signal, "requesting file permission", () => handle.requestPermission({ mode: "readwrite" }))) !== "granted") {
       throw new DOMException("File access was not granted. The file was not changed.", "NotAllowedError")
     }
     return handle
@@ -51,17 +52,31 @@ export async function chooseBackupFile(suggestedName: string, destination: Backu
   const folder = await pickerWindow.showDirectoryPicker({ mode: "readwrite" })
   // getFileHandle(create: true) preserves an existing file. A save picker can
   // truncate it before we get a chance to inspect its profile identity.
-  return folder.getFileHandle(suggestedName, { create: true })
+  return withBackupDeadline(signal => backupStep(signal, "opening the selected backup file", () => folder.getFileHandle(suggestedName, { create: true })))
 }
 
-export function withBackupFileLock(task: () => Promise<void>): Promise<void> {
-  return typeof navigator !== "undefined" && navigator.locks
-    ? navigator.locks.request("uma-profile-backup-write", task)
-    : task()
+let fallbackQueue: Promise<void> = Promise.resolve()
+
+export function withBackupFileLock(task: (signal: AbortSignal) => Promise<void>, signal?: AbortSignal): Promise<void> {
+  if (!signal) return withBackupDeadline(next => withBackupFileLock(task, next))
+  return backupStep(signal, "waiting for the backup file lock", () => {
+    if (typeof navigator !== "undefined" && navigator.locks) {
+      return navigator.locks.request("uma-profile-backup-write", { signal }, () => {
+        signal.throwIfAborted()
+        return task(signal)
+      })
+    }
+    // Keep the physical lock until an already-started close() really settles.
+    // A later writer must never overtake a commit whose result is still unknown.
+    const work = fallbackQueue.then(() => { signal.throwIfAborted(); return task(signal) })
+    fallbackQueue = work.catch(() => {})
+    return work
+  })
 }
 
-export async function readBackupFile(handle: BackupFile): Promise<ImportedProfileFile | null> {
-  const text = await (await handle.getFile()).text()
+export async function readBackupFile(handle: BackupFile, signal?: AbortSignal): Promise<ImportedProfileFile | null> {
+  const file = await backupStep(signal, "reading the backup file", () => handle.getFile())
+  const text = await backupStep(signal, "reading the backup contents", () => file.text())
   if (text.length === 0) return null // getFileHandle creates an empty file for a new path.
   let existing: unknown
   try { existing = JSON.parse(text) } catch { /* Reject unrecognized content below. */ }
@@ -71,8 +86,8 @@ export async function readBackupFile(handle: BackupFile): Promise<ImportedProfil
   return existing
 }
 
-export async function assertBackupFileOwner(handle: BackupFile, sourceProfileId: string) {
-  const existing = await readBackupFile(handle)
+export async function assertBackupFileOwner(handle: BackupFile, sourceProfileId: string, signal?: AbortSignal) {
+  const existing = await readBackupFile(handle, signal)
   if (!existing) return
   if (existing.profile.sourceProfileId !== sourceProfileId) {
     throw new Error(`This backup belongs to profile "${existing.profile.name}". Choose a different file. Nothing was overwritten.`)
@@ -90,11 +105,12 @@ export async function writeProfileBackupFile(
   handle: BackupFile,
   backup: ImportedProfileFile,
   canWrite: () => boolean = () => true,
+  signal?: AbortSignal,
 ): Promise<boolean> {
   if (!isImportedProfileFile(backup)) throw new Error("Profile data is invalid. Nothing was overwritten.")
   const json = JSON.stringify(backup, null, 2)
-  await assertBackupFileOwner(handle, backup.profile.sourceProfileId)
-  return commitBackupFile(handle, json, canWrite)
+  await assertBackupFileOwner(handle, backup.profile.sourceProfileId, signal)
+  return commitBackupFile(handle, json, canWrite, signal)
 }
 
 // Only the explicit relink confirmation uses this path. Normal saves and exports
@@ -104,28 +120,48 @@ export async function relinkProfileBackupFile(
   backup: ImportedProfileFile,
   profile: Profile,
   canWrite: () => boolean = () => true,
+  signal?: AbortSignal,
 ): Promise<boolean> {
   if (!isImportedProfileFile(backup) || backup.profile.sourceProfileId !== (profile.sourceProfileId ?? profile.id)) {
     throw new Error("The profile identity changed. Reopen the profile before linking a backup.")
   }
-  const existing = await readBackupFile(handle)
+  const existing = await readBackupFile(handle, signal)
   if (!existing || !canRelinkBackupFile(profile, existing)) {
     throw new Error("The selected backup changed or belongs to another profile. Select the file again. Nothing was overwritten.")
   }
-  return commitBackupFile(handle, JSON.stringify(backup, null, 2), canWrite)
+  return commitBackupFile(handle, JSON.stringify(backup, null, 2), canWrite, signal)
 }
 
-async function commitBackupFile(handle: BackupFile, json: string, canWrite: () => boolean): Promise<boolean> {
+async function commitBackupFile(handle: BackupFile, json: string, canWrite: () => boolean, signal?: AbortSignal): Promise<boolean> {
   if (!canWrite()) return false
-  const stream = await handle.createWritable()
+  const stream = await backupStep(signal, "opening the backup writer", () => handle.createWritable().then(stream => {
+    if (signal?.aborted) {
+      void stream.abort().catch(() => {})
+      signal.throwIfAborted()
+    }
+    return stream
+  }))
+  let aborted = false
+  const discard = () => {
+    if (aborted) return
+    aborted = true
+    try { void stream.abort().catch(() => {}) } catch { /* Preserve the original save error. */ }
+  }
+  const abort = () => { discard() }
+  signal?.addEventListener("abort", abort, { once: true })
   try {
-    if (!canWrite()) { await stream.abort(); return false }
-    await stream.write(json)
-    if (!canWrite()) { await stream.abort(); return false }
+    if (!canWrite()) { abort(); return false }
+    await backupStep(signal, "writing the backup file", () => stream.write(json))
+    if (!canWrite()) { abort(); return false }
+    markBackupStep(signal, "committing the backup file")
+    // close() is the commit point. Retain the lock until it really settles,
+    // even if the browser ignores the abort after the public operation times out.
     await stream.close()
+    signal?.throwIfAborted()
     return true
   } catch (error) {
-    try { await stream.abort() } catch { /* Keep the original write error. */ }
+    // A stalled abort must not hide the write error or block the save queue.
+    discard()
     throw error
-  }
+  } finally { signal?.removeEventListener("abort", abort) }
 }

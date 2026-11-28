@@ -5,6 +5,8 @@ import { importTS } from "./helpers/importTS.mjs"
 const { restoreProfileFromBackup, importProfileToDevice } = await importTS(new URL("../src/profiles/profileTransfer.ts", import.meta.url))
 const { PROFILE_DATA_VERSION } = await importTS(new URL("../src/profiles/profileDataMigration.ts", import.meta.url))
 const { canRelinkBackupFile } = await importTS(new URL("../src/backup/backupFile.ts", import.meta.url))
+const { readProfileBackup } = await importTS(new URL("../src/backup/profileBackup.ts", import.meta.url))
+const { getStoredValue } = await importTS(new URL("../src/storage/indexedDB.ts", import.meta.url))
 const data = (favoriteUmaId = "old-favorite") => ({ dataVersion: PROFILE_DATA_VERSION, cms: [], lohs: [], customUmaDatabase: { customCharacters: [], customVersions: [], archivedVersionIds: [] }, favoriteUmaId, cmViewMode: "compact", seenOfficialVersionIds: [], onboardingCompleted: false, cmLineupGuideCompleted: false })
 const target = { id: "target-local", sourceProfileId: "target-owner", importedFromSourceProfileId: "original-import", name: "rondel mobile", createdAt: "2026-10-11" }
 const backup = (owner = "target-owner") => ({ format: "uma-tracker-profile", version: 1, profile: { sourceProfileId: owner, name: "rondel backup" }, data: data("restored-favorite") })
@@ -49,6 +51,56 @@ function storage({ failCommit = false, profile = target } = {}) {
   }
   return { read: key => structuredClone(committed.get(key)), snapshot: () => structuredClone(committed), puts, remove: key => committed.delete(key), replace: (key, value) => committed.set(key, value) }
 }
+
+test("backup snapshot returns committed profile data and rejects aborted or invalid snapshots", { timeout: 2000 }, async () => {
+  storage()
+  const result = await readProfileBackup(target.id)
+  assert.equal(result.profile.sourceProfileId, target.sourceProfileId)
+  assert.equal(result.data.favoriteUmaId, "old-favorite")
+  storage({ failCommit: true })
+  await assert.rejects(readProfileBackup(target.id), /aborted/)
+  const store = storage(); store.replace("profiles", [null])
+  await assert.rejects(readProfileBackup(target.id), TypeError, "validation errors must reject rather than escape the completion callback")
+})
+
+test("backup snapshot cancellation aborts its transaction and settles the caller", { timeout: 2000 }, async () => {
+  storage()
+  const db = await new Promise(resolve => { const request = indexedDB.open(); request.onsuccess = () => resolve(request.result) })
+  let aborted = false, closed = false
+  globalThis.indexedDB.open = () => {
+    const request = {}
+    queueMicrotask(() => {
+      request.result = { ...db, close() { closed = true }, transaction() {
+        return { objectStore: () => ({ get: () => ({}) }), abort() { aborted = true } }
+      } }
+      request.onsuccess()
+    })
+    return request
+  }
+  const cancellation = new AbortController(), reading = readProfileBackup(target.id, cancellation.signal)
+  await new Promise(resolve => setImmediate(resolve))
+  cancellation.abort(new Error("Profile switched"))
+  await assert.rejects(reading, /Profile switched/)
+  assert.equal(aborted, true); assert.equal(closed, true)
+})
+
+test("config reads reject transaction aborts even when the read request has no result", { timeout: 2000 }, async () => {
+  let closed = false
+  globalThis.indexedDB = { open() {
+    const request = {}
+    queueMicrotask(() => {
+      request.result = { close() { closed = true }, transaction() {
+        const transaction = { error: new Error("Read transaction aborted"), objectStore: () => ({ get: () => ({}) }) }
+        queueMicrotask(() => transaction.onabort())
+        return transaction
+      } }
+      request.onsuccess()
+    })
+    return request
+  } }
+  await assert.rejects(getStoredValue("backup:profile:test"), /Read transaction aborted/)
+  assert.equal(closed, true)
+})
 
 test("matching and explicitly confirmed foreign restores replace data while preserving every target identity and backup field", async () => {
   for (const owner of ["target-owner", "foreign-owner"]) {

@@ -2,12 +2,13 @@
 [data-app-shell]:has(.unavailable-page) {
   display: flex;
   flex-direction: column;
-  min-height: 100svh;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 [data-app-shell]:has(.unavailable-page) > [data-app-content] {
   display: flex;
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 0;
 }
 
@@ -24,7 +25,6 @@
   flex: 1;
   place-items: center;
   width: 100%;
-  min-height: 320px;
   padding: 40px 24px;
   background-color: #030811;
   background-size: cover;

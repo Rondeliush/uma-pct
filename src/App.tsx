@@ -1098,7 +1098,7 @@ function TrackerApp() {
         : null
       const exportData = await readProfileBackup(profile.id)
       if (handle) {
-        await withBackupFileLock(async () => { await writeProfileBackupFile(handle, exportData) })
+        await withBackupFileLock(async signal => { await writeProfileBackupFile(handle, exportData, undefined, signal) })
         return
       }
 
@@ -1426,10 +1426,9 @@ function TrackerApp() {
       onToggleHomeNight={toggleHomeNight}
       navigation={navigation}
       onProfilesClick={() => {
-        void (async () => {
-          await localBackup.saveNow()
-          navigateAppRoute("profiles", null, import.meta.env.BASE_URL)
-        })().catch(() => setProfileError("Could not return to Profiles."))
+        // Optional file I/O must not block opening the existing profile selector.
+        navigateAppRoute("profiles", null, import.meta.env.BASE_URL)
+        void localBackup.saveNow().catch(() => setProfileError("Could not save the backup file."))
       }}
     />
   </AutoRunTimerProvider>

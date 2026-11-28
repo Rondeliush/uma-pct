@@ -60,6 +60,10 @@ export async function getStoredValue<T>(
     transaction.oncomplete = () => {
       database.close()
     }
+    transaction.onabort = () => {
+      database.close()
+      reject(transaction.error)
+    }
   })
 }
 
